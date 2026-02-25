@@ -1,169 +1,619 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compliance Calendar — NF6 Capital</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0a0e17; color: #e0e6ed; min-height: 100vh; }
-        .nav { background: #111827; border-bottom: 1px solid #1e293b; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
-        .nav-brand { font-size: 1.4rem; font-weight: 700; color: #60a5fa; }
-        .nav-brand span { color: #94a3b8; font-weight: 400; font-size: 0.9rem; margin-left: 0.5rem; }
-        .nav-links { display: flex; gap: 1.5rem; }
-        .nav-links a { color: #94a3b8; text-decoration: none; font-size: 0.95rem; padding: 0.4rem 0.8rem; border-radius: 6px; transition: all 0.2s; }
-        .nav-links a:hover, .nav-links a.active { color: #e0e6ed; background: #1e293b; }
-        .page-header { padding: 2rem 2rem 1rem; max-width: 1200px; margin: 0 auto; }
-        .page-header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
-        .page-header p { color: #64748b; }
-        .calendar-controls { display: flex; align-items: center; justify-content: center; gap: 1.5rem; padding: 1rem 2rem; }
-        .calendar-controls button { background: #1e293b; border: 1px solid #334155; color: #e0e6ed; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
-        .calendar-controls button:hover { background: #334155; }
-        .calendar-controls h2 { font-size: 1.3rem; min-width: 200px; text-align: center; }
-        .calendar-wrapper { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; }
-        .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: #1e293b; border-radius: 12px; overflow: hidden; }
-        .cal-header { background: #1e293b; padding: 0.75rem; text-align: center; font-size: 0.8rem; font-weight: 600; color: #64748b; text-transform: uppercase; }
-        .cal-day { background: #111827; min-height: 100px; padding: 0.5rem; position: relative; transition: background 0.2s; }
-        .cal-day:hover { background: #1a2332; }
-        .cal-day.other-month { opacity: 0.3; }
-        .cal-day.today { border: 2px solid #3b82f6; }
-        .day-num { font-size: 0.85rem; color: #64748b; margin-bottom: 0.25rem; }
-        .cal-event { font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 4px; margin-bottom: 2px; cursor: default; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .cal-event.high { background: #450a0a; color: #f87171; }
-        .cal-event.medium { background: #422006; color: #fbbf24; }
-        .cal-event.low { background: #064e3b; color: #34d399; }
-        .timeline { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; }
-        .timeline h2 { font-size: 1.3rem; margin-bottom: 1rem; }
-        .timeline-item { display: flex; gap: 1rem; padding: 1rem; background: #111827; border: 1px solid #1e293b; border-radius: 10px; margin-bottom: 0.75rem; align-items: center; }
-        .timeline-date { min-width: 90px; font-size: 0.85rem; color: #64748b; font-weight: 600; }
-        .timeline-content { flex: 1; }
-        .timeline-content h3 { font-size: 0.95rem; margin-bottom: 0.2rem; }
-        .timeline-content p { font-size: 0.8rem; color: #64748b; }
-        .timeline-priority { padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
-        .footer { text-align: center; padding: 3rem 2rem; color: #475569; font-size: 0.85rem; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NF6 Capital — Compliance Calendar</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1a202c;
+    --text-secondary: #64748b;
+    --accent: #2563eb;
+    --accent-light: #eff6ff;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --yellow: #ca8a04;
+    --yellow-bg: #fefce8;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --orange: #ea580c;
+    --orange-bg: #fff7ed;
+    --purple: #7c3aed;
+    --purple-bg: #f5f3ff;
+    --gray: #64748b;
+    --gray-bg: #f8fafc;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  /* NAV */
+  nav {
+    background: #0f172a;
+    color: #fff;
+    padding: 0 2rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  nav .brand { font-weight: 700; font-size: 1.15rem; letter-spacing: -.02em; }
+  nav .brand span { color: #60a5fa; }
+  nav .nav-links { display: flex; gap: 1.5rem; }
+  nav .nav-links a { color: #94a3b8; text-decoration: none; font-size: .875rem; font-weight: 500; transition: color .2s; }
+  nav .nav-links a:hover, nav .nav-links a.active { color: #fff; }
+  .today-badge { background: #1e3a5f; color: #93c5fd; font-size: .75rem; padding: 4px 10px; border-radius: 6px; font-weight: 500; }
+
+  /* HEADER */
+  .page-header {
+    padding: 2rem 2rem 0;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .page-header h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -.03em; }
+  .page-header p { color: var(--text-secondary); margin-top: .25rem; font-size: .925rem; }
+
+  /* CALENDAR CONTROLS */
+  .cal-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .cal-controls .month-label {
+    font-size: 1.35rem;
+    font-weight: 700;
+    min-width: 220px;
+    text-align: center;
+  }
+  .cal-controls button {
+    padding: .5rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    font-size: .85rem;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    color: var(--text);
+  }
+  .cal-controls button:hover { border-color: var(--accent); color: var(--accent); }
+  .cal-controls .today-btn { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .cal-controls .today-btn:hover { background: #1d4ed8; }
+
+  /* FILTER ROW */
+  .filter-row {
+    display: flex;
+    gap: .5rem;
+    padding: 0 2rem .75rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+  }
+  .filter-row select {
+    padding: .45rem .75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    font-size: .8rem;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-secondary);
+    outline: none;
+  }
+
+  /* CALENDAR GRID */
+  .cal-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem 2rem;
+  }
+  .cal-grid {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .cal-header-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #f8fafc;
+    border-bottom: 1px solid var(--border);
+  }
+  .cal-header-row .day-label {
+    text-align: center;
+    padding: .65rem .5rem;
+    font-size: .75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text-secondary);
+  }
+  .cal-body {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+  .cal-cell {
+    min-height: 110px;
+    border-right: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+    padding: .35rem .45rem;
+    position: relative;
+    transition: background .15s;
+  }
+  .cal-cell:nth-child(7n) { border-right: none; }
+  .cal-cell:hover { background: #fafbfd; }
+  .cal-cell.outside { background: #fafbfc; opacity: .45; }
+  .cal-cell.today { background: var(--accent-light); }
+  .cal-cell.today .date-num { color: var(--accent); font-weight: 700; }
+  .date-num {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+  .cal-event {
+    display: block;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: .65rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    line-height: 1.4;
+    transition: opacity .15s;
+  }
+  .cal-event:hover { opacity: .85; }
+  .cal-event.urgency-overdue { background: var(--red-bg); color: var(--red); border-left: 3px solid var(--red); }
+  .cal-event.urgency-critical { background: var(--red-bg); color: var(--red); border-left: 3px solid var(--red); }
+  .cal-event.urgency-warning { background: var(--orange-bg); color: var(--orange); border-left: 3px solid var(--orange); }
+  .cal-event.urgency-notice { background: var(--yellow-bg); color: var(--yellow); border-left: 3px solid var(--yellow); }
+  .cal-event.urgency-none { background: var(--green-bg); color: var(--green); border-left: 3px solid var(--green); }
+  .cal-event.urgency-notstarted { background: var(--purple-bg); color: var(--purple); border-left: 3px solid var(--purple); }
+  .cal-more {
+    font-size: .65rem;
+    color: var(--accent);
+    font-weight: 600;
+    padding: 1px 5px;
+    cursor: pointer;
+  }
+  .cal-more:hover { text-decoration: underline; }
+
+  /* TOOLTIP */
+  .tooltip {
+    display: none;
+    position: fixed;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    width: 320px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    z-index: 200;
+    font-size: .82rem;
+  }
+  .tooltip.show { display: block; }
+  .tooltip .tt-title { font-weight: 700; font-size: .9rem; margin-bottom: .5rem; }
+  .tooltip .tt-row { display: flex; gap: .5rem; margin-bottom: .25rem; }
+  .tooltip .tt-label { font-weight: 600; color: var(--text-secondary); min-width: 80px; }
+  .tooltip .tt-val { flex: 1; }
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    white-space: nowrap;
+  }
+  .badge-green { background: var(--green-bg); color: var(--green); }
+  .badge-red { background: var(--red-bg); color: var(--red); }
+  .badge-orange { background: var(--orange-bg); color: var(--orange); }
+  .badge-yellow { background: var(--yellow-bg); color: var(--yellow); }
+  .badge-purple { background: var(--purple-bg); color: var(--purple); }
+  .badge-blue { background: var(--accent-light); color: var(--accent); }
+
+  /* UPCOMING LIST */
+  .upcoming-section {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem 2rem;
+  }
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .upcoming-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: .75rem;
+  }
+  .upcoming-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: .75rem;
+    align-items: flex-start;
+    transition: box-shadow .2s;
+  }
+  .upcoming-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+  .upcoming-card .dot {
+    width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0;
+  }
+  .dot.critical { background: var(--red); }
+  .dot.warning { background: var(--orange); }
+  .dot.notice { background: var(--yellow); }
+  .dot.none { background: var(--green); }
+  .upcoming-card .uc-content { flex: 1; }
+  .upcoming-card .uc-title { font-weight: 600; font-size: .875rem; }
+  .upcoming-card .uc-meta { font-size: .78rem; color: var(--text-secondary); margin-top: 2px; }
+  .upcoming-card .uc-due { font-size: .78rem; font-weight: 600; margin-top: 4px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .cal-cell { min-height: 80px; }
+    .cal-event { font-size: .6rem; }
+    .upcoming-list { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .cal-controls { gap: .75rem; }
+    .cal-controls .month-label { font-size: 1.1rem; min-width: 160px; }
+  }
+</style>
 </head>
 <body>
-    <nav class="nav">
-        <div class="nav-brand">NF6 Capital <span>Compliance Hub</span></div>
-        <div class="nav-links">
-            <a href="index.html">Home</a>
-            <a href="compliance-dashboard.html">Dashboard</a>
-            <a href="compliance-calendar.html" class="active">Calendar</a>
+
+<nav>
+  <div class="brand">NF6 <span>Capital</span></div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="compliance-dashboard.html">Dashboard</a>
+    <a href="compliance-calendar.html" class="active">Calendar</a>
+  </div>
+  <div class="today-badge" id="todayBadge"></div>
+</nav>
+
+<div class="page-header">
+  <h1>Compliance Calendar</h1>
+  <p>Visual timeline of all upcoming compliance deadlines and due dates across all entities.</p>
+</div>
+
+<div class="cal-controls">
+  <button id="prevBtn">← Prev</button>
+  <button class="today-btn" id="todayBtn">Today</button>
+  <div class="month-label" id="monthLabel"></div>
+  <button id="nextBtn">Next →</button>
+</div>
+
+<div class="filter-row">
+  <select id="calLocFilter"><option value="all">All Locations</option></select>
+  <select id="calEntFilter"><option value="all">All Entities</option></select>
+  <select id="calPersonFilter"><option value="all">All People</option></select>
+</div>
+
+<div class="cal-wrapper">
+  <div class="cal-grid">
+    <div class="cal-header-row">
+      <div class="day-label">Sun</div>
+      <div class="day-label">Mon</div>
+      <div class="day-label">Tue</div>
+      <div class="day-label">Wed</div>
+      <div class="day-label">Thu</div>
+      <div class="day-label">Fri</div>
+      <div class="day-label">Sat</div>
+    </div>
+    <div class="cal-body" id="calBody"></div>
+  </div>
+</div>
+
+<div class="upcoming-section">
+  <div class="section-title">📋 Upcoming This Month</div>
+  <div class="upcoming-list" id="upcomingList"></div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ── RAW DATA (same as dashboard) ──
+const RAW_DATA = [
+  {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"United States",entity:"NF Texas",obligation:"Pay property taxes by 1/31 each year — Harris County",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/31/2027",description:"Texas taxes SOP",cost:"",link:"https://myharriscountytax.com/"},
+  {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"United States",entity:"NF Texas",obligation:"Pay property taxes by 1/31 each year — Spring Branch ISD",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/31/2027",description:"Texas taxes SOP",cost:"",link:"https://sbisd.propertytaxpayments.net/search"},
+  {status:"Recurring - Up to date",type:"Donation",category:"Act 22 requirement",location:"Puerto Rico",entity:"MN Personal",obligation:"Make a yearly donation in PR",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/8/2026",dateToDo:"1/5/2027",nextDue:"12/31/2027",description:"Donation SOP",cost:"$5,000.00",link:""},
+  {status:"Recurring - Up to date",type:"529 Gift",category:"529 Gift",location:"United States",entity:"MN Personal",obligation:"Make yearly contribution to Dr. Mike's nieces and nephews",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"12/29/2025",dateToDo:"12/1/2026",nextDue:"12/31/2026",description:"529 SOP",cost:"$114,000.00",link:"https://www.ugift529.com/"},
+  {status:"Recurring - Up to date",type:"Car",category:"Tesla",location:"Puerto Rico",entity:"MN Personal",obligation:"Tesla Car Insurance",person:"Tim",frequency:"Yearly",dateDone:"10/6/2025",dateToDo:"9/1/2026",nextDue:"10/6/2026",description:"",cost:"",link:""},
+  {status:"Recurring - Up to date",type:"Car",category:"Tesla",location:"Puerto Rico",entity:"MN Personal",obligation:"Tesla Registration",person:"Tim",frequency:"Yearly",dateDone:"",dateToDo:"",nextDue:"",description:"",cost:"",link:""},
+  {status:"Recurring - Up to date",type:"Car",category:"Tahoe",location:"Colombia",entity:"NF MDE CO",obligation:"Tahoe insurance SURA",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/23/2025",dateToDo:"12/23/2026",nextDue:"12/28/2026",description:"",cost:"$3,842.00",link:""},
+  {status:"Recurring - Up to date",type:"Car",category:"Tahoe",location:"Colombia",entity:"NF MDE CO",obligation:"Tahoe vehicle tax — Gobernación de Antioquia",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/28/2027",description:"Pay through Gobernación de Ant. website",cost:"",link:"https://www.vehiculosantioquia.com.co/"},
+  {status:"Recurring - Up to date",type:"Car",category:"Tahoe",location:"Colombia",entity:"NF MDE CO",obligation:"Tahoe — SOAT renewal",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/25/2025",dateToDo:"12/25/2026",nextDue:"12/25/2026",description:"Buy a new SOAT through Rappi or another website",cost:"",link:""},
+  {status:"Recurring - Due Soon",type:"Insurance",category:"Dorado Insurance",location:"Puerto Rico",entity:"MN Personal",obligation:"Renew Insurance — hazard policy meets Oriental's requirements",person:"Tim",frequency:"Yearly",dateDone:"1/23/2026",dateToDo:"4/14/2026",nextDue:"5/14/2026",description:"MAPFRE Insurance",cost:"$2,667.00",link:""},
+  {status:"Recurring - Up to date",type:"Insurance",category:"Dorado Insurance",location:"Puerto Rico",entity:"MN Personal",obligation:"Obtain Master Policy from Dorado — due to Oriental 60 days before expiry",person:"Tim",frequency:"Yearly",dateDone:"11/14/2025",dateToDo:"8/1/2026",nextDue:"11/14/2026",description:"",cost:"",link:""},
+  {status:"Recurring - Up to date",type:"Insurance",category:"Dorado Insurance",location:"Puerto Rico",entity:"MN Personal",obligation:"Commercial insurance",person:"Tim",frequency:"Yearly",dateDone:"2/17/2026",dateToDo:"1/16/2027",nextDue:"2/16/2027",description:"",cost:"$1,650.00",link:""},
+  {status:"Recurring - Due Soon",type:"Property",category:"Maintenance",location:"Puerto Rico",entity:"MN Personal",obligation:"AC maintenance quarterly",person:"Amanda/Brandon",frequency:"Quarterly",dateDone:"2/3/2026",dateToDo:"5/1/2026",nextDue:"5/1/2026",description:"AC Maintenance Schedule",cost:"$295.00",link:""},
+  {status:"Recurring - Due Soon",type:"Property",category:"Maintenance",location:"France",entity:"MN Personal",obligation:"AC maintenance bi-yearly",person:"Amanda/Brandon",frequency:"Bi-yearly",dateDone:"11/24/2025",dateToDo:"5/1/2026",nextDue:"5/24/2026",description:"AC Maintenance Schedule",cost:"$938.20",link:""},
+  {status:"Recurring - Due Soon",type:"Property",category:"Maintenance",location:"Puerto Rico",entity:"MN Personal",obligation:"Exterminator monthly service",person:"Brandon",frequency:"Monthly",dateDone:"2/4/2026",dateToDo:"",nextDue:"3/2/2026",description:"",cost:"",link:""},
+  {status:"Recurring - Up to date",type:"Property",category:"Maintenance",location:"Puerto Rico",entity:"MN Personal",obligation:"Golf cart maintenance at Dorado",person:"Tim",frequency:"Monthly",dateDone:"",dateToDo:"",nextDue:"",description:"",cost:"",link:""},
+  {status:"Recurring - Up to date",type:"MN Personal",category:"Passport",location:"United States",entity:"MN Personal",obligation:"Renew passport",person:"Mike/Amanda/Brandon",frequency:"Other",dateDone:"",dateToDo:"",nextDue:"3/25/2034",description:"",cost:"",link:""},
+  {status:"Recurring - Up to date",type:"MN Personal",category:"Medical License",location:"Puerto Rico",entity:"MN Personal",obligation:"Renew Dr. Mike's medical license",person:"Mike",frequency:"Other",dateDone:"8/4/2024",dateToDo:"6/1/2027",nextDue:"8/4/2027",description:"",cost:"",link:""},
+  {status:"Recurring - Up to date",type:"MN Personal",category:"PR Drivers License",location:"Puerto Rico",entity:"MN Personal",obligation:"Renew Dr. Mike's PR Drivers License",person:"Mike/Amanda/Brandon",frequency:"Other",dateDone:"6/20/2025",dateToDo:"5/1/2033",nextDue:"8/4/2033",description:"",cost:"",link:""},
+  {status:"Recurring - Up to date",type:"Business expense",category:"Keeper Security",location:"United States",entity:"TLMND",obligation:"Renew Keeper Security every 3 years",person:"Amanda/Brandon",frequency:"Other",dateDone:"6/24/2025",dateToDo:"5/1/2028",nextDue:"6/25/2028",description:"",cost:"",link:""},
+  {status:"Recurring - Up to date",type:"Entity",category:"Mailbox",location:"France",entity:"Paris Thacko",obligation:"Mailbox subscription — Paris (253 rue Saint Honoré)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"7/16/2025",dateToDo:"7/1/2026",nextDue:"7/1/2026",description:"Pay through Banco Santander portal via transfer",cost:"$1,261.00",link:""},
+  {status:"Recurring - Up to date",type:"Property",category:"House Insurance",location:"France",entity:"Paris Thacko",obligation:"House Insurance of 5 Quai Montebello — AXXA",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/5/2025",dateToDo:"12/1/2025",nextDue:"12/1/2026",description:"Pay through Banco Santander portal via transfer",cost:"$528.00",link:""},
+  {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"France",entity:"Paris Thacko",obligation:"Tax Fonciere — RE Tax",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"10/27/2025",dateToDo:"10/1/2025",nextDue:"10/1/2026",description:"Automatic debit set up",cost:"$2,428.00",link:""},
+  {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"France",entity:"Paris Thacko",obligation:"Vacant Housing Tax",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/30/2026",dateToDo:"10/31/2025",nextDue:"12/30/2026",description:"Automatic debit set up",cost:"$5,777.00",link:""},
+  {status:"Recurring - Up to date",type:"Entity",category:"Entity Taxes",location:"France",entity:"Paris Thacko",obligation:"Paris Thacko corporate tax",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"10/1/2025",dateToDo:"10/1/2025",nextDue:"10/1/2026",description:"Automatic debit set up",cost:"",link:""},
+  {status:"Recurring - Up to date",type:"Property",category:"HOA",location:"France",entity:"Paris Thacko",obligation:"5 Quai Montebello HOA — Syndic quarterly",person:"Manuela Vallejo",frequency:"Quarterly",dateDone:"12/28/2025",dateToDo:"4/1/2026",nextDue:"4/1/2026",description:"Pay through Banco Santander portal via transfer",cost:"$1,296.00",link:""},
+  {status:"Recurring - Up to date",type:"Entity",category:"Accountant fees",location:"France",entity:"Paris Thacko",obligation:"Fees to France accountants Groupe Prieur (Dec & Mar)",person:"Manuela Vallejo",frequency:"Bi-yearly",dateDone:"12/9/2025",dateToDo:"3/10/2026",nextDue:"3/10/2026",description:"Pay through Banco Santander portal via transfer",cost:"$1,860.00",link:""},
+  {status:"Recurring - Up to date",type:"Entity",category:"Tax returns filing",location:"France",entity:"Paris Thacko",obligation:"Tax returns filing — previous accounting year w/ Groupe Prieur",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"4/1/2025",dateToDo:"4/1/2025",nextDue:"4/1/2026",description:"",cost:"",link:""},
+  {status:"Recurring - Up to date",type:"MN Personal",category:"Subscription",location:"United States",entity:"MN Personal",obligation:"United Club membership",person:"Mike/Amanda/Brandon",frequency:"Yearly",dateDone:"9/30/2025",dateToDo:"",nextDue:"9/30/2026",description:"Auto renew on TLMND business card",cost:"",link:""},
+  {status:"Recurring - Up to date",type:"MN Personal",category:"Subscription",location:"United States",entity:"MN Personal",obligation:"AARP Membership renewal (every 5 years)",person:"Amanda/Brandon",frequency:"Other",dateDone:"2/3/2026",dateToDo:"2/1/2031",nextDue:"2/3/2031",description:"Go to website and click renew",cost:"$79.00",link:"https://secure.aarp.org/"},
+  {status:"Recurring - Up to date",type:"MN Personal",category:"Health Insurance",location:"United States",entity:"MN Personal",obligation:"Renew Mike's Health Insurance — GeoBlue",person:"Tim",frequency:"Yearly",dateDone:"10/15/2025",dateToDo:"9/1/2026",nextDue:"10/14/2026",description:"",cost:"$762/month",link:""},
+  {status:"Not started",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Quebrada Arriba RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2025",dateToDo:"2/28/2026",nextDue:"2/28/2027",description:"Pay RE tax through Alcaldía de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co"},
+  {status:"Recurring - Up to date",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Cinturón Verde RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2026",dateToDo:"2/10/2027",nextDue:"2/10/2027",description:"Pay RE tax through Alcaldía de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co"},
+  {status:"Recurring - Up to date",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Provincia Lot RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2026",dateToDo:"2/10/2027",nextDue:"",description:"Pay RE tax through Alcaldía de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co"},
+  {status:"Recurring - Up to date",type:"Insurance",category:"Life Insurance",location:"United States",entity:"MN Personal",obligation:"Renew Mike's life insurance — Lincoln Financial",person:"Tim",frequency:"Yearly",dateDone:"1/7/2026",dateToDo:"1/1/2027",nextDue:"1/7/2027",description:"",cost:"$1,609.58",link:"https://www.lincolnfinancial.com/secure/login"}
+];
+
+// ── HELPERS ──
+const TODAY = new Date();
+TODAY.setHours(0,0,0,0);
+
+function parseDate(str) {
+  if (!str) return null;
+  const parts = str.split('/');
+  if (parts.length !== 3) return null;
+  return new Date(+parts[2], +parts[0]-1, +parts[1]);
+}
+
+function daysUntil(dateStr) {
+  const d = parseDate(dateStr);
+  if (!d) return Infinity;
+  return Math.ceil((d - TODAY) / (1000*60*60*24));
+}
+
+function formatDate(dateStr) {
+  const d = parseDate(dateStr);
+  if (!d) return '—';
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+function locationFlag(loc) {
+  const map = { 'United States':'🇺🇸', 'Puerto Rico':'🇵🇷', 'Colombia':'🇨🇴', 'France':'🇫🇷' };
+  return map[loc] || '🌍';
+}
+
+// ── ENRICH DATA ──
+const items = RAW_DATA.map(d => {
+  const days = daysUntil(d.nextDue);
+  let urgency = 'none';
+  if (d.status === 'Not started') urgency = 'notstarted';
+  else if (days < 0) urgency = 'overdue';
+  else if (days <= 7) urgency = 'critical';
+  else if (days <= 14) urgency = 'warning';
+  else if (days <= 30) urgency = 'notice';
+  return { ...d, _days: days, _urgency: urgency, _date: parseDate(d.nextDue) };
+});
+
+// ── STATE ──
+let viewYear = TODAY.getFullYear();
+let viewMonth = TODAY.getMonth();
+
+// ── POPULATE FILTERS ──
+function populateFilters() {
+  const locs = [...new Set(items.map(i => i.location))].sort();
+  const ents = [...new Set(items.map(i => i.entity))].sort();
+  const ppl = [...new Set(items.flatMap(i => i.person.split('/')))].sort();
+
+  const locSel = document.getElementById('calLocFilter');
+  locs.forEach(l => { const o = document.createElement('option'); o.value=l; o.textContent=`${locationFlag(l)} ${l}`; locSel.appendChild(o); });
+
+  const entSel = document.getElementById('calEntFilter');
+  ents.forEach(e => { const o = document.createElement('option'); o.value=e; o.textContent=e; entSel.appendChild(o); });
+
+  const pSel = document.getElementById('calPersonFilter');
+  ppl.forEach(p => { const o = document.createElement('option'); o.value=p; o.textContent=p; pSel.appendChild(o); });
+}
+
+function getFilteredItems() {
+  const locF = document.getElementById('calLocFilter').value;
+  const entF = document.getElementById('calEntFilter').value;
+  const pF = document.getElementById('calPersonFilter').value;
+  return items.filter(i => {
+    if (!i._date) return false;
+    if (locF !== 'all' && i.location !== locF) return false;
+    if (entF !== 'all' && i.entity !== entF) return false;
+    if (pF !== 'all' && !i.person.includes(pF)) return false;
+    return true;
+  });
+}
+
+// ── RENDER CALENDAR ──
+function renderCalendar() {
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('monthLabel').textContent = `${monthNames[viewMonth]} ${viewYear}`;
+
+  const firstDay = new Date(viewYear, viewMonth, 1);
+  const lastDay = new Date(viewYear, viewMonth + 1, 0);
+  const startDow = firstDay.getDay();
+  const daysInMonth = lastDay.getDate();
+
+  const filtered = getFilteredItems();
+
+  // Group items by date key (YYYY-MM-DD)
+  const dateMap = {};
+  filtered.forEach(i => {
+    if (!i._date) return;
+    const key = `${i._date.getFullYear()}-${i._date.getMonth()}-${i._date.getDate()}`;
+    if (!dateMap[key]) dateMap[key] = [];
+    dateMap[key].push(i);
+  });
+
+  const calBody = document.getElementById('calBody');
+  let html = '';
+
+  // Previous month padding
+  const prevLast = new Date(viewYear, viewMonth, 0).getDate();
+  for (let i = startDow - 1; i >= 0; i--) {
+    html += `<div class="cal-cell outside"><div class="date-num">${prevLast - i}</div></div>`;
+  }
+
+  // Current month days
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = d === TODAY.getDate() && viewMonth === TODAY.getMonth() && viewYear === TODAY.getFullYear();
+    const key = `${viewYear}-${viewMonth}-${d}`;
+    const dayItems = dateMap[key] || [];
+    const maxShow = 3;
+
+    html += `<div class="cal-cell${isToday ? ' today' : ''}">`;
+    html += `<div class="date-num">${d}</div>`;
+    dayItems.slice(0, maxShow).forEach(item => {
+      const short = item.obligation.length > 28 ? item.obligation.substring(0,26) + '…' : item.obligation;
+      html += `<div class="cal-event urgency-${item._urgency}" data-idx="${items.indexOf(item)}">${short}</div>`;
+    });
+    if (dayItems.length > maxShow) {
+      html += `<div class="cal-more">+${dayItems.length - maxShow} more</div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Next month padding
+  const totalCells = startDow + daysInMonth;
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remaining; i++) {
+    html += `<div class="cal-cell outside"><div class="date-num">${i}</div></div>`;
+  }
+
+  calBody.innerHTML = html;
+
+  // Upcoming items for this month
+  renderUpcoming(filtered);
+}
+
+function renderUpcoming(filtered) {
+  const monthItems = filtered
+    .filter(i => i._date && i._date.getMonth() === viewMonth && i._date.getFullYear() === viewYear)
+    .sort((a, b) => a._date - b._date);
+
+  const container = document.getElementById('upcomingList');
+
+  if (!monthItems.length) {
+    container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-secondary);font-size:.9rem;">No compliance items due this month.</div>';
+    return;
+  }
+
+  container.innerHTML = monthItems.map(i => {
+    const dotClass = i._urgency === 'notstarted' ? 'notice' : i._urgency === 'overdue' ? 'critical' : i._urgency;
+    const dueLabel = i._days === 0 ? 'Due today' : i._days === 1 ? 'Due tomorrow' : i._days < 0 ? `${Math.abs(i._days)} days overdue` : `Due in ${i._days} days`;
+    const dueColor = i._days <= 0 ? 'var(--red)' : i._days <= 7 ? 'var(--red)' : i._days <= 14 ? 'var(--orange)' : i._days <= 30 ? 'var(--yellow)' : 'var(--green)';
+    return `
+      <div class="upcoming-card">
+        <div class="dot ${dotClass || 'none'}"></div>
+        <div class="uc-content">
+          <div class="uc-title">${i.obligation}</div>
+          <div class="uc-meta">${i.entity} · ${locationFlag(i.location)} ${i.location} · ${i.person}${i.cost ? ' · ' + i.cost : ''}</div>
+          <div class="uc-due" style="color:${dueColor};">${dueLabel} — ${formatDate(i.nextDue)}</div>
         </div>
-    </nav>
+      </div>
+    `;
+  }).join('');
+}
 
-    <div class="page-header">
-        <h1>Compliance Calendar</h1>
-        <p>Visual timeline of all upcoming regulatory deadlines and filing dates.</p>
-    </div>
+// ── TOOLTIP ──
+document.getElementById('calBody').addEventListener('mouseover', e => {
+  const ev = e.target.closest('.cal-event');
+  if (!ev) return;
+  const idx = +ev.dataset.idx;
+  const item = items[idx];
+  if (!item) return;
 
-    <div class="calendar-controls">
-        <button onclick="changeMonth(-1)">&larr; Prev</button>
-        <h2 id="monthLabel"></h2>
-        <button onclick="changeMonth(1)">Next &rarr;</button>
-    </div>
+  const tt = document.getElementById('tooltip');
+  const urgBadge = item._urgency === 'overdue' ? '<span class="badge badge-red">Overdue</span>'
+    : item._urgency === 'notstarted' ? '<span class="badge badge-purple">Not Started</span>'
+    : item._urgency === 'critical' ? '<span class="badge badge-red">Due ≤ 7d</span>'
+    : item._urgency === 'warning' ? '<span class="badge badge-orange">Due ≤ 14d</span>'
+    : item._urgency === 'notice' ? '<span class="badge badge-yellow">Due ≤ 30d</span>'
+    : '<span class="badge badge-green">Up to Date</span>';
 
-    <div class="calendar-wrapper">
-        <div class="calendar" id="calendar"></div>
-    </div>
+  tt.innerHTML = `
+    <div class="tt-title">${item.obligation}</div>
+    <div class="tt-row"><div class="tt-label">Status</div><div class="tt-val">${urgBadge}</div></div>
+    <div class="tt-row"><div class="tt-label">Entity</div><div class="tt-val">${item.entity}</div></div>
+    <div class="tt-row"><div class="tt-label">Location</div><div class="tt-val">${locationFlag(item.location)} ${item.location}</div></div>
+    <div class="tt-row"><div class="tt-label">Person</div><div class="tt-val">${item.person}</div></div>
+    <div class="tt-row"><div class="tt-label">Category</div><div class="tt-val"><span class="badge badge-blue">${item.category}</span></div></div>
+    <div class="tt-row"><div class="tt-label">Due</div><div class="tt-val">${formatDate(item.nextDue)}</div></div>
+    ${item.cost ? `<div class="tt-row"><div class="tt-label">Cost</div><div class="tt-val">${item.cost}</div></div>` : ''}
+    ${item.description ? `<div class="tt-row"><div class="tt-label">Notes</div><div class="tt-val">${item.description}</div></div>` : ''}
+  `;
 
-    <div class="timeline">
-        <h2>Upcoming Deadlines</h2>
-        <div id="timelineList"></div>
-    </div>
+  const rect = ev.getBoundingClientRect();
+  tt.style.left = Math.min(rect.right + 8, window.innerWidth - 340) + 'px';
+  tt.style.top = Math.max(rect.top - 20, 10) + 'px';
+  tt.classList.add('show');
+});
 
-    <footer class="footer">&copy; 2026 NF6 Capital — Compliance Hub</footer>
+document.getElementById('calBody').addEventListener('mouseout', e => {
+  const ev = e.target.closest('.cal-event');
+  if (!ev) return;
+  document.getElementById('tooltip').classList.remove('show');
+});
 
-    <script>
-        var events = [
-            { date: "2026-01-15", title: "Blue Sky State Filings", priority: "high" },
-            { date: "2026-01-31", title: "Code of Ethics Annual Cert", priority: "medium" },
-            { date: "2026-02-15", title: "Form PF Quarterly Filing", priority: "high" },
-            { date: "2026-02-28", title: "Form D Filing \u2014 Fund III", priority: "high" },
-            { date: "2026-03-15", title: "Custody Rule Audit", priority: "high" },
-            { date: "2026-03-31", title: "Form ADV Annual Update", priority: "high" },
-            { date: "2026-03-31", title: "Personal Trading Pre-Clearance Audit", priority: "low" },
-            { date: "2026-04-15", title: "Investor Quarterly Report", priority: "medium" },
-            { date: "2026-04-30", title: "Anti-Money Laundering Review", priority: "medium" },
-            { date: "2026-05-15", title: "Form PF Quarterly Filing (Q1)", priority: "high" },
-            { date: "2026-05-31", title: "Cybersecurity Risk Assessment", priority: "medium" },
-            { date: "2026-06-30", title: "Business Continuity Plan Update", priority: "low" },
-            { date: "2026-07-31", title: "Privacy Policy Annual Review", priority: "low" },
-            { date: "2026-08-15", title: "Form PF Quarterly Filing (Q2)", priority: "high" },
-            { date: "2026-09-30", title: "Annual Compliance Review", priority: "high" },
-            { date: "2026-11-15", title: "Form PF Quarterly Filing (Q3)", priority: "high" },
-            { date: "2026-12-31", title: "Year-End Compliance Checklist", priority: "medium" }
-        ];
+// ── EVENT LISTENERS ──
+document.getElementById('todayBadge').textContent = TODAY.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
 
-        var currentDate = new Date(2026, 1, 1);
-        var monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-        var dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+document.getElementById('prevBtn').addEventListener('click', () => {
+  viewMonth--;
+  if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+  renderCalendar();
+});
+document.getElementById('nextBtn').addEventListener('click', () => {
+  viewMonth++;
+  if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+  renderCalendar();
+});
+document.getElementById('todayBtn').addEventListener('click', () => {
+  viewYear = TODAY.getFullYear();
+  viewMonth = TODAY.getMonth();
+  renderCalendar();
+});
 
-        function renderCalendar() {
-            var year = currentDate.getFullYear();
-            var month = currentDate.getMonth();
-            document.getElementById("monthLabel").textContent = monthNames[month] + " " + year;
+document.getElementById('calLocFilter').addEventListener('change', renderCalendar);
+document.getElementById('calEntFilter').addEventListener('change', renderCalendar);
+document.getElementById('calPersonFilter').addEventListener('change', renderCalendar);
 
-            var firstDay = new Date(year, month, 1).getDay();
-            var daysInMonth = new Date(year, month + 1, 0).getDate();
-            var daysInPrev = new Date(year, month, 0).getDate();
-
-            var html = "";
-            for (var di = 0; di < dayNames.length; di++) {
-                html += '<div class="cal-header">' + dayNames[di] + "</div>";
-            }
-            var today = new Date();
-
-            for (var i = 0; i < firstDay; i++) {
-                html += '<div class="cal-day other-month"><div class="day-num">' + (daysInPrev - firstDay + i + 1) + "</div></div>";
-            }
-
-            for (var d = 1; d <= daysInMonth; d++) {
-                var dateStr = year + "-" + String(month+1).padStart(2,"0") + "-" + String(d).padStart(2,"0");
-                var isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d;
-                var dayEvents = events.filter(function(e) { return e.date === dateStr; });
-                html += '<div class="cal-day' + (isToday ? " today" : "") + '">' +
-                    '<div class="day-num">' + d + "</div>";
-                for (var ei = 0; ei < dayEvents.length; ei++) {
-                    html += '<div class="cal-event ' + dayEvents[ei].priority + '" title="' + dayEvents[ei].title + '">' + dayEvents[ei].title + "</div>";
-                }
-                html += "</div>";
-            }
-
-            var remaining = 42 - firstDay - daysInMonth;
-            for (var ri = 1; ri <= remaining; ri++) {
-                html += '<div class="cal-day other-month"><div class="day-num">' + ri + "</div></div>";
-            }
-
-            document.getElementById("calendar").innerHTML = html;
-        }
-
-        function renderTimeline() {
-            var now = new Date();
-            var upcoming = events.filter(function(e) { return new Date(e.date) >= now; }).sort(function(a,b) { return new Date(a.date) - new Date(b.date); }).slice(0, 8);
-            var container = document.getElementById("timelineList");
-            var html = "";
-            var colors = { high: "background:#450a0a;color:#f87171", medium: "background:#422006;color:#fbbf24", low: "background:#064e3b;color:#34d399" };
-            for (var ti = 0; ti < upcoming.length; ti++) {
-                var e = upcoming[ti];
-                var dd = new Date(e.date);
-                html += '<div class="timeline-item">' +
-                    '<div class="timeline-date">' + monthNames[dd.getMonth()].slice(0,3) + " " + dd.getDate() + ", " + dd.getFullYear() + "</div>" +
-                    '<div class="timeline-content"><h3>' + e.title + "</h3><p>" + e.priority.charAt(0).toUpperCase() + e.priority.slice(1) + " Priority</p></div>" +
-                    '<span class="timeline-priority" style="' + colors[e.priority] + '">' + e.priority.toUpperCase() + "</span>" +
-                    "</div>";
-            }
-            container.innerHTML = html;
-        }
-
-        function changeMonth(delta) {
-            currentDate.setMonth(currentDate.getMonth() + delta);
-            renderCalendar();
-        }
-
-        renderCalendar();
-        renderTimeline();
-    </script>
+// ── INIT ──
+populateFilters();
+renderCalendar();
+</script>
 </body>
 </html>
