@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NF6 Capital — Compliance Hub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0a0e17; color: #e0e6ed; min-height: 100vh; }
+        .nav { background: #111827; border-bottom: 1px solid #1e293b; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { font-size: 1.4rem; font-weight: 700; color: #60a5fa; }
+        .nav-brand span { color: #94a3b8; font-weight: 400; font-size: 0.9rem; margin-left: 0.5rem; }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-links a { color: #94a3b8; text-decoration: none; font-size: 0.95rem; padding: 0.4rem 0.8rem; border-radius: 6px; transition: all 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: #e0e6ed; background: #1e293b; }
+        .hero { text-align: center; padding: 4rem 2rem 3rem; }
+        .hero h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.75rem; background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.1rem; color: #94a3b8; max-width: 600px; margin: 0 auto; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; max-width: 1100px; margin: 0 auto; padding: 2rem; }
+        .card { background: #111827; border: 1px solid #1e293b; border-radius: 12px; padding: 2rem; transition: all 0.3s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+        .card:hover { border-color: #3b82f6; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(59,130,246,0.15); }
+        .card-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .card h2 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #f1f5f9; }
+        .card p { color: #94a3b8; font-size: 0.95rem; line-height: 1.5; }
+        .card .badge { display: inline-block; margin-top: 1rem; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .badge-live { background: #064e3b; color: #34d399; }
+        .badge-track { background: #1e1b4b; color: #a78bfa; }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; max-width: 1100px; margin: 2rem auto; padding: 0 2rem; }
+        .stat { background: #111827; border: 1px solid #1e293b; border-radius: 10px; padding: 1.5rem; text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: #60a5fa; }
+        .stat-label { font-size: 0.85rem; color: #64748b; margin-top: 0.25rem; }
+        .footer { text-align: center; padding: 3rem 2rem; color: #475569; font-size: 0.85rem; }
+        @media (max-width: 768px) { .stats { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 1.8rem; } }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-brand">NF6 Capital <span>Compliance Hub</span></div>
+        <div class="nav-links">
+            <a href="index.html" class="active">Home</a>
+            <a href="compliance-dashboard.html">Dashboard</a>
+            <a href="compliance-calendar.html">Calendar</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Compliance Command Center</h1>
+        <p>Track regulatory deadlines, monitor compliance status, and manage filings — all in one place.</p>
+    </section>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-value" id="totalItems">12</div>
+            <div class="stat-label">Total Items</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color: #34d399;">8</div>
+            <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color: #fbbf24;">3</div>
+            <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color: #f87171;">1</div>
+            <div class="stat-label">Overdue</div>
+        </div>
+    </div>
+
+    <div class="cards">
+        <a href="compliance-dashboard.html" class="card">
+            <div class="card-icon">📊</div>
+            <h2>Compliance Dashboard</h2>
+            <p>View real-time compliance status, track filing progress, and monitor regulatory requirements across all entities.</p>
+            <span class="badge badge-live">Live Status</span>
+        </a>
+        <a href="compliance-calendar.html" class="card">
+            <div class="card-icon">📅</div>
+            <h2>Compliance Calendar</h2>
+            <p>Interactive calendar showing upcoming deadlines, filing due dates, and regulatory milestones for the year.</p>
+            <span class="badge badge-track">Deadlines</span>
+        </a>
+        <a href="compliance-tracker.csv" class="card">
+            <div class="card-icon">📋</div>
+            <h2>Compliance Tracker (CSV)</h2>
+            <p>Download the raw compliance tracking data for import into Excel, Google Sheets, or your preferred analysis tool.</p>
+            <span class="badge badge-track">Download</span>
+        </a>
+    </div>
+
+    <footer class="footer">
+        &copy; 2026 NF6 Capital — Compliance Hub. Internal use only.
+    </footer>
+</body>
+</html>
