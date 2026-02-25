@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compliance Calendar â NF6 Capital</title>
+    <title>Compliance Calendar — NF6 Capital</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0a0e17; color: #e0e6ed; min-height: 100vh; }
@@ -73,14 +73,14 @@
         <div id="timelineList"></div>
     </div>
 
-    <footer class="footer">&copy; 2026 NF6 Capital â Compliance Hub</footer>
+    <footer class="footer">&copy; 2026 NF6 Capital — Compliance Hub</footer>
 
     <script>
-        const events = [
+        var events = [
             { date: "2026-01-15", title: "Blue Sky State Filings", priority: "high" },
             { date: "2026-01-31", title: "Code of Ethics Annual Cert", priority: "medium" },
             { date: "2026-02-15", title: "Form PF Quarterly Filing", priority: "high" },
-            { date: "2026-02-28", title: "Form D Filing â Fund III", priority: "high" },
+            { date: "2026-02-28", title: "Form D Filing \u2014 Fund III", priority: "high" },
             { date: "2026-03-15", title: "Custody Rule Audit", priority: "high" },
             { date: "2026-03-31", title: "Form ADV Annual Update", priority: "high" },
             { date: "2026-03-31", title: "Personal Trading Pre-Clearance Audit", priority: "low" },
@@ -96,57 +96,65 @@
             { date: "2026-12-31", title: "Year-End Compliance Checklist", priority: "medium" }
         ];
 
-        let currentDate = new Date(2026, 1, 1); // Feb 2026
-        const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        var currentDate = new Date(2026, 1, 1);
+        var monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+        var dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
         function renderCalendar() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            document.getElementById('monthLabel').textContent = `${months[month]} ${year}`;
+            var year = currentDate.getFullYear();
+            var month = currentDate.getMonth();
+            document.getElementById("monthLabel").textContent = monthNames[month] + " " + year;
 
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const daysInPrev = new Date(year, month, 0).getDate();
+            var firstDay = new Date(year, month, 1).getDay();
+            var daysInMonth = new Date(year, month + 1, 0).getDate();
+            var daysInPrev = new Date(year, month, 0).getDate();
 
-            let html = days.map(d => `<div class="cal-header">${d}</div>`).join('');
-            const today = new Date();
+            var html = "";
+            for (var di = 0; di < dayNames.length; di++) {
+                html += '<div class="cal-header">' + dayNames[di] + "</div>";
+            }
+            var today = new Date();
 
-            for (let i = 0; i < firstDay; i++) {
-                html += `<div class="cal-day other-month"><div class="day-num">${daysInPrev - firstDay + i + 1}</div></div>`;
+            for (var i = 0; i < firstDay; i++) {
+                html += '<div class="cal-day other-month"><div class="day-num">' + (daysInPrev - firstDay + i + 1) + "</div></div>";
             }
 
-            for (let d = 1; d <= daysInMonth; d++) {
-                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d;
-                const dayEvents = events.filter(e => e.date === dateStr);
-                html += `<div class="cal-day${isToday ? ' today' : ''}">
-                    <div class="day-num">${d}</div>
-                    ${dayEvents.map(e => `<div class="cal-event ${e.priority}" title="${e.title}">${e.title}</div>`).join('')}
-                </div>`;
+            for (var d = 1; d <= daysInMonth; d++) {
+                var dateStr = year + "-" + String(month+1).padStart(2,"0") + "-" + String(d).padStart(2,"0");
+                var isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d;
+                var dayEvents = events.filter(function(e) { return e.date === dateStr; });
+                html += '<div class="cal-day' + (isToday ? " today" : "") + '">' +
+                    '<div class="day-num">' + d + "</div>";
+                for (var ei = 0; ei < dayEvents.length; ei++) {
+                    html += '<div class="cal-event ' + dayEvents[ei].priority + '" title="' + dayEvents[ei].title + '">' + dayEvents[ei].title + "</div>";
+                }
+                html += "</div>";
             }
 
-            const remaining = 42 - firstDay - daysInMonth;
-            for (let i = 1; i <= remaining; i++) {
-                html += `<div class="cal-day other-month"><div class="day-num">${i}</div></div>`;
+            var remaining = 42 - firstDay - daysInMonth;
+            for (var ri = 1; ri <= remaining; ri++) {
+                html += '<div class="cal-day other-month"><div class="day-num">' + ri + "</div></div>";
             }
 
-            document.getElementById('calendar').innerHTML = html;
+            document.getElementById("calendar").innerHTML = html;
         }
 
         function renderTimeline() {
-            const now = new Date();
-            const upcoming = events.filter(e => new Date(e.date) >= now).sort((a,b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
-            const container = document.getElementById('timelineList');
-            container.innerHTML = upcoming.map(e => {
-                const d = new Date(e.date);
-                const colors = { high: 'background:#450a0a;color:#f87171', medium: 'background:#422006;color:#fbbf24', low: 'background:#064e3b;color:#34d399' };
-                return `<div class="timeline-item">
-                    <div class="timeline-date">${months[d.getMonth()].slice(0,3)} ${d.getDate()}, ${d.getFullYear()}</div>
-                    <div class="timeline-content"><h3>${e.title}</h3><p>${e.priority.charAt(0).toUpperCase()+e.priority.slice(1)} Priority</p></div>
-                    <span class="timeline-priority" style="${colors[e.priority]}">${e.priority.toUpperCase()}</span>
-                </div>`;
-            }).join('');
+            var now = new Date();
+            var upcoming = events.filter(function(e) { return new Date(e.date) >= now; }).sort(function(a,b) { return new Date(a.date) - new Date(b.date); }).slice(0, 8);
+            var container = document.getElementById("timelineList");
+            var html = "";
+            var colors = { high: "background:#450a0a;color:#f87171", medium: "background:#422006;color:#fbbf24", low: "background:#064e3b;color:#34d399" };
+            for (var ti = 0; ti < upcoming.length; ti++) {
+                var e = upcoming[ti];
+                var dd = new Date(e.date);
+                html += '<div class="timeline-item">' +
+                    '<div class="timeline-date">' + monthNames[dd.getMonth()].slice(0,3) + " " + dd.getDate() + ", " + dd.getFullYear() + "</div>" +
+                    '<div class="timeline-content"><h3>' + e.title + "</h3><p>" + e.priority.charAt(0).toUpperCase() + e.priority.slice(1) + " Priority</p></div>" +
+                    '<span class="timeline-priority" style="' + colors[e.priority] + '">' + e.priority.toUpperCase() + "</span>" +
+                    "</div>";
+            }
+            container.innerHTML = html;
         }
 
         function changeMonth(delta) {
