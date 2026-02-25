@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance Dashboard — NF6 Capital</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0a0e17; color: #e0e6ed; min-height: 100vh; }
+        .nav { background: #111827; border-bottom: 1px solid #1e293b; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { font-size: 1.4rem; font-weight: 700; color: #60a5fa; }
+        .nav-brand span { color: #94a3b8; font-weight: 400; font-size: 0.9rem; margin-left: 0.5rem; }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-links a { color: #94a3b8; text-decoration: none; font-size: 0.95rem; padding: 0.4rem 0.8rem; border-radius: 6px; transition: all 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: #e0e6ed; background: #1e293b; }
+        .page-header { padding: 2rem 2rem 1rem; max-width: 1200px; margin: 0 auto; }
+        .page-header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .page-header p { color: #64748b; }
+        .filters { display: flex; gap: 0.75rem; padding: 0 2rem 1rem; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
+        .filter-btn { padding: 0.4rem 1rem; border-radius: 20px; border: 1px solid #1e293b; background: transparent; color: #94a3b8; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+        .filter-btn:hover, .filter-btn.active { background: #1e293b; color: #e0e6ed; border-color: #3b82f6; }
+        .dashboard { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; }
+        table { width: 100%; border-collapse: collapse; background: #111827; border-radius: 12px; overflow: hidden; }
+        thead { background: #1e293b; }
+        th { padding: 0.85rem 1rem; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; font-weight: 600; }
+        td { padding: 0.85rem 1rem; border-bottom: 1px solid #1e293b; font-size: 0.9rem; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: #1a2332; }
+        .status { padding: 0.2rem 0.65rem; border-radius: 12px; font-size: 0.78rem; font-weight: 600; display: inline-block; }
+        .status-complete { background: #064e3b; color: #34d399; }
+        .status-pending { background: #422006; color: #fbbf24; }
+        .status-overdue { background: #450a0a; color: #f87171; }
+        .status-in-progress { background: #1e1b4b; color: #a78bfa; }
+        .priority { font-weight: 600; }
+        .priority-high { color: #f87171; }
+        .priority-medium { color: #fbbf24; }
+        .priority-low { color: #34d399; }
+        .footer { text-align: center; padding: 3rem 2rem; color: #475569; font-size: 0.85rem; }
+        @media (max-width: 768px) { table { display: block; overflow-x: auto; } }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-brand">NF6 Capital <span>Compliance Hub</span></div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="compliance-dashboard.html" class="active">Dashboard</a>
+            <a href="compliance-calendar.html">Calendar</a>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <h1>Compliance Dashboard</h1>
+        <p>Real-time overview of all compliance items, filings, and regulatory requirements.</p>
+    </div>
+
+    <div class="filters">
+        <button class="filter-btn active" onclick="filterTable('all')">All</button>
+        <button class="filter-btn" onclick="filterTable('complete')">Complete</button>
+        <button class="filter-btn" onclick="filterTable('pending')">Pending</button>
+        <button class="filter-btn" onclick="filterTable('overdue')">Overdue</button>
+        <button class="filter-btn" onclick="filterTable('in-progress')">In Progress</button>
+    </div>
+
+    <div class="dashboard">
+        <table id="complianceTable">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Category</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Assigned To</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <footer class="footer">&copy; 2026 NF6 Capital — Compliance Hub</footer>
+
+    <script>
+        const complianceData = [
+            { item: "Form ADV Annual Update", category: "SEC Filing", due: "2026-03-31", status: "pending", priority: "high", assigned: "Brandon C.", notes: "Annual amendment due within 90 days of fiscal year end" },
+            { item: "Form PF Quarterly Filing", category: "SEC Filing", due: "2026-02-15", status: "complete", priority: "high", assigned: "Brandon C.", notes: "Q4 2025 filing completed" },
+            { item: "Anti-Money Laundering Review", category: "AML/KYC", due: "2026-04-30", status: "pending", priority: "medium", assigned: "Compliance Team", notes: "Annual AML program review" },
+            { item: "Code of Ethics Annual Cert", category: "Internal", due: "2026-01-31", status: "complete", priority: "medium", assigned: "All Employees", notes: "Annual acknowledgment completed" },
+            { item: "Form D Filing — Fund III", category: "SEC Filing", due: "2026-02-28", status: "in-progress", priority: "high", assigned: "Brandon C.", notes: "New fund offering — Reg D exemption" },
+            { item: "Custody Rule Audit", category: "Audit", due: "2026-03-15", status: "pending", priority: "high", assigned: "External Auditor", notes: "Annual surprise custody examination" },
+            { item: "Business Continuity Plan Update", category: "Internal", due: "2026-06-30", status: "complete", priority: "low", assigned: "Operations", notes: "Annual BCP review and testing" },
+            { item: "Cybersecurity Risk Assessment", category: "IT/Security", due: "2026-05-31", status: "complete", priority: "medium", assigned: "IT Team", notes: "Annual cyber risk review per SEC guidance" },
+            { item: "Blue Sky State Filings", category: "State Filing", due: "2026-01-15", status: "overdue", priority: "high", assigned: "Brandon C.", notes: "State notice filings — renewals overdue" },
+            { item: "Investor Quarterly Report", category: "Reporting", due: "2026-04-15", status: "complete", priority: "medium", assigned: "IR Team", notes: "Q4 2025 investor communications" },
+            { item: "Personal Trading Pre-Clearance Audit", category: "Internal", due: "2026-03-31", status: "complete", priority: "low", assigned: "Compliance Team", notes: "Quarterly review of personal trading" },
+            { item: "Privacy Policy Annual Review", category: "Regulatory", due: "2026-07-31", status: "complete", priority: "low", assigned: "Legal", notes: "Reg S-P privacy notice review" }
+        ];
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = data.map(row => \`
+                <tr data-status="\${row.status}">
+                    <td><strong>\${row.item}</strong></td>
+                    <td>\${row.category}</td>
+                    <td>\${row.due}</td>
+                    <td><span class="status status-\${row.status}">\${row.status.replace('-', ' ').replace(/\\b\\w/g, l => l.toUpperCase())}</span></td>
+                    <td><span class="priority priority-\${row.priority}">\${row.priority.charAt(0).toUpperCase() + row.priority.slice(1)}</span></td>
+                    <td>\${row.assigned}</td>
+                    <td>\${row.notes}</td>
+                </tr>
+            \`).join('');
+        }
+
+        function filterTable(status) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            if (status === 'all') { renderTable(complianceData); return; }
+            renderTable(complianceData.filter(r => r.status === status));
+        }
+
+        renderTable(complianceData);
+    </script>
+</body>
+</html>
