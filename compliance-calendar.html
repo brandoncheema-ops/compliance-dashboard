@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance Calendar â NF6 Capital</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0a0e17; color: #e0e6ed; min-height: 100vh; }
+        .nav { background: #111827; border-bottom: 1px solid #1e293b; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { font-size: 1.4rem; font-weight: 700; color: #60a5fa; }
+        .nav-brand span { color: #94a3b8; font-weight: 400; font-size: 0.9rem; margin-left: 0.5rem; }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-links a { color: #94a3b8; text-decoration: none; font-size: 0.95rem; padding: 0.4rem 0.8rem; border-radius: 6px; transition: all 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: #e0e6ed; background: #1e293b; }
+        .page-header { padding: 2rem 2rem 1rem; max-width: 1200px; margin: 0 auto; }
+        .page-header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .page-header p { color: #64748b; }
+        .calendar-controls { display: flex; align-items: center; justify-content: center; gap: 1.5rem; padding: 1rem 2rem; }
+        .calendar-controls button { background: #1e293b; border: 1px solid #334155; color: #e0e6ed; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .calendar-controls button:hover { background: #334155; }
+        .calendar-controls h2 { font-size: 1.3rem; min-width: 200px; text-align: center; }
+        .calendar-wrapper { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; }
+        .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: #1e293b; border-radius: 12px; overflow: hidden; }
+        .cal-header { background: #1e293b; padding: 0.75rem; text-align: center; font-size: 0.8rem; font-weight: 600; color: #64748b; text-transform: uppercase; }
+        .cal-day { background: #111827; min-height: 100px; padding: 0.5rem; position: relative; transition: background 0.2s; }
+        .cal-day:hover { background: #1a2332; }
+        .cal-day.other-month { opacity: 0.3; }
+        .cal-day.today { border: 2px solid #3b82f6; }
+        .day-num { font-size: 0.85rem; color: #64748b; margin-bottom: 0.25rem; }
+        .cal-event { font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 4px; margin-bottom: 2px; cursor: default; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cal-event.high { background: #450a0a; color: #f87171; }
+        .cal-event.medium { background: #422006; color: #fbbf24; }
+        .cal-event.low { background: #064e3b; color: #34d399; }
+        .timeline { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; }
+        .timeline h2 { font-size: 1.3rem; margin-bottom: 1rem; }
+        .timeline-item { display: flex; gap: 1rem; padding: 1rem; background: #111827; border: 1px solid #1e293b; border-radius: 10px; margin-bottom: 0.75rem; align-items: center; }
+        .timeline-date { min-width: 90px; font-size: 0.85rem; color: #64748b; font-weight: 600; }
+        .timeline-content { flex: 1; }
+        .timeline-content h3 { font-size: 0.95rem; margin-bottom: 0.2rem; }
+        .timeline-content p { font-size: 0.8rem; color: #64748b; }
+        .timeline-priority { padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+        .footer { text-align: center; padding: 3rem 2rem; color: #475569; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-brand">NF6 Capital <span>Compliance Hub</span></div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="compliance-dashboard.html">Dashboard</a>
+            <a href="compliance-calendar.html" class="active">Calendar</a>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <h1>Compliance Calendar</h1>
+        <p>Visual timeline of all upcoming regulatory deadlines and filing dates.</p>
+    </div>
+
+    <div class="calendar-controls">
+        <button onclick="changeMonth(-1)">&larr; Prev</button>
+        <h2 id="monthLabel"></h2>
+        <button onclick="changeMonth(1)">Next &rarr;</button>
+    </div>
+
+    <div class="calendar-wrapper">
+        <div class="calendar" id="calendar"></div>
+    </div>
+
+    <div class="timeline">
+        <h2>Upcoming Deadlines</h2>
+        <div id="timelineList"></div>
+    </div>
+
+    <footer class="footer">&copy; 2026 NF6 Capital â Compliance Hub</footer>
+
+    <script>
+        const events = [
+            { date: "2026-01-15", title: "Blue Sky State Filings", priority: "high" },
+            { date: "2026-01-31", title: "Code of Ethics Annual Cert", priority: "medium" },
+            { date: "2026-02-15", title: "Form PF Quarterly Filing", priority: "high" },
+            { date: "2026-02-28", title: "Form D Filing â Fund III", priority: "high" },
+            { date: "2026-03-15", title: "Custody Rule Audit", priority: "high" },
+            { date: "2026-03-31", title: "Form ADV Annual Update", priority: "high" },
+            { date: "2026-03-31", title: "Personal Trading Pre-Clearance Audit", priority: "low" },
+            { date: "2026-04-15", title: "Investor Quarterly Report", priority: "medium" },
+            { date: "2026-04-30", title: "Anti-Money Laundering Review", priority: "medium" },
+            { date: "2026-05-15", title: "Form PF Quarterly Filing (Q1)", priority: "high" },
+            { date: "2026-05-31", title: "Cybersecurity Risk Assessment", priority: "medium" },
+            { date: "2026-06-30", title: "Business Continuity Plan Update", priority: "low" },
+            { date: "2026-07-31", title: "Privacy Policy Annual Review", priority: "low" },
+            { date: "2026-08-15", title: "Form PF Quarterly Filing (Q2)", priority: "high" },
+            { date: "2026-09-30", title: "Annual Compliance Review", priority: "high" },
+            { date: "2026-11-15", title: "Form PF Quarterly Filing (Q3)", priority: "high" },
+            { date: "2026-12-31", title: "Year-End Compliance Checklist", priority: "medium" }
+        ];
+
+        let currentDate = new Date(2026, 1, 1); // Feb 2026
+        const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            document.getElementById('monthLabel').textContent = `${months[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrev = new Date(year, month, 0).getDate();
+
+            let html = days.map(d => `<div class="cal-header">${d}</div>`).join('');
+            const today = new Date();
+
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div class="cal-day other-month"><div class="day-num">${daysInPrev - firstDay + i + 1}</div></div>`;
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d;
+                const dayEvents = events.filter(e => e.date === dateStr);
+                html += `<div class="cal-day${isToday ? ' today' : ''}">
+                    <div class="day-num">${d}</div>
+                    ${dayEvents.map(e => `<div class="cal-event ${e.priority}" title="${e.title}">${e.title}</div>`).join('')}
+                </div>`;
+            }
+
+            const remaining = 42 - firstDay - daysInMonth;
+            for (let i = 1; i <= remaining; i++) {
+                html += `<div class="cal-day other-month"><div class="day-num">${i}</div></div>`;
+            }
+
+            document.getElementById('calendar').innerHTML = html;
+        }
+
+        function renderTimeline() {
+            const now = new Date();
+            const upcoming = events.filter(e => new Date(e.date) >= now).sort((a,b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
+            const container = document.getElementById('timelineList');
+            container.innerHTML = upcoming.map(e => {
+                const d = new Date(e.date);
+                const colors = { high: 'background:#450a0a;color:#f87171', medium: 'background:#422006;color:#fbbf24', low: 'background:#064e3b;color:#34d399' };
+                return `<div class="timeline-item">
+                    <div class="timeline-date">${months[d.getMonth()].slice(0,3)} ${d.getDate()}, ${d.getFullYear()}</div>
+                    <div class="timeline-content"><h3>${e.title}</h3><p>${e.priority.charAt(0).toUpperCase()+e.priority.slice(1)} Priority</p></div>
+                    <span class="timeline-priority" style="${colors[e.priority]}">${e.priority.toUpperCase()}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        renderCalendar();
+        renderTimeline();
+    </script>
+</body>
+</html>
