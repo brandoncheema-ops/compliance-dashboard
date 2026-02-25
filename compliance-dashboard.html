@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NF6 Capital â Compliance Dashboard</title>
+<title>NF6 Capital — Compliance Dashboard</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -141,7 +141,7 @@
   }
   .search-box input:focus { border-color: var(--accent); }
   .search-box::before {
-    content: 'ð';
+    content: '🔍';
     position: absolute;
     left: .75rem;
     top: 50%;
@@ -360,14 +360,14 @@
 
 <div class="controls">
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search obligations, entities, peopleâ¦">
+    <input type="text" id="searchInput" placeholder="Search obligations, entities, people…">
   </div>
   <div class="filter-group" id="statusFilters">
     <button class="filter-btn active" data-filter="all">All</button>
     <button class="filter-btn" data-filter="overdue">Overdue</button>
-    <button class="filter-btn" data-filter="due-7">Due â¤ 7 days</button>
-    <button class="filter-btn" data-filter="due-14">Due â¤ 14 days</button>
-    <button class="filter-btn" data-filter="due-30">Due â¤ 30 days</button>
+    <button class="filter-btn" data-filter="due-7">Due ≤ 7 days</button>
+    <button class="filter-btn" data-filter="due-14">Due ≤ 14 days</button>
+    <button class="filter-btn" data-filter="due-30">Due ≤ 30 days</button>
     <button class="filter-btn" data-filter="up-to-date">Up to Date</button>
     <button class="filter-btn" data-filter="not-started">Not Started</button>
   </div>
@@ -406,25 +406,25 @@
 </div>
 
 <div class="reminders-section">
-  <div class="section-title">ð§ Upcoming Email Reminders <span style="font-weight:400;font-size:.8rem;color:var(--text-secondary);">(to brandon.cheema@nf6capital.com)</span></div>
+  <div class="section-title">📧 Upcoming Email Reminders <span style="font-weight:400;font-size:.8rem;color:var(--text-secondary);">(to brandon.cheema@nf6capital.com)</span></div>
   <div class="reminder-cards" id="reminderCards"></div>
   <div class="email-preview" id="emailPreview"></div>
 </div>
 
 <script>
-// ââ RAW DATA ââ
+// ── RAW DATA ──
 const RAW_DATA = [
-  {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"United States",entity:"NF Texas",obligation:"Pay property taxes by 1/31 each year â Harris County",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/31/2027",description:"Texas taxes SOP",cost:"",link:"https://myharriscountytax.com/"},
-  {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"United States",entity:"NF Texas",obligation:"Pay property taxes by 1/31 each year â Spring Branch ISD",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/31/2027",description:"Texas taxes SOP",cost:"",link:"https://sbisd.propertytaxpayments.net/search"},
+  {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"United States",entity:"NF Texas",obligation:"Pay property taxes by 1/31 each year — Harris County",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/31/2027",description:"Texas taxes SOP",cost:"",link:"https://myharriscountytax.com/"},
+  {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"United States",entity:"NF Texas",obligation:"Pay property taxes by 1/31 each year — Spring Branch ISD",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/31/2027",description:"Texas taxes SOP",cost:"",link:"https://sbisd.propertytaxpayments.net/search"},
   {status:"Recurring - Up to date",type:"Donation",category:"Act 22 requirement",location:"Puerto Rico",entity:"MN Personal",obligation:"Make a yearly donation in PR",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/8/2026",dateToDo:"1/5/2027",nextDue:"12/31/2027",description:"Donation SOP",cost:"$5,000.00",link:""},
   {status:"Recurring - Up to date",type:"529 Gift",category:"529 Gift",location:"United States",entity:"MN Personal",obligation:"Make yearly contribution to Dr. Mike's nieces and nephews",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"12/29/2025",dateToDo:"12/1/2026",nextDue:"12/31/2026",description:"529 SOP",cost:"$114,000.00",link:"https://www.ugift529.com/"},
   {status:"Recurring - Up to date",type:"Car",category:"Tesla",location:"Puerto Rico",entity:"MN Personal",obligation:"Tesla Car Insurance",person:"Tim",frequency:"Yearly",dateDone:"10/6/2025",dateToDo:"9/1/2026",nextDue:"10/6/2026",description:"",cost:"",link:""},
   {status:"Recurring - Up to date",type:"Car",category:"Tesla",location:"Puerto Rico",entity:"MN Personal",obligation:"Tesla Registration",person:"Tim",frequency:"Yearly",dateDone:"",dateToDo:"",nextDue:"",description:"",cost:"",link:""},
   {status:"Recurring - Up to date",type:"Car",category:"Tahoe",location:"Colombia",entity:"NF MDE CO",obligation:"Tahoe insurance SURA",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/23/2025",dateToDo:"12/23/2026",nextDue:"12/28/2026",description:"",cost:"$3,842.00",link:""},
-  {status:"Recurring - Up to date",type:"Car",category:"Tahoe",location:"Colombia",entity:"NF MDE CO",obligation:"Tahoe vehicle tax â GobernaciÃ³n de Antioquia",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/28/2027",description:"Pay through GobernaciÃ³n de Ant. website",cost:"",link:"https://www.vehiculosantioquia.com.co/"},
-  {status:"Recurring - Up to date",type:"Car",category:"Tahoe",location:"Colombia",entity:"NF MDE CO",obligation:"Tahoe â SOAT renewal",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/25/2025",dateToDo:"12/25/2026",nextDue:"12/25/2026",description:"Buy a new SOAT through Rappi or another website",cost:"",link:""},
-  {status:"Recurring - Due Soon",type:"Insurance",category:"Dorado Insurance",location:"Puerto Rico",entity:"MN Personal",obligation:"Renew Insurance â hazard policy meets Oriental's requirements",person:"Tim",frequency:"Yearly",dateDone:"1/23/2026",dateToDo:"4/14/2026",nextDue:"5/14/2026",description:"MAPFRE Insurance",cost:"$2,667.00",link:""},
-  {status:"Recurring - Up to date",type:"Insurance",category:"Dorado Insurance",location:"Puerto Rico",entity:"MN Personal",obligation:"Obtain Master Policy from Dorado â due to Oriental 60 days before expiry",person:"Tim",frequency:"Yearly",dateDone:"11/14/2025",dateToDo:"8/1/2026",nextDue:"11/14/2026",description:"",cost:"",link:""},
+  {status:"Recurring - Up to date",type:"Car",category:"Tahoe",location:"Colombia",entity:"NF MDE CO",obligation:"Tahoe vehicle tax — Gobernación de Antioquia",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/28/2027",description:"Pay through Gobernación de Ant. website",cost:"",link:"https://www.vehiculosantioquia.com.co/"},
+  {status:"Recurring - Up to date",type:"Car",category:"Tahoe",location:"Colombia",entity:"NF MDE CO",obligation:"Tahoe — SOAT renewal",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/25/2025",dateToDo:"12/25/2026",nextDue:"12/25/2026",description:"Buy a new SOAT through Rappi or another website",cost:"",link:""},
+  {status:"Recurring - Due Soon",type:"Insurance",category:"Dorado Insurance",location:"Puerto Rico",entity:"MN Personal",obligation:"Renew Insurance — hazard policy meets Oriental's requirements",person:"Tim",frequency:"Yearly",dateDone:"1/23/2026",dateToDo:"4/14/2026",nextDue:"5/14/2026",description:"MAPFRE Insurance",cost:"$2,667.00",link:""},
+  {status:"Recurring - Up to date",type:"Insurance",category:"Dorado Insurance",location:"Puerto Rico",entity:"MN Personal",obligation:"Obtain Master Policy from Dorado — due to Oriental 60 days before expiry",person:"Tim",frequency:"Yearly",dateDone:"11/14/2025",dateToDo:"8/1/2026",nextDue:"11/14/2026",description:"",cost:"",link:""},
   {status:"Recurring - Up to date",type:"Insurance",category:"Dorado Insurance",location:"Puerto Rico",entity:"MN Personal",obligation:"Commercial insurance",person:"Tim",frequency:"Yearly",dateDone:"2/17/2026",dateToDo:"1/16/2027",nextDue:"2/16/2027",description:"",cost:"$1,650.00",link:""},
   {status:"Recurring - Due Soon",type:"Property",category:"Maintenance",location:"Puerto Rico",entity:"MN Personal",obligation:"AC maintenance quarterly",person:"Amanda/Brandon",frequency:"Quarterly",dateDone:"2/3/2026",dateToDo:"5/1/2026",nextDue:"5/1/2026",description:"AC Maintenance Schedule",cost:"$295.00",link:""},
   {status:"Recurring - Due Soon",type:"Property",category:"Maintenance",location:"France",entity:"MN Personal",obligation:"AC maintenance bi-yearly",person:"Amanda/Brandon",frequency:"Bi-yearly",dateDone:"11/24/2025",dateToDo:"5/1/2026",nextDue:"5/24/2026",description:"AC Maintenance Schedule",cost:"$938.20",link:""},
@@ -434,24 +434,24 @@ const RAW_DATA = [
   {status:"Recurring - Up to date",type:"MN Personal",category:"Medical License",location:"Puerto Rico",entity:"MN Personal",obligation:"Renew Dr. Mike's medical license",person:"Mike",frequency:"Other",dateDone:"8/4/2024",dateToDo:"6/1/2027",nextDue:"8/4/2027",description:"",cost:"",link:""},
   {status:"Recurring - Up to date",type:"MN Personal",category:"PR Drivers License",location:"Puerto Rico",entity:"MN Personal",obligation:"Renew Dr. Mike's PR Drivers License",person:"Mike/Amanda/Brandon",frequency:"Other",dateDone:"6/20/2025",dateToDo:"5/1/2033",nextDue:"8/4/2033",description:"",cost:"",link:""},
   {status:"Recurring - Up to date",type:"Business expense",category:"Keeper Security",location:"United States",entity:"TLMND",obligation:"Renew Keeper Security every 3 years",person:"Amanda/Brandon",frequency:"Other",dateDone:"6/24/2025",dateToDo:"5/1/2028",nextDue:"6/25/2028",description:"",cost:"",link:""},
-  {status:"Recurring - Up to date",type:"Entity",category:"Mailbox",location:"France",entity:"Paris Thacko",obligation:"Mailbox subscription â Paris (253 rue Saint HonorÃ©)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"7/16/2025",dateToDo:"7/1/2026",nextDue:"7/1/2026",description:"Pay through Banco Santander portal via transfer",cost:"$1,261.00",link:""},
-  {status:"Recurring - Up to date",type:"Property",category:"House Insurance",location:"France",entity:"Paris Thacko",obligation:"House Insurance of 5 Quai Montebello â AXXA",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/5/2025",dateToDo:"12/1/2025",nextDue:"12/1/2026",description:"Pay through Banco Santander portal via transfer",cost:"$528.00",link:""},
-  {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"France",entity:"Paris Thacko",obligation:"Tax Fonciere â RE Tax",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"10/27/2025",dateToDo:"10/1/2025",nextDue:"10/1/2026",description:"Automatic debit set up",cost:"$2,428.00",link:""},
+  {status:"Recurring - Up to date",type:"Entity",category:"Mailbox",location:"France",entity:"Paris Thacko",obligation:"Mailbox subscription — Paris (253 rue Saint Honoré)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"7/16/2025",dateToDo:"7/1/2026",nextDue:"7/1/2026",description:"Pay through Banco Santander portal via transfer",cost:"$1,261.00",link:""},
+  {status:"Recurring - Up to date",type:"Property",category:"House Insurance",location:"France",entity:"Paris Thacko",obligation:"House Insurance of 5 Quai Montebello — AXXA",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/5/2025",dateToDo:"12/1/2025",nextDue:"12/1/2026",description:"Pay through Banco Santander portal via transfer",cost:"$528.00",link:""},
+  {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"France",entity:"Paris Thacko",obligation:"Tax Fonciere — RE Tax",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"10/27/2025",dateToDo:"10/1/2025",nextDue:"10/1/2026",description:"Automatic debit set up",cost:"$2,428.00",link:""},
   {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"France",entity:"Paris Thacko",obligation:"Vacant Housing Tax",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/30/2026",dateToDo:"10/31/2025",nextDue:"12/30/2026",description:"Automatic debit set up",cost:"$5,777.00",link:""},
   {status:"Recurring - Up to date",type:"Entity",category:"Entity Taxes",location:"France",entity:"Paris Thacko",obligation:"Paris Thacko corporate tax",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"10/1/2025",dateToDo:"10/1/2025",nextDue:"10/1/2026",description:"Automatic debit set up",cost:"",link:""},
-  {status:"Recurring - Up to date",type:"Property",category:"HOA",location:"France",entity:"Paris Thacko",obligation:"5 Quai Montebello HOA â Syndic quarterly",person:"Manuela Vallejo",frequency:"Quarterly",dateDone:"12/28/2025",dateToDo:"4/1/2026",nextDue:"4/1/2026",description:"Pay through Banco Santander portal via transfer",cost:"$1,296.00",link:""},
+  {status:"Recurring - Up to date",type:"Property",category:"HOA",location:"France",entity:"Paris Thacko",obligation:"5 Quai Montebello HOA — Syndic quarterly",person:"Manuela Vallejo",frequency:"Quarterly",dateDone:"12/28/2025",dateToDo:"4/1/2026",nextDue:"4/1/2026",description:"Pay through Banco Santander portal via transfer",cost:"$1,296.00",link:""},
   {status:"Recurring - Up to date",type:"Entity",category:"Accountant fees",location:"France",entity:"Paris Thacko",obligation:"Fees to France accountants Groupe Prieur (Dec & Mar)",person:"Manuela Vallejo",frequency:"Bi-yearly",dateDone:"12/9/2025",dateToDo:"3/10/2026",nextDue:"3/10/2026",description:"Pay through Banco Santander portal via transfer",cost:"$1,860.00",link:""},
-  {status:"Recurring - Up to date",type:"Entity",category:"Tax returns filing",location:"France",entity:"Paris Thacko",obligation:"Tax returns filing â previous accounting year w/ Groupe Prieur",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"4/1/2025",dateToDo:"4/1/2025",nextDue:"4/1/2026",description:"",cost:"",link:""},
+  {status:"Recurring - Up to date",type:"Entity",category:"Tax returns filing",location:"France",entity:"Paris Thacko",obligation:"Tax returns filing — previous accounting year w/ Groupe Prieur",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"4/1/2025",dateToDo:"4/1/2025",nextDue:"4/1/2026",description:"",cost:"",link:""},
   {status:"Recurring - Up to date",type:"MN Personal",category:"Subscription",location:"United States",entity:"MN Personal",obligation:"United Club membership",person:"Mike/Amanda/Brandon",frequency:"Yearly",dateDone:"9/30/2025",dateToDo:"",nextDue:"9/30/2026",description:"Auto renew on TLMND business card",cost:"",link:""},
   {status:"Recurring - Up to date",type:"MN Personal",category:"Subscription",location:"United States",entity:"MN Personal",obligation:"AARP Membership renewal (every 5 years)",person:"Amanda/Brandon",frequency:"Other",dateDone:"2/3/2026",dateToDo:"2/1/2031",nextDue:"2/3/2031",description:"Go to website and click renew",cost:"$79.00",link:"https://secure.aarp.org/"},
-  {status:"Recurring - Up to date",type:"MN Personal",category:"Health Insurance",location:"United States",entity:"MN Personal",obligation:"Renew Mike's Health Insurance â GeoBlue",person:"Tim",frequency:"Yearly",dateDone:"10/15/2025",dateToDo:"9/1/2026",nextDue:"10/14/2026",description:"",cost:"$762/month",link:""},
-  {status:"Not started",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Quebrada Arriba RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2025",dateToDo:"2/28/2026",nextDue:"2/28/2027",description:"Pay RE tax through AlcaldÃ­a de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co"},
-  {status:"Recurring - Up to date",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"CinturÃ³n Verde RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2026",dateToDo:"2/10/2027",nextDue:"2/10/2027",description:"Pay RE tax through AlcaldÃ­a de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co"},
-  {status:"Recurring - Up to date",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Provincia Lot RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2026",dateToDo:"2/10/2027",nextDue:"",description:"Pay RE tax through AlcaldÃ­a de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co"},
-  {status:"Recurring - Up to date",type:"Insurance",category:"Life Insurance",location:"United States",entity:"MN Personal",obligation:"Renew Mike's life insurance â Lincoln Financial",person:"Tim",frequency:"Yearly",dateDone:"1/7/2026",dateToDo:"1/1/2027",nextDue:"1/7/2027",description:"",cost:"$1,609.58",link:"https://www.lincolnfinancial.com/secure/login"}
+  {status:"Recurring - Up to date",type:"MN Personal",category:"Health Insurance",location:"United States",entity:"MN Personal",obligation:"Renew Mike's Health Insurance — GeoBlue",person:"Tim",frequency:"Yearly",dateDone:"10/15/2025",dateToDo:"9/1/2026",nextDue:"10/14/2026",description:"",cost:"$762/month",link:""},
+  {status:"Not started",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Quebrada Arriba RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2025",dateToDo:"2/28/2026",nextDue:"2/28/2027",description:"Pay RE tax through Alcaldía de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co"},
+  {status:"Recurring - Up to date",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Cinturón Verde RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2026",dateToDo:"2/10/2027",nextDue:"2/10/2027",description:"Pay RE tax through Alcaldía de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co"},
+  {status:"Recurring - Up to date",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Provincia Lot RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2026",dateToDo:"2/10/2027",nextDue:"",description:"Pay RE tax through Alcaldía de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co"},
+  {status:"Recurring - Up to date",type:"Insurance",category:"Life Insurance",location:"United States",entity:"MN Personal",obligation:"Renew Mike's life insurance — Lincoln Financial",person:"Tim",frequency:"Yearly",dateDone:"1/7/2026",dateToDo:"1/1/2027",nextDue:"1/7/2027",description:"",cost:"$1,609.58",link:"https://www.lincolnfinancial.com/secure/login"}
 ];
 
-// ââ HELPERS ââ
+// ── HELPERS ──
 const TODAY = new Date();
 TODAY.setHours(0,0,0,0);
 
@@ -470,16 +470,16 @@ function daysUntil(dateStr) {
 
 function formatDate(dateStr) {
   const d = parseDate(dateStr);
-  if (!d) return 'â';
+  if (!d) return '—';
   return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
 }
 
 function locationFlag(loc) {
-  const map = { 'United States':'ðºð¸', 'Puerto Rico':'ðµð·', 'Colombia':'ð¨ð´', 'France':'ð«ð·' };
-  return map[loc] || 'ð';
+  const map = { 'United States':'🇺🇸', 'Puerto Rico':'🇵🇷', 'Colombia':'🇨🇴', 'France':'🇫🇷' };
+  return map[loc] || '🌍';
 }
 
-// ââ ENRICH DATA ââ
+// ── ENRICH DATA ──
 const items = RAW_DATA.map(d => {
   const days = daysUntil(d.nextDue);
   let urgency = 'none';
@@ -490,7 +490,7 @@ const items = RAW_DATA.map(d => {
   return { ...d, _days: days, _urgency: urgency };
 });
 
-// ââ STATS ââ
+// ── STATS ──
 function renderStats() {
   const total = items.length;
   const overdue = items.filter(i => i._urgency === 'overdue').length;
@@ -507,22 +507,22 @@ function renderStats() {
   `;
 }
 
-// ââ REMINDER BANNER ââ
+// ── REMINDER BANNER ──
 function renderBanner() {
   const urgent = items.filter(i => i._days >= 0 && i._days <= 7);
   if (!urgent.length) { document.getElementById('reminderBanner').innerHTML = ''; return; }
   document.getElementById('reminderBanner').innerHTML = `
     <div class="reminder-box">
-      <div class="icon">â ï¸</div>
+      <div class="icon">⚠️</div>
       <div class="content">
         <strong>${urgent.length} item${urgent.length>1?'s':''} due within 7 days</strong>
-        <span>${urgent.map(i => i.obligation.substring(0,40)).join(' Â· ')}</span>
+        <span>${urgent.map(i => i.obligation.substring(0,40)).join(' · ')}</span>
       </div>
     </div>
   `;
 }
 
-// ââ POPULATE FILTERS ââ
+// ── POPULATE FILTERS ──
 function populateDropdowns() {
   const locs = [...new Set(items.map(i => i.location))].sort();
   const ents = [...new Set(items.map(i => i.entity))].sort();
@@ -538,7 +538,7 @@ function populateDropdowns() {
   ppl.forEach(p => { const o = document.createElement('option'); o.value=p; o.textContent=p; pSel.appendChild(o); });
 }
 
-// ââ TABLE ââ
+// ── TABLE ──
 let currentSort = { key: 'nextDue', asc: true };
 
 function statusBadge(item) {
@@ -550,9 +550,9 @@ function statusBadge(item) {
 
 function reminderBadge(item) {
   if (item._days === Infinity || item._days < 0) return '';
-  if (item._days <= 7) return '<div class="reminder-tag r7">ð´ â¤ 7 days</div>';
-  if (item._days <= 14) return '<div class="reminder-tag r14">ð¡ â¤ 14 days</div>';
-  if (item._days <= 30) return '<div class="reminder-tag r30">ð¡ â¤ 30 days</div>';
+  if (item._days <= 7) return '<div class="reminder-tag r7">🔴 �j� 7 days</div>';
+  if (item._days <= 14) return '<div class="reminder-tag r14">🟠 ≤ 14 days</div>';
+  if (item._days <= 30) return '<div class="reminder-tag r30">🟡 ≤ 30 days</div>';
   return '';
 }
 
@@ -611,7 +611,7 @@ function renderTable() {
       <td>${statusBadge(i)}</td>
       <td class="obligation-text">
         <div class="main">${i.obligation}</div>
-        <div class="entity">${i.type} Â· ${i.description || 'â'}</div>
+        <div class="entity">${i.type} · ${i.description || '—'}</div>
       </td>
       <td><span class="badge badge-blue">${i.category}</span></td>
       <td><span class="location-flag">${locationFlag(i.location)}</span>${i.location}</td>
@@ -623,13 +623,13 @@ function renderTable() {
         ${i._days !== Infinity && i._days >= 0 ? `<div style="font-size:.72rem;color:var(--text-secondary);">${i._days} day${i._days!==1?'s':''} left</div>` : ''}
         ${i._days < 0 ? `<div style="font-size:.72rem;color:var(--red);">${Math.abs(i._days)} days overdue</div>` : ''}
       </td>
-      <td>${i.cost || 'â'}</td>
+      <td>${i.cost || '—'}</td>
       <td>${reminderBadge(i)}</td>
     </tr>
   `).join('');
 }
 
-// ââ REMINDER CARDS ââ
+// ── REMINDER CARDS ──
 function renderReminders() {
   const upcoming = items
     .filter(i => i._days >= 0 && i._days <= 30)
@@ -651,8 +651,8 @@ function renderReminders() {
         <div class="urgency-dot ${dotClass}"></div>
         <div class="rc-content">
           <div class="rc-title">${i.obligation}</div>
-          <div class="rc-meta">${i.entity} Â· ${locationFlag(i.location)} ${i.location} Â· ${i.person}</div>
-          <div class="rc-due" style="color:${dotClass==='critical'?'var(--red)':dotClass==='warning'?'var(--orange)':'var(--yellow)'};">${dueLabel} â ${formatDate(i.nextDue)}</div>
+          <div class="rc-meta">${i.entity} · ${locationFlag(i.location)} ${i.location} · ${i.person}</div>
+          <div class="rc-due" style="color:${dotClass==='critical'?'var(--red)':dotClass==='warning'?'var(--orange)':'var(--yellow)'};">${dueLabel} — ${formatDate(i.nextDue)}</div>
         </div>
       </div>
     `;
@@ -663,9 +663,9 @@ function renderReminders() {
   const ep = document.getElementById('emailPreview');
   ep.style.display = 'block';
   ep.innerHTML = `
-    <h4>ð§ Sample Email Reminder</h4>
+    <h4>📧 Sample Email Reminder</h4>
     <div class="email-field"><strong>To:</strong> brandon.cheema@nf6capital.com</div>
-    <div class="email-field"><strong>Subject:</strong> â ï¸ Compliance Reminder: ${next.obligation} â Due ${formatDate(next.nextDue)}</div>
+    <div class="email-field"><strong>Subject:</strong> ⚠️ Compliance Reminder: ${next.obligation} — Due ${formatDate(next.nextDue)}</div>
     <div class="email-body">
       Hi Brandon,<br><br>
       This is a reminder that the following compliance item is due <strong>${next._days === 0 ? 'today' : 'in ' + next._days + ' days'}</strong>:<br><br>
@@ -684,7 +684,7 @@ function renderReminders() {
   `;
 }
 
-// ââ EVENT LISTENERS ââ
+// ── EVENT LISTENERS ──
 document.getElementById('todayBadge').textContent = TODAY.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -709,7 +709,7 @@ document.querySelectorAll('th[data-sort]').forEach(th => {
   });
 });
 
-// ââ INIT ââ
+// ── INIT ──
 renderStats();
 renderBanner();
 populateDropdowns();
