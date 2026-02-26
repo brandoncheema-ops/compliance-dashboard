@@ -151,6 +151,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
     <a href="compliance-calendar.html" data-i18n="nav_calendar">Calendar</a>
     <a href="audit-trail.html" data-i18n="nav_audit">Audit Trail</a>
     <a href="upload.html" data-i18n="nav_upload">Upload</a>
+    <a href="document-finder.html" data-i18n="nav_docfinder">Documents</a>
   </div>
   <div class="nav-right">
     <button class="toggle-btn" onclick="toggleLang()" id="langToggle" title="Switch language"><span class="icon">&#127760;</span> <span class="label-text" id="langLabel">ES</span></button>
@@ -170,6 +171,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
   <a href="compliance-calendar.html" data-i18n="nav_calendar">Calendar</a>
   <a href="audit-trail.html" data-i18n="nav_audit">Audit Trail</a>
   <a href="upload.html" data-i18n="nav_upload">Upload</a>
+  <a href="document-finder.html" data-i18n="nav_docfinder">Documents</a>
   <div class="mobile-toggles">
     <button class="toggle-btn" onclick="toggleLang()"><span class="icon">&#127760;</span> <span id="langLabelM">ES</span></button>
     <button class="toggle-btn" onclick="toggleTheme()"><span class="icon" id="themeIconM">&#9789;</span> <span id="themeLabelM">Dark</span></button>
@@ -221,12 +223,11 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
     </a>
 
     <!-- DOCUMENT FINDER -->
-    <div class="module-card coming-soon">
-      <div class="coming-badge" data-i18n="coming_soon">Coming Soon</div>
+    <a href="document-finder.html" class="module-card">
       <div class="module-icon orange">&#128269;</div>
       <div class="module-title" data-i18n="mod_docfinder_title">Document Finder</div>
       <div class="module-desc" data-i18n="mod_docfinder_desc">Search, organize, and retrieve compliance documents, contracts, and filings across all entities.</div>
-    </div>
+    </a>
 
   </div>
 </div>
@@ -243,7 +244,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
 const TRANSLATIONS = {
   en: {
     nav_homebase:'HomeBase', nav_dashboard:'Dashboard', nav_calendar:'Calendar',
-    nav_audit:'Audit Trail', nav_upload:'Upload', nav_signout:'Sign Out',
+    nav_audit:'Audit Trail', nav_upload:'Upload', nav_docfinder:'Documents', nav_signout:'Sign Out',
     hero_subtitle:'Internal Operations Hub \u2014 All your tools in one place.',
     section_modules:'Modules',
     mod_compliance_title:'Compliance Calendar',
@@ -258,7 +259,7 @@ const TRANSLATIONS = {
   },
   es: {
     nav_homebase:'Inicio', nav_dashboard:'Panel', nav_calendar:'Calendario',
-    nav_audit:'Historial', nav_upload:'Cargar', nav_signout:'Cerrar Sesi\u00f3n',
+    nav_audit:'Historial', nav_upload:'Cargar', nav_docfinder:'Documentos', nav_signout:'Cerrar Sesi\u00f3n',
     hero_subtitle:'Centro de Operaciones Internas \u2014 Todas tus herramientas en un solo lugar.',
     section_modules:'M\u00f3dulos',
     mod_compliance_title:'Calendario de Cumplimiento',

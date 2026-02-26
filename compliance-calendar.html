@@ -525,6 +525,7 @@
     <a href="compliance-calendar.html" class="active" data-i18n="nav_calendar">Calendar</a>
     <a href="audit-trail.html" data-i18n="nav_audit">Audit Trail</a>
     <a href="upload.html" data-i18n="nav_upload">Upload</a>
+    <a href="document-finder.html" data-i18n="nav_docfinder">Documents</a>
   </div>
   <div style="display:flex;align-items:center;gap:.4rem;">
     <button class="toggle-btn" onclick="toggleLang()" id="langToggle" title="Switch language"><span class="icon">&#127760;</span> <span class="label-text" id="langLabel">ES</span></button>
@@ -543,6 +544,7 @@
   <a href="compliance-calendar.html" class="active" style="color:#fff;text-decoration:none;padding:.6rem .75rem;border-radius:8px;font-size:.9rem;background:#1e293b" data-i18n="nav_calendar">Calendar</a>
   <a href="audit-trail.html" style="color:#94a3b8;text-decoration:none;padding:.6rem .75rem;border-radius:8px;font-size:.9rem" data-i18n="nav_audit">Audit Trail</a>
   <a href="upload.html" style="color:#94a3b8;text-decoration:none;padding:.6rem .75rem;border-radius:8px;font-size:.9rem" data-i18n="nav_upload">Upload</a>
+  <a href="document-finder.html" style="color:#94a3b8;text-decoration:none;padding:.6rem .75rem;border-radius:8px;font-size:.9rem" data-i18n="nav_docfinder">Documents</a>
 </div>
 
 <div class="page-header">
@@ -728,7 +730,7 @@ let viewMonth = TODAY.getMonth();
 let editingIdx = -1;
 
 // ── THEME + LANG ──
-const TRANSLATIONS={en:{nav_homebase:'HomeBase',nav_dashboard:'Dashboard',nav_calendar:'Calendar',nav_audit:'Audit Trail',nav_upload:'Upload',nav_signout:'Sign Out'},es:{nav_homebase:'Inicio',nav_dashboard:'Panel',nav_calendar:'Calendario',nav_audit:'Historial',nav_upload:'Cargar',nav_signout:'Cerrar Sesión'}};
+const TRANSLATIONS={en:{nav_homebase:'HomeBase',nav_dashboard:'Dashboard',nav_calendar:'Calendar',nav_audit:'Audit Trail',nav_upload:'Upload',nav_docfinder:'Documents',nav_signout:'Sign Out'},es:{nav_homebase:'Inicio',nav_dashboard:'Panel',nav_calendar:'Calendario',nav_audit:'Historial',nav_upload:'Cargar',nav_docfinder:'Documentos',nav_signout:'Cerrar Sesión'}};
 let currentLang=localStorage.getItem('nf6_lang')||'en';
 let currentTheme=localStorage.getItem('nf6_theme')||'light';
 function applyLang(lang){currentLang=lang;localStorage.setItem('nf6_lang',lang);document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(TRANSLATIONS[lang]&&TRANSLATIONS[lang][k])el.textContent=TRANSLATIONS[lang][k];});const next=lang==='en'?'ES':'EN';const lb=document.getElementById('langLabel');if(lb)lb.textContent=next;}
