@@ -2,94 +2,297 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NF6 Capital — Compliance Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>NF6 Capital &mdash; Compliance Hub</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg: #f5f7fa;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1a202c;
+            --text-secondary: #64748b;
+            --accent: #2563eb;
+            --accent-light: #eff6ff;
+            --green: #16a34a;
+            --green-bg: #f0fdf4;
+            --yellow: #ca8a04;
+            --red: #dc2626;
+            --red-bg: #fef2f2;
+            --orange: #ea580c;
+            --orange-bg: #fff7ed;
+            --nav-bg: #0f172a;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0a0e17; color: #e0e6ed; min-height: 100vh; }
-        .nav { background: #111827; border-bottom: 1px solid #1e293b; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
-        .nav-brand { font-size: 1.4rem; font-weight: 700; color: #60a5fa; }
-        .nav-brand span { color: #94a3b8; font-weight: 400; font-size: 0.9rem; margin-left: 0.5rem; }
-        .nav-links { display: flex; gap: 1.5rem; }
-        .nav-links a { color: #94a3b8; text-decoration: none; font-size: 0.95rem; padding: 0.4rem 0.8rem; border-radius: 6px; transition: all 0.2s; }
-        .nav-links a:hover, .nav-links a.active { color: #e0e6ed; background: #1e293b; }
-        .hero { text-align: center; padding: 4rem 2rem 3rem; }
-        .hero h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.75rem; background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero p { font-size: 1.1rem; color: #94a3b8; max-width: 600px; margin: 0 auto; }
-        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; max-width: 1100px; margin: 0 auto; padding: 2rem; }
-        .card { background: #111827; border: 1px solid #1e293b; border-radius: 12px; padding: 2rem; transition: all 0.3s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
-        .card:hover { border-color: #3b82f6; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(59,130,246,0.15); }
-        .card-icon { font-size: 2.5rem; margin-bottom: 1rem; }
-        .card h2 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #f1f5f9; }
-        .card p { color: #94a3b8; font-size: 0.95rem; line-height: 1.5; }
-        .card .badge { display: inline-block; margin-top: 1rem; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
-        .badge-live { background: #064e3b; color: #34d399; }
-        .badge-track { background: #1e1b4b; color: #a78bfa; }
-        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; max-width: 1100px; margin: 2rem auto; padding: 0 2rem; }
-        .stat { background: #111827; border: 1px solid #1e293b; border-radius: 10px; padding: 1.5rem; text-align: center; }
-        .stat-value { font-size: 2rem; font-weight: 700; color: #60a5fa; }
-        .stat-label { font-size: 0.85rem; color: #64748b; margin-top: 0.25rem; }
-        .footer { text-align: center; padding: 3rem 2rem; color: #475569; font-size: 0.85rem; }
-        @media (max-width: 768px) { .stats { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 1.8rem; } }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: env(safe-area-inset-bottom, 0);
+        }
+
+        /* NAV */
+        nav {
+            background: var(--nav-bg);
+            color: #fff;
+            padding: 0 1.25rem;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding-top: env(safe-area-inset-top, 0);
+        }
+        .brand { font-weight: 700; font-size: 1.15rem; letter-spacing: -.02em; }
+        .brand span { color: #60a5fa; }
+        .brand .sub { color: #94a3b8; font-weight: 400; font-size: .8rem; margin-left: .5rem; }
+        .nav-links { display: flex; gap: 1rem; }
+        .nav-links a {
+            color: #94a3b8; text-decoration: none; font-size: .85rem; font-weight: 500;
+            padding: .4rem .6rem; border-radius: 6px; transition: all .2s;
+        }
+        .nav-links a:hover, .nav-links a.active { color: #fff; background: #1e293b; }
+        .hamburger {
+            display: none; background: none; border: none; color: #fff;
+            font-size: 1.5rem; cursor: pointer;
+        }
+        .mobile-menu {
+            display: none; position: fixed; top: 56px; left: 0; right: 0;
+            background: var(--nav-bg); padding: 1rem; z-index: 99;
+            flex-direction: column; gap: .5rem;
+        }
+        .mobile-menu.open { display: flex; }
+        .mobile-menu a {
+            color: #94a3b8; text-decoration: none; padding: .75rem 1rem;
+            border-radius: 8px; font-size: .95rem;
+        }
+        .mobile-menu a:hover, .mobile-menu a.active { color: #fff; background: #1e293b; }
+
+        /* HERO */
+        .hero {
+            text-align: center;
+            padding: 3.5rem 1.5rem 2.5rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -.03em;
+            color: var(--text);
+            margin-bottom: .5rem;
+        }
+        .hero h1 em {
+            font-style: normal;
+            color: var(--accent);
+        }
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        /* STATS */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: .75rem;
+            max-width: 900px;
+            margin: 0 auto 2rem;
+            padding: 0 1.25rem;
+        }
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .stat-card .label {
+            font-size: .8rem;
+            color: var(--text-secondary);
+            margin-top: .15rem;
+            font-weight: 500;
+        }
+        .stat-card.info .value { color: var(--accent); }
+        .stat-card.success .value { color: var(--green); }
+        .stat-card.warning .value { color: var(--orange); }
+        .stat-card.danger .value { color: var(--red); }
+
+        /* CARDS */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            max-width: 1000px;
+            margin: 0 auto 2rem;
+            padding: 0 1.25rem;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.75rem;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: all .2s;
+        }
+        .card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 20px rgba(37, 99, 235, .1);
+            transform: translateY(-2px);
+        }
+        .card-icon { font-size: 2rem; margin-bottom: .75rem; }
+        .card h2 { font-size: 1.15rem; margin-bottom: .4rem; }
+        .card p { color: var(--text-secondary); font-size: .875rem; line-height: 1.5; }
+        .card .badge-link {
+            display: inline-block;
+            margin-top: .75rem;
+            padding: .25rem .75rem;
+            border-radius: 20px;
+            font-size: .75rem;
+            font-weight: 600;
+        }
+        .badge-live { background: var(--green-bg); color: var(--green); }
+        .badge-track { background: var(--accent-light); color: var(--accent); }
+        .badge-download { background: var(--orange-bg); color: var(--orange); }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            padding: 2rem 1.25rem;
+            color: var(--text-secondary);
+            font-size: .8rem;
+            margin-top: auto;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .hamburger { display: block; }
+            .nav-links { display: none; }
+            .hero { padding: 2.5rem 1.25rem 1.5rem; }
+            .hero h1 { font-size: 1.5rem; }
+            .hero p { font-size: .9rem; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); gap: .5rem; }
+            .stat-card .value { font-size: 1.5rem; }
+            .cards { grid-template-columns: 1fr; }
+        }
+
+        @supports (-webkit-touch-callout: none) {
+            .card, .nav-links a, .hamburger {
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+        }
     </style>
 </head>
 <body>
-    <nav class="nav">
-        <div class="nav-brand">NF6 Capital <span>Compliance Hub</span></div>
-        <div class="nav-links">
-            <a href="index.html" class="active">Home</a>
-            <a href="compliance-dashboard.html">Dashboard</a>
-            <a href="compliance-calendar.html">Calendar</a>
-        </div>
-    </nav>
 
-    <section class="hero">
-        <h1>Compliance Command Center</h1>
-        <p>Track regulatory deadlines, monitor compliance status, and manage filings — all in one place.</p>
-    </section>
-
-    <div class="stats">
-        <div class="stat">
-            <div class="stat-value" id="totalItems">12</div>
-            <div class="stat-label">Total Items</div>
-        </div>
-        <div class="stat">
-            <div class="stat-value" style="color: #34d399;">8</div>
-            <div class="stat-label">Completed</div>
-        </div>
-        <div class="stat">
-            <div class="stat-value" style="color: #fbbf24;">3</div>
-            <div class="stat-label">Pending</div>
-        </div>
-        <div class="stat">
-            <div class="stat-value" style="color: #f87171;">1</div>
-            <div class="stat-label">Overdue</div>
-        </div>
+<nav>
+    <div class="brand">NF6 <span>Capital</span> <span class="sub">Compliance Hub</span></div>
+    <div class="nav-links">
+        <a href="index.html" class="active">Home</a>
+        <a href="compliance-dashboard.html">Dashboard</a>
+        <a href="compliance-calendar.html">Calendar</a>
     </div>
+    <button class="hamburger" onclick="document.getElementById('mm').classList.toggle('open')">&#9776;</button>
+</nav>
+<div class="mobile-menu" id="mm">
+    <a href="index.html" class="active">Home</a>
+    <a href="compliance-dashboard.html">Dashboard</a>
+    <a href="compliance-calendar.html">Calendar</a>
+</div>
 
-    <div class="cards">
-        <a href="compliance-dashboard.html" class="card">
-            <div class="card-icon">📊</div>
-            <h2>Compliance Dashboard</h2>
-            <p>View real-time compliance status, track filing progress, and monitor regulatory requirements across all entities.</p>
-            <span class="badge badge-live">Live Status</span>
-        </a>
-        <a href="compliance-calendar.html" class="card">
-            <div class="card-icon">📅</div>
-            <h2>Compliance Calendar</h2>
-            <p>Interactive calendar showing upcoming deadlines, filing due dates, and regulatory milestones for the year.</p>
-            <span class="badge badge-track">Deadlines</span>
-        </a>
-        <a href="compliance-tracker.csv" class="card">
-            <div class="card-icon">📋</div>
-            <h2>Compliance Tracker (CSV)</h2>
-            <p>Download the raw compliance tracking data for import into Excel, Google Sheets, or your preferred analysis tool.</p>
-            <span class="badge badge-track">Download</span>
-        </a>
-    </div>
+<section class="hero">
+    <h1>Compliance <em>Command Center</em></h1>
+    <p>Track regulatory deadlines, monitor compliance status, and manage filings &mdash; all in one place.</p>
+</section>
 
-    <footer class="footer">
-        &copy; 2026 NF6 Capital — Compliance Hub. Internal use only.
-    </footer>
+<section class="stats-row" id="statsRow">
+    <div class="stat-card info"><div class="value" id="sTot">--</div><div class="label">Total Items</div></div>
+    <div class="stat-card success"><div class="value" id="sOk">--</div><div class="label">Up to Date</div></div>
+    <div class="stat-card warning"><div class="value" id="sDue">--</div><div class="label">Due Soon</div></div>
+    <div class="stat-card danger"><div class="value" id="sOver">--</div><div class="label">Overdue</div></div>
+</section>
+
+<section class="cards">
+    <a href="compliance-dashboard.html" class="card">
+        <div class="card-icon">&#128202;</div>
+        <h2>Compliance Dashboard</h2>
+        <p>View real-time compliance status, track filing progress, and monitor regulatory requirements across all entities.</p>
+        <span class="badge-link badge-live">Live Status</span>
+    </a>
+    <a href="compliance-calendar.html" class="card">
+        <div class="card-icon">&#128197;</div>
+        <h2>Compliance Calendar</h2>
+        <p>Interactive calendar showing upcoming deadlines, filing due dates, and regulatory milestones for the year.</p>
+        <span class="badge-link badge-track">Deadlines</span>
+    </a>
+    <a href="#" class="card" onclick="exportCSV(); return false;">
+        <div class="card-icon">&#128203;</div>
+        <h2>Export to Google Sheets</h2>
+        <p>Download the compliance data as a CSV file for import into Google Sheets, Excel, or your preferred analysis tool.</p>
+        <span class="badge-link badge-download">Download CSV</span>
+    </a>
+</section>
+
+<footer>&copy; 2026 NF6 Capital &mdash; Compliance Hub. Internal use only.</footer>
+
+<script>
+    // Load data from localStorage (shared with dashboard)
+    const STORAGE_KEY = 'nf6_compliance_data';
+    let data = [];
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) data = JSON.parse(stored);
+    } catch(e) {}
+
+    if (data.length) {
+        const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+        function parseDate(str) {
+            if (!str) return null;
+            if (str.includes('-')) { const d = new Date(str+'T00:00:00'); return isNaN(d)?null:d; }
+            const p = str.split('/'); return p.length===3 ? new Date(+p[2],+p[0]-1,+p[1]) : null;
+        }
+        function daysUntil(s) { const d = parseDate(s); return d ? Math.ceil((d-TODAY)/(864e5)) : Infinity; }
+
+        const enriched = data.map(d => ({ ...d, _days: daysUntil(d.nextDue) }));
+        document.getElementById('sTot').textContent = data.length;
+        document.getElementById('sOk').textContent = enriched.filter(i => i.status.includes('Up to date') && i._days > 30).length;
+        document.getElementById('sDue').textContent = enriched.filter(i => i._days >= 0 && i._days <= 30).length;
+        document.getElementById('sOver').textContent = enriched.filter(i => i._days < 0).length;
+    }
+
+    function exportCSV() {
+        if (!data.length) { alert('No data to export. Visit the Dashboard first to load data.'); return; }
+        const fields = ['status','type','category','location','entity','obligation','person','frequency','dateDone','dateToDo','nextDue','description','cost','link'];
+        const header = fields.join(',');
+        const rows = data.map(r => fields.map(f => '"' + ((r[f]||'').replace(/"/g,'""')) + '"').join(','));
+        const csv = header + '\n' + rows.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'nf6_compliance_tracker_' + new Date().toISOString().slice(0,10) + '.csv';
+        a.click();
+    }
+</script>
 </body>
 </html>

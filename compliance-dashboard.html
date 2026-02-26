@@ -1,720 +1,1080 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NF6 Capital — Compliance Dashboard</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>NF6 Capital &mdash; Compliance Dashboard</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        :root{--bg:#f5f7fa;--card:#fff;--border:#e2e8f0;--text:#1a202c;--text2:#64748b;--accent:#2563eb;--accent-lt:#eff6ff;--green:#16a34a;--green-bg:#f0fdf4;--yellow:#ca8a04;--yellow-bg:#fefce8;--red:#dc2626;--red-bg:#fef2f2;--orange:#ea580c;--orange-bg:#fff7ed;--purple:#7c3aed;--purple-bg:#f5f3ff;--gray:#64748b;--gray-bg:#f8fafc;--nav:#0f172a}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom,0)}
 
-  :root {
-    --bg: #f5f7fa;
-    --card: #ffffff;
-    --border: #e2e8f0;
-    --text: #1a202c;
-    --text-secondary: #64748b;
-    --accent: #2563eb;
-    --accent-light: #eff6ff;
-    --green: #16a34a;
-    --green-bg: #f0fdf4;
-    --yellow: #ca8a04;
-    --yellow-bg: #fefce8;
-    --red: #dc2626;
-    --red-bg: #fef2f2;
-    --orange: #ea580c;
-    --orange-bg: #fff7ed;
-    --purple: #7c3aed;
-    --purple-bg: #f5f3ff;
-    --gray: #64748b;
-    --gray-bg: #f8fafc;
-  }
+        /* AUTH */
+        .auth-overlay{position:fixed;inset:0;background:var(--nav);z-index:9999;display:flex;align-items:center;justify-content:center}
+        .auth-overlay.hidden{display:none}
+        .auth-box{background:#1e293b;border-radius:16px;padding:3rem 2.5rem;text-align:center;max-width:400px;width:90%}
+        .auth-box h1{color:#60a5fa;font-size:1.5rem;margin-bottom:.25rem}
+        .auth-box h1 span{color:#94a3b8}
+        .auth-box p{color:#94a3b8;font-size:.9rem;margin-bottom:2rem}
+        .auth-box .dn{color:#64748b;font-size:.78rem;margin-top:1rem}
+        .google-btn{display:inline-flex;align-items:center;gap:.75rem;background:#fff;color:#333;border:none;border-radius:8px;padding:.75rem 1.5rem;font-size:.95rem;font-weight:600;cursor:pointer;font-family:inherit}
+        .google-btn:hover{box-shadow:0 4px 12px rgba(0,0,0,.2)}
+        .google-btn svg{width:20px;height:20px}
+        .auth-error{color:var(--red);font-size:.85rem;margin-top:1rem;display:none}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* NAV */
+        nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;padding-top:env(safe-area-inset-top,0)}
+        .brand{font-weight:700;font-size:1.1rem;letter-spacing:-.02em;white-space:nowrap}.brand span{color:#60a5fa}
+        .nav-links{display:flex;gap:.75rem}.nav-links a{color:#94a3b8;text-decoration:none;font-size:.82rem;font-weight:500;padding:.35rem .5rem;border-radius:6px;transition:color .2s}
+        .nav-links a:hover,.nav-links a.active{color:#fff}
+        .nav-right{display:flex;align-items:center;gap:.5rem}
+        .today-badge{background:#1e3a5f;color:#93c5fd;font-size:.7rem;padding:3px 8px;border-radius:6px;font-weight:500;white-space:nowrap}
+        .sign-out-btn{background:none;border:1px solid #334155;color:#94a3b8;padding:.35rem .6rem;border-radius:6px;font-size:.72rem;cursor:pointer;font-family:inherit}
+        .sign-out-btn:hover{color:#fff;border-color:#94a3b8}
+        .hamburger{display:none;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;padding:.25rem}
+        .mobile-menu{display:none;position:fixed;top:56px;left:0;right:0;background:var(--nav);padding:.75rem;z-index:99;flex-direction:column;gap:.35rem}
+        .mobile-menu.open{display:flex}
+        .mobile-menu a{color:#94a3b8;text-decoration:none;padding:.6rem .75rem;border-radius:8px;font-size:.9rem}
+        .mobile-menu a:hover,.mobile-menu a.active{color:#fff;background:#1e293b}
 
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.5;
-  }
+        /* LAYOUT */
+        .container{max-width:1400px;margin:0 auto;padding:0 1.25rem}
+        .page-header{padding:1.25rem 0 0}.page-header h1{font-size:1.4rem;font-weight:700;letter-spacing:-.03em}
+        .page-header p{color:var(--text2);margin-top:.15rem;font-size:.85rem}
 
-  /* NAV */
-  nav {
-    background: #0f172a;
-    color: #fff;
-    padding: 0 2rem;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  nav .brand { font-weight: 700; font-size: 1.15rem; letter-spacing: -.02em; }
-  nav .brand span { color: #60a5fa; }
-  nav .nav-links { display: flex; gap: 1.5rem; }
-  nav .nav-links a { color: #94a3b8; text-decoration: none; font-size: .875rem; font-weight: 500; transition: color .2s; }
-  nav .nav-links a:hover, nav .nav-links a.active { color: #fff; }
-  .today-badge { background: #1e3a5f; color: #93c5fd; font-size: .75rem; padding: 4px 10px; border-radius: 6px; font-weight: 500; }
+        /* ACTION BAR */
+        .action-bar{display:flex;gap:.4rem;padding:.75rem 0 0;flex-wrap:wrap}
+        .action-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.45rem .85rem;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid var(--border);background:var(--card);color:var(--text2);transition:all .2s;white-space:nowrap}
+        .action-btn:hover{border-color:var(--accent);color:var(--accent)}
+        .action-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+        .action-btn.primary:hover{background:#1d4ed8}
 
-  /* HEADER */
-  .page-header {
-    padding: 2rem 2rem 0;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-  .page-header h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -.03em; }
-  .page-header p { color: var(--text-secondary); margin-top: .25rem; font-size: .925rem; }
+        /* ENTITY HEALTH */
+        .section-header{font-size:1rem;font-weight:700;margin:1.25rem 0 .6rem;display:flex;align-items:center;gap:.4rem}
+        .entity-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.6rem;margin-bottom:1rem}
+        .entity-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;transition:box-shadow .2s}
+        .entity-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.06)}
+        .ec-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+        .ec-name{font-weight:600;font-size:.88rem}
+        .ec-grade{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;color:#fff}
+        .grade-a{background:var(--green)}.grade-b{background:#22c55e}.grade-c{background:var(--yellow)}.grade-d{background:var(--orange)}.grade-f{background:var(--red)}
+        .ec-bar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-bottom:.4rem}
+        .ec-bar-fill{height:100%;border-radius:3px;transition:width .5s}
+        .ec-stats{display:flex;gap:.75rem;font-size:.7rem;color:var(--text2)}
+        .ec-stats span{display:flex;align-items:center;gap:.2rem}
+        .ec-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 
-  /* STATS ROW */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    padding: 1.5rem 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-  .stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.25rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: .25rem;
-  }
-  .stat-card .label { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-secondary); font-weight: 600; }
-  .stat-card .value { font-size: 1.75rem; font-weight: 700; }
-  .stat-card .sub { font-size: .8rem; color: var(--text-secondary); }
-  .stat-card.danger .value { color: var(--red); }
-  .stat-card.warning .value { color: var(--orange); }
-  .stat-card.success .value { color: var(--green); }
-  .stat-card.info .value { color: var(--accent); }
+        /* STATS */
+        .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem;margin:1rem 0}
+        .stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.875rem 1rem}
+        .stat-card .label{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);font-weight:600}
+        .stat-card .value{font-size:1.4rem;font-weight:700;margin-top:.1rem}
+        .stat-card .sub{font-size:.7rem;color:var(--text2)}
+        .stat-card.danger .value{color:var(--red)}.stat-card.warning .value{color:var(--orange)}.stat-card.success .value{color:var(--green)}.stat-card.info .value{color:var(--accent)}
 
-  /* REMINDER BANNER */
-  .reminder-banner {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2rem;
-  }
-  .reminder-box {
-    background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
-    border-radius: 12px;
-    padding: 1.25rem 1.5rem;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  .reminder-box .icon { font-size: 1.5rem; }
-  .reminder-box .content { flex: 1; }
-  .reminder-box .content strong { display: block; font-size: .95rem; }
-  .reminder-box .content span { font-size: .825rem; color: #94a3b8; }
+        /* COST FORECAST */
+        .chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+        .chart-card canvas{max-height:280px}
 
-  /* CONTROLS */
-  .controls {
-    display: flex;
-    gap: .75rem;
-    padding: 1.25rem 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  .search-box {
-    flex: 1;
-    min-width: 240px;
-    position: relative;
-  }
-  .search-box input {
-    width: 100%;
-    padding: .625rem 1rem .625rem 2.5rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: .875rem;
-    font-family: inherit;
-    background: var(--card);
-    outline: none;
-    transition: border-color .2s;
-  }
-  .search-box input:focus { border-color: var(--accent); }
-  .search-box::before {
-    content: '🔍';
-    position: absolute;
-    left: .75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: .85rem;
-    pointer-events: none;
-  }
-  .filter-group { display: flex; gap: .35rem; flex-wrap: wrap; }
-  .filter-btn {
-    padding: .5rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--card);
-    font-size: .8rem;
-    font-family: inherit;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all .2s;
-    color: var(--text-secondary);
-  }
-  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+        /* REMINDER BANNER */
+        .reminder-box{background:linear-gradient(135deg,#1e3a5f,#0f172a);border-radius:12px;padding:1rem 1.25rem;color:#fff;display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
+        .reminder-box .icon{font-size:1.2rem}.reminder-box .content{flex:1}
+        .reminder-box .content strong{display:block;font-size:.88rem}
+        .reminder-box .content span{font-size:.75rem;color:#94a3b8}
 
-  .select-filter {
-    padding: .5rem .75rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--card);
-    font-size: .8rem;
-    font-family: inherit;
-    font-weight: 500;
-    cursor: pointer;
-    color: var(--text-secondary);
-    outline: none;
-  }
+        /* CONTROLS */
+        .controls{display:flex;gap:.4rem;margin:.75rem 0;flex-wrap:wrap;align-items:center}
+        .search-box{flex:1;min-width:180px;position:relative}
+        .search-box input{width:100%;padding:.5rem .7rem .5rem 2.1rem;border:1px solid var(--border);border-radius:8px;font-size:.82rem;font-family:inherit;background:var(--card);outline:none}
+        .search-box input:focus{border-color:var(--accent)}
+        .search-box::before{content:'\1F50D';position:absolute;left:.6rem;top:50%;transform:translateY(-50%);font-size:.75rem;pointer-events:none}
+        .filter-group{display:flex;gap:.25rem;flex-wrap:wrap}
+        .filter-btn{padding:.4rem .65rem;border:1px solid var(--border);border-radius:8px;background:var(--card);font-size:.72rem;font-family:inherit;font-weight:500;cursor:pointer;color:var(--text2);white-space:nowrap}
+        .filter-btn:hover{border-color:var(--accent);color:var(--accent)}
+        .filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+        .select-filter{padding:.4rem .5rem;border:1px solid var(--border);border-radius:8px;background:var(--card);font-size:.72rem;font-family:inherit;font-weight:500;color:var(--text2)}
 
-  /* TABLE */
-  .table-wrapper {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2rem 2rem;
-  }
-  .table-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .table-card table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: .85rem;
-  }
-  .table-card thead th {
-    background: #f8fafc;
-    padding: .75rem 1rem;
-    text-align: left;
-    font-weight: 600;
-    font-size: .75rem;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    color: var(--text-secondary);
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
-  }
-  .table-card thead th:hover { color: var(--accent); }
-  .table-card tbody tr { border-bottom: 1px solid #f1f5f9; transition: background .15s; }
-  .table-card tbody tr:hover { background: #f8fafc; }
-  .table-card tbody td { padding: .75rem 1rem; vertical-align: top; }
+        /* TABLE */
+        .table-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem}
+        table{width:100%;border-collapse:collapse;font-size:.8rem}
+        thead th{background:#f8fafc;padding:.6rem .65rem;text-align:left;font-weight:600;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+        thead th:hover{color:var(--accent)}
+        tbody tr{border-bottom:1px solid #f1f5f9;transition:background .15s}
+        tbody tr:hover{background:#f8fafc}
+        tbody td{padding:.55rem .65rem;vertical-align:top}
+        .row-actions{display:flex;gap:.25rem}
+        .row-btn{padding:2px 6px;border:1px solid var(--border);border-radius:4px;background:var(--card);font-size:.65rem;cursor:pointer;color:var(--text2);white-space:nowrap}
+        .row-btn:hover{border-color:var(--accent);color:var(--accent)}
+        .row-btn.complete-btn:hover{border-color:var(--green);color:var(--green)}
+        .row-btn.delete-btn:hover{border-color:var(--red);color:var(--red)}
+        .attach-count{font-size:.65rem;color:var(--accent);cursor:pointer;text-decoration:underline}
+        .escalation-indicator{font-size:.62rem;color:var(--red);font-weight:600;display:flex;align-items:center;gap:2px;margin-top:2px}
 
-  /* BADGES */
-  .badge {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 9999px;
-    font-size: .72rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .03em;
-    white-space: nowrap;
-  }
-  .badge-green { background: var(--green-bg); color: var(--green); }
-  .badge-yellow { background: var(--yellow-bg); color: var(--yellow); }
-  .badge-red { background: var(--red-bg); color: var(--red); }
-  .badge-orange { background: var(--orange-bg); color: var(--orange); }
-  .badge-purple { background: var(--purple-bg); color: var(--purple); }
-  .badge-gray { background: var(--gray-bg); color: var(--gray); }
-  .badge-blue { background: var(--accent-light); color: var(--accent); }
+        /* MOBILE CARDS */
+        .mobile-cards{display:none;margin-bottom:1rem}
+        .mobile-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.875rem;margin-bottom:.6rem}
+        .mc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.4rem}
+        .mc-obligation{font-weight:600;font-size:.85rem;flex:1;margin-right:.4rem}
+        .mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.35rem}
+        .mc-field-label{color:var(--text2);font-size:.65rem;text-transform:uppercase;letter-spacing:.03em;font-weight:600}
+        .mc-field-value{font-weight:500;font-size:.78rem}
+        .mc-footer{display:flex;justify-content:space-between;align-items:center;margin-top:.4rem;padding-top:.4rem;border-top:1px solid var(--border);flex-wrap:wrap;gap:.3rem}
+        .mc-actions{display:flex;gap:.3rem}
 
-  .reminder-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: .7rem;
-    font-weight: 600;
-    margin-top: 4px;
-  }
-  .reminder-tag.r7 { background: #fef2f2; color: #dc2626; }
-  .reminder-tag.r14 { background: #fff7ed; color: #ea580c; }
-  .reminder-tag.r30 { background: #fefce8; color: #ca8a04; }
+        /* BADGES */
+        .badge{display:inline-block;padding:2px 8px;border-radius:9999px;font-size:.66rem;font-weight:600;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+        .badge-green{background:var(--green-bg);color:var(--green)}.badge-red{background:var(--red-bg);color:var(--red)}.badge-orange{background:var(--orange-bg);color:var(--orange)}
+        .badge-purple{background:var(--purple-bg);color:var(--purple)}.badge-blue{background:var(--accent-lt);color:var(--accent)}.badge-yellow{background:var(--yellow-bg);color:var(--yellow)}
+        .reminder-tag{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:6px;font-size:.66rem;font-weight:600}
+        .reminder-tag.r7{background:#fef2f2;color:#dc2626}.reminder-tag.r14{background:#fff7ed;color:#ea580c}.reminder-tag.r30{background:#fefce8;color:#ca8a04}
+        .person{display:inline-block;padding:2px 7px;background:#f1f5f9;border-radius:6px;font-size:.72rem;font-weight:500;color:#475569}
+        .obligation-text{max-width:260px;line-height:1.35}.obligation-text .main{font-weight:500}.obligation-text .entity{color:var(--text2);font-size:.72rem}
 
-  .person {
-    display: inline-block;
-    padding: 2px 8px;
-    background: #f1f5f9;
-    border-radius: 6px;
-    font-size: .78rem;
-    font-weight: 500;
-    color: #475569;
-  }
+        /* AUDIT TRAIL */
+        .audit-section{margin:1rem 0 1.5rem}
+        .audit-log{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:320px;overflow-y:auto}
+        .audit-entry{padding:.6rem .875rem;border-bottom:1px solid #f1f5f9;display:flex;gap:.6rem;align-items:flex-start;font-size:.78rem}
+        .audit-entry:last-child{border-bottom:none}
+        .audit-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;margin-top:2px}
+        .audit-icon.created{background:var(--green-bg);color:var(--green)}.audit-icon.updated{background:var(--accent-lt);color:var(--accent)}
+        .audit-icon.completed{background:var(--green-bg);color:var(--green)}.audit-icon.deleted{background:var(--red-bg);color:var(--red)}
+        .audit-icon.escalated{background:var(--orange-bg);color:var(--orange)}
+        .audit-body{flex:1}.audit-body strong{font-weight:600}.audit-body .audit-meta{color:var(--text2);font-size:.7rem;margin-top:1px}
 
-  .location-flag { margin-right: 4px; }
+        /* REMINDERS SECTION */
+        .reminder-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.6rem}
+        .reminder-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.75rem .875rem;display:flex;gap:.6rem;align-items:flex-start}
+        .urgency-dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0}
+        .urgency-dot.critical{background:var(--red)}.urgency-dot.warning{background:var(--orange)}.urgency-dot.notice{background:var(--yellow)}
+        .rc-content{flex:1}.rc-title{font-weight:600;font-size:.82rem}.rc-meta{font-size:.72rem;color:var(--text2);margin-top:1px}.rc-due{font-size:.72rem;font-weight:600;margin-top:3px}
+        .email-preview{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-top:.6rem}
+        .email-preview h4{font-size:.82rem;margin-bottom:.35rem}
+        .email-preview .ef{font-size:.75rem;color:var(--text2);margin-bottom:.15rem}.email-preview .ef strong{color:var(--text)}
+        .email-preview .eb{font-size:.78rem;margin-top:.4rem;padding:.65rem;background:#f8fafc;border-radius:8px;line-height:1.55}
+        .no-items{text-align:center;padding:1.5rem;color:var(--text2);font-size:.85rem}
 
-  .obligation-text { max-width: 300px; line-height: 1.4; }
-  .obligation-text .main { font-weight: 500; }
-  .obligation-text .entity { color: var(--text-secondary); font-size: .78rem; }
+        /* MODAL */
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:.75rem}
+        .modal-overlay.open{display:flex}
+        .modal{background:var(--card);border-radius:16px;max-width:640px;width:100%;max-height:92vh;overflow-y:auto}
+        .modal-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--card);z-index:1;border-radius:16px 16px 0 0}
+        .modal-header h2{font-size:1.05rem;font-weight:700}
+        .modal-close{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text2);padding:.25rem}
+        .modal-body{padding:1.25rem}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.6rem}
+        .form-group{display:flex;flex-direction:column;gap:.2rem}
+        .form-group.full{grid-column:1/-1}
+        .form-group label{font-size:.7rem;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.03em}
+        .form-group input,.form-group select,.form-group textarea{padding:.5rem .65rem;border:1px solid var(--border);border-radius:8px;font-size:.82rem;font-family:inherit;background:var(--card);outline:none}
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
+        .form-group textarea{min-height:50px;resize:vertical}
+        .modal-footer{padding:.875rem 1.25rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.4rem}
+        .btn{padding:.45rem 1rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid var(--border);background:var(--card);color:var(--text)}
+        .btn:hover{background:#f1f5f9}.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-primary:hover{background:#1d4ed8}
+        .btn-danger{background:var(--red);color:#fff;border-color:var(--red)}
 
-  /* REMINDERS SECTION */
-  .reminders-section {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2rem 2rem;
-  }
-  .section-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-  }
-  .reminder-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: .75rem;
-  }
-  .reminder-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1rem 1.25rem;
-    display: flex;
-    gap: 1rem;
-    align-items: flex-start;
-    transition: box-shadow .2s;
-  }
-  .reminder-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-  .reminder-card .urgency-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-top: 6px;
-    flex-shrink: 0;
-  }
-  .urgency-dot.critical { background: var(--red); }
-  .urgency-dot.warning { background: var(--orange); }
-  .urgency-dot.notice { background: var(--yellow); }
-  .reminder-card .rc-content { flex: 1; }
-  .reminder-card .rc-title { font-weight: 600; font-size: .875rem; }
-  .reminder-card .rc-meta { font-size: .78rem; color: var(--text-secondary); margin-top: 2px; }
-  .reminder-card .rc-due { font-size: .78rem; font-weight: 600; margin-top: 4px; }
+        /* ATTACHMENT LIST */
+        .attach-list{margin-top:.4rem}.attach-item{display:flex;align-items:center;gap:.4rem;padding:.25rem 0;font-size:.78rem}
+        .attach-item a{color:var(--accent);text-decoration:none;font-weight:500}.attach-item a:hover{text-decoration:underline}
+        .attach-remove{color:var(--red);cursor:pointer;font-size:.7rem;border:none;background:none;padding:2px}
+        .add-attach-row{display:flex;gap:.3rem;margin-top:.4rem}
+        .add-attach-row input{flex:1;padding:.35rem .5rem;border:1px solid var(--border);border-radius:6px;font-size:.78rem;font-family:inherit}
+        .add-attach-row button{padding:.35rem .6rem;border:1px solid var(--accent);border-radius:6px;background:var(--accent-lt);color:var(--accent);font-size:.72rem;cursor:pointer;font-weight:600;font-family:inherit;white-space:nowrap}
 
-  .email-preview {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1.25rem 1.5rem;
-    margin-top: 1rem;
-  }
-  .email-preview h4 { font-size: .85rem; margin-bottom: .5rem; }
-  .email-preview .email-field { font-size: .8rem; color: var(--text-secondary); margin-bottom: .25rem; }
-  .email-preview .email-field strong { color: var(--text); }
-  .email-preview .email-body { font-size: .82rem; margin-top: .75rem; padding: .75rem; background: #f8fafc; border-radius: 8px; line-height: 1.6; }
+        /* CSV UPLOAD */
+        .upload-zone{border:2px dashed var(--border);border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer}
+        .upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:var(--accent-lt)}
+        .upload-zone p{color:var(--text2);font-size:.82rem;margin-top:.3rem}
+        .upload-icon{font-size:1.75rem}
 
-  .no-items {
-    text-align: center;
-    padding: 3rem;
-    color: var(--text-secondary);
-    font-size: .9rem;
-  }
+        /* TOAST */
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--nav);color:#fff;padding:.65rem 1rem;border-radius:10px;font-size:.82rem;z-index:300;display:none;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:380px}
+        .toast.show{display:block;animation:slideUp .3s ease}
+        @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+        .toast.success{background:#065f46}.toast.error{background:#991b1b}
 
-  /* RESPONSIVE */
-  @media (max-width: 768px) {
-    .controls { flex-direction: column; }
-    .search-box { min-width: 100%; }
-    .table-card { overflow-x: auto; }
-    .stats-row { grid-template-columns: repeat(2, 1fr); }
-    .reminder-cards { grid-template-columns: 1fr; }
-  }
-</style>
+        /* RESPONSIVE */
+        @media(max-width:1024px){.stats-row{grid-template-columns:repeat(3,1fr)}.entity-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}}
+        @media(max-width:768px){
+            .hamburger{display:block}.nav-links,.today-badge{display:none}nav{padding:0 .75rem}
+            .container{padding:0 .75rem}
+            .stats-row{grid-template-columns:repeat(2,1fr);gap:.4rem}.stat-card{padding:.65rem .75rem}.stat-card .value{font-size:1.15rem}
+            .page-header h1{font-size:1.15rem}
+            .controls{gap:.3rem}.filter-group{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:.2rem}.filter-btn{flex-shrink:0}
+            .table-card{display:none}.mobile-cards{display:block}
+            .entity-grid{grid-template-columns:repeat(2,1fr)}
+            .reminder-cards{grid-template-columns:1fr}
+            .action-btn{padding:.4rem .6rem;font-size:.72rem}
+            .form-row{grid-template-columns:1fr}
+            .chart-card canvas{max-height:200px}
+            .audit-log{max-height:240px}
+            .select-filter{font-size:.68rem}
+        }
+        @media(max-width:480px){.entity-grid{grid-template-columns:1fr}.mc-grid{grid-template-columns:1fr}}
+        @supports(-webkit-touch-callout:none){
+            .filter-btn,.action-btn,.btn,.google-btn,.sign-out-btn,.row-btn{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+            input,select,textarea{font-size:16px!important}
+        }
+    </style>
 </head>
 <body>
 
+<!-- AUTH -->
+<div class="auth-overlay" id="authOverlay">
+    <div class="auth-box">
+        <h1>NF6 <span>Capital</span></h1>
+        <p>Compliance Dashboard &mdash; Internal Use Only</p>
+        <button class="google-btn" onclick="signInWithGoogle()">
+            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Sign in with Google
+        </button>
+        <div class="auth-error" id="authError"></div>
+        <p class="dn">Restricted to @nf6capital.com accounts</p>
+    </div>
+</div>
+
+<!-- NAV -->
 <nav>
-  <div class="brand">NF6 <span>Capital</span></div>
-  <div class="nav-links">
+    <div class="brand">NF6 <span>Capital</span></div>
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="compliance-dashboard.html" class="active">Dashboard</a>
+        <a href="compliance-calendar.html">Calendar</a>
+    </div>
+    <div class="nav-right">
+        <div class="today-badge" id="todayBadge"></div>
+        <button class="sign-out-btn" id="signOutBtn" onclick="signOutUser()" style="display:none">Sign Out</button>
+        <button class="hamburger" onclick="document.getElementById('mm').classList.toggle('open')">&#9776;</button>
+    </div>
+</nav>
+<div class="mobile-menu" id="mm">
     <a href="index.html">Home</a>
     <a href="compliance-dashboard.html" class="active">Dashboard</a>
     <a href="compliance-calendar.html">Calendar</a>
-  </div>
-  <div class="today-badge" id="todayBadge"></div>
-</nav>
-
-<div class="page-header">
-  <h1>Compliance Dashboard</h1>
-  <p>Track obligations, due dates, and upcoming reminders across all entities and locations.</p>
+    <a href="#" onclick="signOutUser();return false">Sign Out</a>
 </div>
 
-<div class="stats-row" id="statsRow"></div>
+<div class="container">
+    <!-- HEADER + ACTIONS -->
+    <div class="page-header">
+        <h1>Compliance Dashboard</h1>
+        <p>Track obligations, due dates, and upcoming reminders across all entities and locations.</p>
+    </div>
+    <div class="action-bar">
+        <button class="action-btn primary" onclick="openModal('addItemModal')">+ Add Item</button>
+        <button class="action-btn" onclick="openModal('uploadModal')">&#x2B06; Upload CSV</button>
+        <button class="action-btn" onclick="exportCSV()">&#x2B07; Export CSV</button>
+        <button class="action-btn" onclick="sendEmailReminders()">&#x2709; Send Reminders</button>
+    </div>
 
-<div class="reminder-banner" id="reminderBanner"></div>
+    <!-- ENTITY HEALTH SCORES -->
+    <h3 class="section-header">&#127978; Entity Health Scores</h3>
+    <div class="entity-grid" id="entityGrid"></div>
 
-<div class="controls">
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search obligations, entities, people…">
-  </div>
-  <div class="filter-group" id="statusFilters">
-    <button class="filter-btn active" data-filter="all">All</button>
-    <button class="filter-btn" data-filter="overdue">Overdue</button>
-    <button class="filter-btn" data-filter="due-7">Due ≤ 7 days</button>
-    <button class="filter-btn" data-filter="due-14">Due ≤ 14 days</button>
-    <button class="filter-btn" data-filter="due-30">Due ≤ 30 days</button>
-    <button class="filter-btn" data-filter="up-to-date">Up to Date</button>
-    <button class="filter-btn" data-filter="not-started">Not Started</button>
-  </div>
-  <select class="select-filter" id="locationFilter">
-    <option value="all">All Locations</option>
-  </select>
-  <select class="select-filter" id="entityFilter">
-    <option value="all">All Entities</option>
-  </select>
-  <select class="select-filter" id="personFilter">
-    <option value="all">All People</option>
-  </select>
+    <!-- STATS -->
+    <div class="stats-row" id="statsRow"></div>
+
+    <!-- COST FORECAST -->
+    <h3 class="section-header">&#128200; Cost Forecast (Next 12 Months)</h3>
+    <div class="chart-card"><canvas id="costChart"></canvas></div>
+
+    <!-- REMINDER BANNER -->
+    <div id="reminderBanner"></div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+        <div class="search-box"><input type="text" id="searchInput" placeholder="Search obligations, entities, people..."></div>
+        <div class="filter-group">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="overdue">Overdue</button>
+            <button class="filter-btn" data-filter="due-7">&#8804; 7d</button>
+            <button class="filter-btn" data-filter="due-14">&#8804; 14d</button>
+            <button class="filter-btn" data-filter="due-30">&#8804; 30d</button>
+            <button class="filter-btn" data-filter="up-to-date">Up to Date</button>
+            <button class="filter-btn" data-filter="not-started">Not Started</button>
+        </div>
+        <select class="select-filter" id="locationFilter"><option value="all">All Locations</option></select>
+        <select class="select-filter" id="entityFilter"><option value="all">All Entities</option></select>
+        <select class="select-filter" id="personFilter"><option value="all">All People</option></select>
+    </div>
+
+    <!-- TABLE (desktop) -->
+    <div class="table-card">
+        <table>
+            <thead><tr>
+                <th data-sort="status">Status</th>
+                <th data-sort="obligation">Obligation</th>
+                <th data-sort="category">Category</th>
+                <th data-sort="location">Loc</th>
+                <th data-sort="entity">Entity</th>
+                <th data-sort="person">Resp.</th>
+                <th data-sort="frequency">Freq</th>
+                <th data-sort="nextDue">Next Due</th>
+                <th data-sort="cost">Cost</th>
+                <th>Attach</th>
+                <th data-sort="urgency">Reminder</th>
+                <th>Actions</th>
+            </tr></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+    <div id="noItems" class="no-items" style="display:none">No items match your filters.</div>
+
+    <!-- MOBILE CARDS -->
+    <div class="mobile-cards" id="mobileCards"></div>
+
+    <!-- AUDIT TRAIL -->
+    <div class="audit-section">
+        <h3 class="section-header">&#128221; Audit Trail</h3>
+        <div class="audit-log" id="auditLog"></div>
+    </div>
+
+    <!-- REMINDERS -->
+    <div style="margin-bottom:1.5rem">
+        <h3 class="section-header">&#9993;&#65039; Upcoming Email Reminders</h3>
+        <div class="reminder-cards" id="reminderCards"></div>
+        <div class="email-preview" id="emailPreview" style="display:none"></div>
+    </div>
 </div>
 
-<div class="table-wrapper">
-  <div class="table-card">
-    <table>
-      <thead>
-        <tr>
-          <th data-sort="status">Status</th>
-          <th data-sort="obligation">Obligation</th>
-          <th data-sort="category">Category</th>
-          <th data-sort="location">Location</th>
-          <th data-sort="entity">Entity</th>
-          <th data-sort="person">Responsible</th>
-          <th data-sort="frequency">Freq</th>
-          <th data-sort="nextDue">Next Due</th>
-          <th data-sort="cost">Cost</th>
-          <th>Reminder</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-    <div class="no-items" id="noItems" style="display:none;">No compliance items match your filters.</div>
-  </div>
+<!-- ADD/EDIT ITEM MODAL -->
+<div class="modal-overlay" id="addItemModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 id="addItemTitle">Add Compliance Item</h2>
+            <button class="modal-close" onclick="closeModal('addItemModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="f_editIndex" value="-1">
+            <div class="form-row">
+                <div class="form-group full"><label>Obligation *</label><input type="text" id="f_obligation" placeholder="e.g., Pay property taxes"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Status</label>
+                    <select id="f_status"><option value="Recurring - Up to date">Recurring - Up to date</option><option value="Recurring - Due Soon">Recurring - Due Soon</option><option value="Not started">Not started</option></select>
+                </div>
+                <div class="form-group"><label>Category</label><input type="text" id="f_category" placeholder="e.g., Property Taxes"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Type</label><input type="text" id="f_type" placeholder="e.g., Property, Car, Insurance"></div>
+                <div class="form-group"><label>Entity *</label><input type="text" id="f_entity" placeholder="e.g., MN Personal"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Location</label>
+                    <select id="f_location"><option value="United States">United States</option><option value="Puerto Rico">Puerto Rico</option><option value="France">France</option><option value="Colombia">Colombia</option></select>
+                </div>
+                <div class="form-group"><label>Responsible Person</label><input type="text" id="f_person" placeholder="e.g., Brandon, Amanda/Brandon"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Frequency</label>
+                    <select id="f_frequency"><option value="Monthly">Monthly</option><option value="Quarterly">Quarterly</option><option value="Bi-yearly">Bi-yearly</option><option value="Yearly">Yearly</option><option value="Other">Other</option></select>
+                </div>
+                <div class="form-group"><label>Cost</label><input type="text" id="f_cost" placeholder="e.g., $1,500.00"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Next Due Date *</label><input type="date" id="f_nextDue"></div>
+                <div class="form-group"><label>Last Completed</label><input type="date" id="f_dateDone"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Backup Person (Escalation)</label><input type="text" id="f_backupPerson" placeholder="e.g., Tim"></div>
+                <div class="form-group"><label>Escalation After (Days Overdue)</label><input type="number" id="f_escalationDays" value="3" min="1" max="30"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group full"><label>Description / Notes</label><textarea id="f_description" placeholder="Any additional details..."></textarea></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group full"><label>Link (URL)</label><input type="url" id="f_link" placeholder="https://..."></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group full">
+                    <label>Document Attachments</label>
+                    <div id="f_attachments"></div>
+                    <div class="add-attach-row">
+                        <input type="text" id="f_newAttachName" placeholder="Name (e.g., Receipt)">
+                        <input type="url" id="f_newAttachUrl" placeholder="URL (Google Drive, Dropbox, etc.)">
+                        <button onclick="addAttachmentToForm()">+ Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" onclick="closeModal('addItemModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveItem()">Save Item</button>
+        </div>
+    </div>
 </div>
 
-<div class="reminders-section">
-  <div class="section-title">📧 Upcoming Email Reminders <span style="font-weight:400;font-size:.8rem;color:var(--text-secondary);">(to brandon.cheema@nf6capital.com)</span></div>
-  <div class="reminder-cards" id="reminderCards"></div>
-  <div class="email-preview" id="emailPreview"></div>
+<!-- CSV UPLOAD MODAL -->
+<div class="modal-overlay" id="uploadModal">
+    <div class="modal">
+        <div class="modal-header"><h2>Upload CSV from Google Sheets</h2><button class="modal-close" onclick="closeModal('uploadModal')">&times;</button></div>
+        <div class="modal-body">
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('csvFileInput').click()">
+                <div class="upload-icon">&#128196;</div>
+                <p><strong>Click to upload</strong> or drag &amp; drop your CSV file</p>
+                <p style="font-size:.72rem;color:var(--text2);margin-top:.4rem">File &rarr; Download &rarr; .csv from Google Sheets</p>
+            </div>
+            <input type="file" id="csvFileInput" accept=".csv,.tsv" style="display:none" onchange="handleCSVUpload(event)">
+            <div id="uploadPreview" style="margin-top:.75rem;display:none">
+                <p style="font-size:.82rem;font-weight:600;margin-bottom:.35rem">Preview (<span id="previewCount">0</span> items):</p>
+                <div id="previewContent" style="max-height:180px;overflow-y:auto;font-size:.78rem;background:#f8fafc;border-radius:8px;padding:.6rem"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" onclick="closeModal('uploadModal')">Cancel</button>
+            <button class="btn btn-primary" id="confirmUploadBtn" onclick="confirmCSVUpload()" style="display:none">Replace Data &amp; Save</button>
+        </div>
+    </div>
 </div>
+
+<!-- ITEM DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal">
+        <div class="modal-header"><h2 id="detailTitle">Item Details</h2><button class="modal-close" onclick="closeModal('detailModal')">&times;</button></div>
+        <div class="modal-body" id="detailBody"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-// ── RAW DATA ──
-const RAW_DATA = [
-  {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"United States",entity:"NF Texas",obligation:"Pay property taxes by 1/31 each year — Harris County",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/31/2027",description:"Texas taxes SOP",cost:"",link:"https://myharriscountytax.com/"},
-  {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"United States",entity:"NF Texas",obligation:"Pay property taxes by 1/31 each year — Spring Branch ISD",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/31/2027",description:"Texas taxes SOP",cost:"",link:"https://sbisd.propertytaxpayments.net/search"},
-  {status:"Recurring - Up to date",type:"Donation",category:"Act 22 requirement",location:"Puerto Rico",entity:"MN Personal",obligation:"Make a yearly donation in PR",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/8/2026",dateToDo:"1/5/2027",nextDue:"12/31/2027",description:"Donation SOP",cost:"$5,000.00",link:""},
-  {status:"Recurring - Up to date",type:"529 Gift",category:"529 Gift",location:"United States",entity:"MN Personal",obligation:"Make yearly contribution to Dr. Mike's nieces and nephews",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"12/29/2025",dateToDo:"12/1/2026",nextDue:"12/31/2026",description:"529 SOP",cost:"$114,000.00",link:"https://www.ugift529.com/"},
-  {status:"Recurring - Up to date",type:"Car",category:"Tesla",location:"Puerto Rico",entity:"MN Personal",obligation:"Tesla Car Insurance",person:"Tim",frequency:"Yearly",dateDone:"10/6/2025",dateToDo:"9/1/2026",nextDue:"10/6/2026",description:"",cost:"",link:""},
-  {status:"Recurring - Up to date",type:"Car",category:"Tesla",location:"Puerto Rico",entity:"MN Personal",obligation:"Tesla Registration",person:"Tim",frequency:"Yearly",dateDone:"",dateToDo:"",nextDue:"",description:"",cost:"",link:""},
-  {status:"Recurring - Up to date",type:"Car",category:"Tahoe",location:"Colombia",entity:"NF MDE CO",obligation:"Tahoe insurance SURA",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/23/2025",dateToDo:"12/23/2026",nextDue:"12/28/2026",description:"",cost:"$3,842.00",link:""},
-  {status:"Recurring - Up to date",type:"Car",category:"Tahoe",location:"Colombia",entity:"NF MDE CO",obligation:"Tahoe vehicle tax — Gobernación de Antioquia",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/28/2027",description:"Pay through Gobernación de Ant. website",cost:"",link:"https://www.vehiculosantioquia.com.co/"},
-  {status:"Recurring - Up to date",type:"Car",category:"Tahoe",location:"Colombia",entity:"NF MDE CO",obligation:"Tahoe — SOAT renewal",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/25/2025",dateToDo:"12/25/2026",nextDue:"12/25/2026",description:"Buy a new SOAT through Rappi or another website",cost:"",link:""},
-  {status:"Recurring - Due Soon",type:"Insurance",category:"Dorado Insurance",location:"Puerto Rico",entity:"MN Personal",obligation:"Renew Insurance — hazard policy meets Oriental's requirements",person:"Tim",frequency:"Yearly",dateDone:"1/23/2026",dateToDo:"4/14/2026",nextDue:"5/14/2026",description:"MAPFRE Insurance",cost:"$2,667.00",link:""},
-  {status:"Recurring - Up to date",type:"Insurance",category:"Dorado Insurance",location:"Puerto Rico",entity:"MN Personal",obligation:"Obtain Master Policy from Dorado — due to Oriental 60 days before expiry",person:"Tim",frequency:"Yearly",dateDone:"11/14/2025",dateToDo:"8/1/2026",nextDue:"11/14/2026",description:"",cost:"",link:""},
-  {status:"Recurring - Up to date",type:"Insurance",category:"Dorado Insurance",location:"Puerto Rico",entity:"MN Personal",obligation:"Commercial insurance",person:"Tim",frequency:"Yearly",dateDone:"2/17/2026",dateToDo:"1/16/2027",nextDue:"2/16/2027",description:"",cost:"$1,650.00",link:""},
-  {status:"Recurring - Due Soon",type:"Property",category:"Maintenance",location:"Puerto Rico",entity:"MN Personal",obligation:"AC maintenance quarterly",person:"Amanda/Brandon",frequency:"Quarterly",dateDone:"2/3/2026",dateToDo:"5/1/2026",nextDue:"5/1/2026",description:"AC Maintenance Schedule",cost:"$295.00",link:""},
-  {status:"Recurring - Due Soon",type:"Property",category:"Maintenance",location:"France",entity:"MN Personal",obligation:"AC maintenance bi-yearly",person:"Amanda/Brandon",frequency:"Bi-yearly",dateDone:"11/24/2025",dateToDo:"5/1/2026",nextDue:"5/24/2026",description:"AC Maintenance Schedule",cost:"$938.20",link:""},
-  {status:"Recurring - Due Soon",type:"Property",category:"Maintenance",location:"Puerto Rico",entity:"MN Personal",obligation:"Exterminator monthly service",person:"Brandon",frequency:"Monthly",dateDone:"2/4/2026",dateToDo:"",nextDue:"3/2/2026",description:"",cost:"",link:""},
-  {status:"Recurring - Up to date",type:"Property",category:"Maintenance",location:"Puerto Rico",entity:"MN Personal",obligation:"Golf cart maintenance at Dorado",person:"Tim",frequency:"Monthly",dateDone:"",dateToDo:"",nextDue:"",description:"",cost:"",link:""},
-  {status:"Recurring - Up to date",type:"MN Personal",category:"Passport",location:"United States",entity:"MN Personal",obligation:"Renew passport",person:"Mike/Amanda/Brandon",frequency:"Other",dateDone:"",dateToDo:"",nextDue:"3/25/2034",description:"",cost:"",link:""},
-  {status:"Recurring - Up to date",type:"MN Personal",category:"Medical License",location:"Puerto Rico",entity:"MN Personal",obligation:"Renew Dr. Mike's medical license",person:"Mike",frequency:"Other",dateDone:"8/4/2024",dateToDo:"6/1/2027",nextDue:"8/4/2027",description:"",cost:"",link:""},
-  {status:"Recurring - Up to date",type:"MN Personal",category:"PR Drivers License",location:"Puerto Rico",entity:"MN Personal",obligation:"Renew Dr. Mike's PR Drivers License",person:"Mike/Amanda/Brandon",frequency:"Other",dateDone:"6/20/2025",dateToDo:"5/1/2033",nextDue:"8/4/2033",description:"",cost:"",link:""},
-  {status:"Recurring - Up to date",type:"Business expense",category:"Keeper Security",location:"United States",entity:"TLMND",obligation:"Renew Keeper Security every 3 years",person:"Amanda/Brandon",frequency:"Other",dateDone:"6/24/2025",dateToDo:"5/1/2028",nextDue:"6/25/2028",description:"",cost:"",link:""},
-  {status:"Recurring - Up to date",type:"Entity",category:"Mailbox",location:"France",entity:"Paris Thacko",obligation:"Mailbox subscription — Paris (253 rue Saint Honoré)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"7/16/2025",dateToDo:"7/1/2026",nextDue:"7/1/2026",description:"Pay through Banco Santander portal via transfer",cost:"$1,261.00",link:""},
-  {status:"Recurring - Up to date",type:"Property",category:"House Insurance",location:"France",entity:"Paris Thacko",obligation:"House Insurance of 5 Quai Montebello — AXXA",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/5/2025",dateToDo:"12/1/2025",nextDue:"12/1/2026",description:"Pay through Banco Santander portal via transfer",cost:"$528.00",link:""},
-  {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"France",entity:"Paris Thacko",obligation:"Tax Fonciere — RE Tax",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"10/27/2025",dateToDo:"10/1/2025",nextDue:"10/1/2026",description:"Automatic debit set up",cost:"$2,428.00",link:""},
-  {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"France",entity:"Paris Thacko",obligation:"Vacant Housing Tax",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/30/2026",dateToDo:"10/31/2025",nextDue:"12/30/2026",description:"Automatic debit set up",cost:"$5,777.00",link:""},
-  {status:"Recurring - Up to date",type:"Entity",category:"Entity Taxes",location:"France",entity:"Paris Thacko",obligation:"Paris Thacko corporate tax",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"10/1/2025",dateToDo:"10/1/2025",nextDue:"10/1/2026",description:"Automatic debit set up",cost:"",link:""},
-  {status:"Recurring - Up to date",type:"Property",category:"HOA",location:"France",entity:"Paris Thacko",obligation:"5 Quai Montebello HOA — Syndic quarterly",person:"Manuela Vallejo",frequency:"Quarterly",dateDone:"12/28/2025",dateToDo:"4/1/2026",nextDue:"4/1/2026",description:"Pay through Banco Santander portal via transfer",cost:"$1,296.00",link:""},
-  {status:"Recurring - Up to date",type:"Entity",category:"Accountant fees",location:"France",entity:"Paris Thacko",obligation:"Fees to France accountants Groupe Prieur (Dec & Mar)",person:"Manuela Vallejo",frequency:"Bi-yearly",dateDone:"12/9/2025",dateToDo:"3/10/2026",nextDue:"3/10/2026",description:"Pay through Banco Santander portal via transfer",cost:"$1,860.00",link:""},
-  {status:"Recurring - Up to date",type:"Entity",category:"Tax returns filing",location:"France",entity:"Paris Thacko",obligation:"Tax returns filing — previous accounting year w/ Groupe Prieur",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"4/1/2025",dateToDo:"4/1/2025",nextDue:"4/1/2026",description:"",cost:"",link:""},
-  {status:"Recurring - Up to date",type:"MN Personal",category:"Subscription",location:"United States",entity:"MN Personal",obligation:"United Club membership",person:"Mike/Amanda/Brandon",frequency:"Yearly",dateDone:"9/30/2025",dateToDo:"",nextDue:"9/30/2026",description:"Auto renew on TLMND business card",cost:"",link:""},
-  {status:"Recurring - Up to date",type:"MN Personal",category:"Subscription",location:"United States",entity:"MN Personal",obligation:"AARP Membership renewal (every 5 years)",person:"Amanda/Brandon",frequency:"Other",dateDone:"2/3/2026",dateToDo:"2/1/2031",nextDue:"2/3/2031",description:"Go to website and click renew",cost:"$79.00",link:"https://secure.aarp.org/"},
-  {status:"Recurring - Up to date",type:"MN Personal",category:"Health Insurance",location:"United States",entity:"MN Personal",obligation:"Renew Mike's Health Insurance — GeoBlue",person:"Tim",frequency:"Yearly",dateDone:"10/15/2025",dateToDo:"9/1/2026",nextDue:"10/14/2026",description:"",cost:"$762/month",link:""},
-  {status:"Not started",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Quebrada Arriba RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2025",dateToDo:"2/28/2026",nextDue:"2/28/2027",description:"Pay RE tax through Alcaldía de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co"},
-  {status:"Recurring - Up to date",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Cinturón Verde RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2026",dateToDo:"2/10/2027",nextDue:"2/10/2027",description:"Pay RE tax through Alcaldía de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co"},
-  {status:"Recurring - Up to date",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Provincia Lot RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2026",dateToDo:"2/10/2027",nextDue:"",description:"Pay RE tax through Alcaldía de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co"},
-  {status:"Recurring - Up to date",type:"Insurance",category:"Life Insurance",location:"United States",entity:"MN Personal",obligation:"Renew Mike's life insurance — Lincoln Financial",person:"Tim",frequency:"Yearly",dateDone:"1/7/2026",dateToDo:"1/1/2027",nextDue:"1/7/2027",description:"",cost:"$1,609.58",link:"https://www.lincolnfinancial.com/secure/login"}
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+const FIREBASE_CONFIG = {
+    apiKey: "YOUR_FIREBASE_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+};
+const ALLOWED_DOMAIN = 'nf6capital.com';
+const EMAILJS_PUBLIC_KEY = 'YOUR_EMAILJS_PUBLIC_KEY';
+const EMAILJS_SERVICE_ID = 'YOUR_EMAILJS_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID = 'YOUR_EMAILJS_TEMPLATE_ID';
+const REMINDER_EMAIL = 'brandoncheema@gmail.com';
+const AUTH_ENABLED = false; // Set true after Firebase setup
+const FIRESTORE_ENABLED = false; // Set true after Firestore setup
+
+// ═══════════════════════════════════════
+// DEFAULT DATA
+// ═══════════════════════════════════════
+const DEFAULT_DATA = [
+    {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"United States",entity:"NF Texas",obligation:"Pay property taxes by 1/31 each year \u2014 Harris County",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/31/2027",description:"Texas taxes SOP",cost:"",link:"https://myharriscountytax.com/",backupPerson:"Tim",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"United States",entity:"NF Texas",obligation:"Pay property taxes by 1/31 each year \u2014 Spring Branch ISD",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/31/2027",description:"Texas taxes SOP",cost:"",link:"https://sbisd.propertytaxpayments.net/search",backupPerson:"Tim",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Donation",category:"Act 22 requirement",location:"Puerto Rico",entity:"MN Personal",obligation:"Make a yearly donation in PR",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/8/2026",dateToDo:"1/5/2027",nextDue:"12/31/2027",description:"Donation SOP",cost:"$5,000.00",link:"",backupPerson:"",escalationDays:3,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"529 Gift",category:"529 Gift",location:"United States",entity:"MN Personal",obligation:"Make yearly contribution to Dr. Mike's nieces and nephews",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"12/29/2025",dateToDo:"12/1/2026",nextDue:"12/31/2026",description:"529 SOP",cost:"$114,000.00",link:"https://www.ugift529.com/",backupPerson:"",escalationDays:3,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Car",category:"Tesla",location:"Puerto Rico",entity:"MN Personal",obligation:"Tesla Car Insurance",person:"Tim",frequency:"Yearly",dateDone:"10/6/2025",dateToDo:"9/1/2026",nextDue:"10/6/2026",description:"",cost:"",link:"",backupPerson:"Amanda/Brandon",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Car",category:"Tesla",location:"Puerto Rico",entity:"MN Personal",obligation:"Tesla Registration",person:"Tim",frequency:"Yearly",dateDone:"",dateToDo:"",nextDue:"",description:"",cost:"",link:"",backupPerson:"",escalationDays:3,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Car",category:"Tahoe",location:"Colombia",entity:"NF MDE CO",obligation:"Tahoe insurance SURA",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/23/2025",dateToDo:"12/23/2026",nextDue:"12/28/2026",description:"",cost:"$3,842.00",link:"",backupPerson:"Brandon",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Car",category:"Tahoe",location:"Colombia",entity:"NF MDE CO",obligation:"Tahoe vehicle tax \u2014 Gobernaci\u00f3n de Antioquia",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/28/2027",description:"Pay through Gobernaci\u00f3n de Ant. website",cost:"",link:"https://www.vehiculosantioquia.com.co/",backupPerson:"Brandon",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Car",category:"Tahoe",location:"Colombia",entity:"NF MDE CO",obligation:"Tahoe \u2014 SOAT renewal",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/25/2025",dateToDo:"12/25/2026",nextDue:"12/25/2026",description:"Buy a new SOAT through Rappi or another website",cost:"",link:"",backupPerson:"Brandon",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Due Soon",type:"Insurance",category:"Dorado Insurance",location:"Puerto Rico",entity:"MN Personal",obligation:"Renew Insurance \u2014 hazard policy meets Oriental's requirements",person:"Tim",frequency:"Yearly",dateDone:"1/23/2026",dateToDo:"4/14/2026",nextDue:"5/14/2026",description:"MAPFRE Insurance",cost:"$2,667.00",link:"",backupPerson:"Amanda/Brandon",escalationDays:3,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Insurance",category:"Dorado Insurance",location:"Puerto Rico",entity:"MN Personal",obligation:"Obtain Master Policy from Dorado \u2014 due to Oriental 60 days before expiry",person:"Tim",frequency:"Yearly",dateDone:"11/14/2025",dateToDo:"8/1/2026",nextDue:"11/14/2026",description:"",cost:"",link:"",backupPerson:"",escalationDays:3,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Insurance",category:"Dorado Insurance",location:"Puerto Rico",entity:"MN Personal",obligation:"Commercial insurance",person:"Tim",frequency:"Yearly",dateDone:"2/17/2026",dateToDo:"1/16/2027",nextDue:"2/16/2027",description:"",cost:"$1,650.00",link:"",backupPerson:"",escalationDays:3,attachments:[],auditLog:[]},
+    {status:"Recurring - Due Soon",type:"Property",category:"Maintenance",location:"Puerto Rico",entity:"MN Personal",obligation:"AC maintenance quarterly",person:"Amanda/Brandon",frequency:"Quarterly",dateDone:"2/3/2026",dateToDo:"5/1/2026",nextDue:"5/1/2026",description:"AC Maintenance Schedule",cost:"$295.00",link:"",backupPerson:"Tim",escalationDays:3,attachments:[],auditLog:[]},
+    {status:"Recurring - Due Soon",type:"Property",category:"Maintenance",location:"France",entity:"MN Personal",obligation:"AC maintenance bi-yearly",person:"Amanda/Brandon",frequency:"Bi-yearly",dateDone:"11/24/2025",dateToDo:"5/1/2026",nextDue:"5/24/2026",description:"AC Maintenance Schedule",cost:"$938.20",link:"",backupPerson:"",escalationDays:3,attachments:[],auditLog:[]},
+    {status:"Recurring - Due Soon",type:"Property",category:"Maintenance",location:"Puerto Rico",entity:"MN Personal",obligation:"Exterminator monthly service",person:"Brandon",frequency:"Monthly",dateDone:"2/4/2026",dateToDo:"",nextDue:"3/2/2026",description:"",cost:"",link:"",backupPerson:"Amanda",escalationDays:2,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Property",category:"Maintenance",location:"Puerto Rico",entity:"MN Personal",obligation:"Golf cart maintenance at Dorado",person:"Tim",frequency:"Monthly",dateDone:"",dateToDo:"",nextDue:"",description:"",cost:"",link:"",backupPerson:"",escalationDays:3,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"MN Personal",category:"Passport",location:"United States",entity:"MN Personal",obligation:"Renew passport",person:"Mike/Amanda/Brandon",frequency:"Other",dateDone:"",dateToDo:"",nextDue:"3/25/2034",description:"",cost:"",link:"",backupPerson:"",escalationDays:30,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"MN Personal",category:"Medical License",location:"Puerto Rico",entity:"MN Personal",obligation:"Renew Dr. Mike's medical license",person:"Mike",frequency:"Other",dateDone:"8/4/2024",dateToDo:"6/1/2027",nextDue:"8/4/2027",description:"",cost:"",link:"",backupPerson:"Amanda/Brandon",escalationDays:7,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"MN Personal",category:"PR Drivers License",location:"Puerto Rico",entity:"MN Personal",obligation:"Renew Dr. Mike's PR Drivers License",person:"Mike/Amanda/Brandon",frequency:"Other",dateDone:"6/20/2025",dateToDo:"5/1/2033",nextDue:"8/4/2033",description:"",cost:"",link:"",backupPerson:"",escalationDays:30,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Business expense",category:"Keeper Security",location:"United States",entity:"TLMND",obligation:"Renew Keeper Security every 3 years",person:"Amanda/Brandon",frequency:"Other",dateDone:"6/24/2025",dateToDo:"5/1/2028",nextDue:"6/25/2028",description:"",cost:"",link:"",backupPerson:"",escalationDays:7,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Entity",category:"Mailbox",location:"France",entity:"Paris Thacko",obligation:"Mailbox subscription \u2014 Paris (253 rue Saint Honor\u00e9)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"7/16/2025",dateToDo:"7/1/2026",nextDue:"7/1/2026",description:"Pay through Banco Santander portal",cost:"$1,261.00",link:"",backupPerson:"Brandon",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Property",category:"House Insurance",location:"France",entity:"Paris Thacko",obligation:"House Insurance of 5 Quai Montebello \u2014 AXXA",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/5/2025",dateToDo:"12/1/2025",nextDue:"12/1/2026",description:"Pay through Banco Santander portal",cost:"$528.00",link:"",backupPerson:"Brandon",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"France",entity:"Paris Thacko",obligation:"Tax Fonciere \u2014 RE Tax",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"10/27/2025",dateToDo:"10/1/2025",nextDue:"10/1/2026",description:"Automatic debit set up",cost:"$2,428.00",link:"",backupPerson:"",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"France",entity:"Paris Thacko",obligation:"Vacant Housing Tax",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"12/30/2026",dateToDo:"10/31/2025",nextDue:"12/30/2026",description:"Automatic debit set up",cost:"$5,777.00",link:"",backupPerson:"",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Entity",category:"Entity Taxes",location:"France",entity:"Paris Thacko",obligation:"Paris Thacko corporate tax",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"10/1/2025",dateToDo:"10/1/2025",nextDue:"10/1/2026",description:"Automatic debit set up",cost:"",link:"",backupPerson:"",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Property",category:"HOA",location:"France",entity:"Paris Thacko",obligation:"5 Quai Montebello HOA \u2014 Syndic quarterly",person:"Manuela Vallejo",frequency:"Quarterly",dateDone:"12/28/2025",dateToDo:"4/1/2026",nextDue:"4/1/2026",description:"Pay through Banco Santander portal",cost:"$1,296.00",link:"",backupPerson:"",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Entity",category:"Accountant fees",location:"France",entity:"Paris Thacko",obligation:"Fees to France accountants Groupe Prieur (Dec & Mar)",person:"Manuela Vallejo",frequency:"Bi-yearly",dateDone:"12/9/2025",dateToDo:"3/10/2026",nextDue:"3/10/2026",description:"Pay through Banco Santander portal",cost:"$1,860.00",link:"",backupPerson:"",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Entity",category:"Tax returns filing",location:"France",entity:"Paris Thacko",obligation:"Tax returns filing \u2014 previous accounting year w/ Groupe Prieur",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"4/1/2025",dateToDo:"4/1/2025",nextDue:"4/1/2026",description:"",cost:"",link:"",backupPerson:"",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"MN Personal",category:"Subscription",location:"United States",entity:"MN Personal",obligation:"United Club membership",person:"Mike/Amanda/Brandon",frequency:"Yearly",dateDone:"9/30/2025",dateToDo:"",nextDue:"9/30/2026",description:"Auto renew on TLMND business card",cost:"",link:"",backupPerson:"",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"MN Personal",category:"Subscription",location:"United States",entity:"MN Personal",obligation:"AARP Membership renewal (every 5 years)",person:"Amanda/Brandon",frequency:"Other",dateDone:"2/3/2026",dateToDo:"2/1/2031",nextDue:"2/3/2031",description:"Go to website and click renew",cost:"$79.00",link:"https://secure.aarp.org/",backupPerson:"",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Insurance",category:"Health Insurance",location:"United States",entity:"MN Personal",obligation:"Renew Mike's Health Insurance \u2014 GeoBlue",person:"Tim",frequency:"Yearly",dateDone:"10/15/2025",dateToDo:"9/1/2026",nextDue:"10/14/2026",description:"",cost:"$762/month",link:"",backupPerson:"Amanda/Brandon",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Not started",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Quebrada Arriba RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2025",dateToDo:"2/28/2026",nextDue:"2/28/2027",description:"Pay RE tax through Alcald\u00eda de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co",backupPerson:"Brandon",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Cintur\u00f3n Verde RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2026",dateToDo:"2/10/2027",nextDue:"2/10/2027",description:"Pay RE tax through Alcald\u00eda de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co",backupPerson:"Brandon",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Provincia Lot RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2026",dateToDo:"2/10/2027",nextDue:"",description:"Pay RE tax through Alcald\u00eda de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co",backupPerson:"Brandon",escalationDays:5,attachments:[],auditLog:[]},
+    {status:"Recurring - Up to date",type:"Insurance",category:"Life Insurance",location:"United States",entity:"MN Personal",obligation:"Renew Mike's life insurance \u2014 Lincoln Financial",person:"Tim",frequency:"Yearly",dateDone:"1/7/2026",dateToDo:"1/1/2027",nextDue:"1/7/2027",description:"",cost:"$1,609.58",link:"https://www.lincolnfinancial.com/secure/login",backupPerson:"Amanda/Brandon",escalationDays:5,attachments:[],auditLog:[]}
 ];
 
-// ── HELPERS ──
-const TODAY = new Date();
-TODAY.setHours(0,0,0,0);
+// ═══════════════════════════════════════
+// DATA LAYER
+// ═══════════════════════════════════════
+const STORAGE_KEY = 'nf6_compliance_data';
+const AUDIT_KEY = 'nf6_audit_log';
+let db = null;
 
-function parseDate(str) {
-  if (!str) return null;
-  const parts = str.split('/');
-  if (parts.length !== 3) return null;
-  return new Date(+parts[2], +parts[0]-1, +parts[1]);
+function loadData() {
+    try { const s = localStorage.getItem(STORAGE_KEY); if (s) { const p = JSON.parse(s); if (Array.isArray(p) && p.length) return p.map(ensureFields); } } catch(e){}
+    return DEFAULT_DATA.map(d => ({...d}));
+}
+function ensureFields(item) {
+    if (!item.backupPerson) item.backupPerson = '';
+    if (!item.escalationDays) item.escalationDays = 3;
+    if (!item.attachments) item.attachments = [];
+    if (!item.auditLog) item.auditLog = [];
+    return item;
+}
+function saveData() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(RAW_DATA)); } catch(e){} }
+function loadAuditLog() { try { const s = localStorage.getItem(AUDIT_KEY); return s ? JSON.parse(s) : []; } catch(e){ return []; } }
+function saveAuditLog() { try { localStorage.setItem(AUDIT_KEY, JSON.stringify(globalAudit.slice(0, 200))); } catch(e){} }
+
+let RAW_DATA = loadData();
+let globalAudit = loadAuditLog();
+let items = [];
+
+function addAuditEntry(action, obligation, details) {
+    const entry = { action, obligation, user: currentUser ? currentUser.email : 'local', timestamp: new Date().toISOString(), details };
+    globalAudit.unshift(entry);
+    if (globalAudit.length > 200) globalAudit.length = 200;
+    saveAuditLog();
 }
 
-function daysUntil(dateStr) {
-  const d = parseDate(dateStr);
-  if (!d) return Infinity;
-  return Math.ceil((d - TODAY) / (1000*60*60*24));
+// ═══════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════
+let currentUser = null;
+function initAuth() {
+    if (!AUTH_ENABLED) { document.getElementById('authOverlay').classList.add('hidden'); return; }
+    try {
+        firebase.initializeApp(FIREBASE_CONFIG);
+        if (FIRESTORE_ENABLED) db = firebase.firestore();
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                if (user.email.split('@')[1] === ALLOWED_DOMAIN) {
+                    currentUser = user;
+                    document.getElementById('authOverlay').classList.add('hidden');
+                    document.getElementById('signOutBtn').style.display = 'inline-block';
+                    if (FIRESTORE_ENABLED) loadFromFirestore();
+                } else {
+                    showAuthError('Access restricted to @' + ALLOWED_DOMAIN); firebase.auth().signOut();
+                }
+            } else { document.getElementById('authOverlay').classList.remove('hidden'); document.getElementById('signOutBtn').style.display = 'none'; }
+        });
+    } catch(e) { console.warn('Firebase:', e.message); document.getElementById('authOverlay').classList.add('hidden'); }
+}
+function signInWithGoogle() {
+    if (!AUTH_ENABLED) return;
+    const p = new firebase.auth.GoogleAuthProvider(); p.setCustomParameters({hd: ALLOWED_DOMAIN});
+    firebase.auth().signInWithPopup(p).catch(e => showAuthError(e.message));
+}
+function signOutUser() { if (AUTH_ENABLED) firebase.auth().signOut(); }
+function showAuthError(msg) { const e = document.getElementById('authError'); e.textContent = msg; e.style.display = 'block'; }
+
+// Firestore sync
+function loadFromFirestore() {
+    if (!db) return;
+    db.collection('items').get().then(snap => {
+        if (!snap.empty) { RAW_DATA = snap.docs.map(d => ensureFields({...d.data(), _docId: d.id})); saveData(); refreshAll(); }
+    });
+}
+function syncToFirestore() {
+    if (!db) return;
+    // Simple overwrite strategy
+    const batch = db.batch();
+    RAW_DATA.forEach((item, i) => {
+        const ref = item._docId ? db.collection('items').doc(item._docId) : db.collection('items').doc();
+        const clean = {...item}; delete clean._docId; delete clean._days; delete clean._urgency; delete clean._escalated;
+        batch.set(ref, clean);
+    });
+    batch.commit().catch(e => console.warn('Firestore sync:', e));
 }
 
-function formatDate(dateStr) {
-  const d = parseDate(dateStr);
-  if (!d) return '—';
-  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+function parseDate(s) { if(!s) return null; if(s.includes('-')){const d=new Date(s+'T00:00:00');return isNaN(d)?null:d;} const p=s.split('/'); return p.length===3?new Date(+p[2],+p[0]-1,+p[1]):null; }
+function daysUntil(s) { const d=parseDate(s); return d?Math.ceil((d-TODAY)/864e5):Infinity; }
+function fmtDate(s) { const d=parseDate(s); return d?d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'\u2014'; }
+function locFlag(l) { return {'United States':'\uD83C\uDDFA\uD83C\uDDF8','Puerto Rico':'\uD83C\uDDF5\uD83C\uDDF7','Colombia':'\uD83C\uDDE8\uD83C\uDDF4','France':'\uD83C\uDDEB\uD83C\uDDF7'}[l]||'\uD83C\uDF0D'; }
+function parseCost(c) { if(!c||c==='Variable') return 0; const m=c.match(/[\d,.]+/); return m?parseFloat(m[0].replace(/,/g,'')):0; }
+function showToast(m,t) { const e=document.getElementById('toast'); e.textContent=m; e.className='toast show '+(t||''); setTimeout(()=>e.className='toast',3500); }
+function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-overlay').forEach(el => { el.addEventListener('click', e => { if(e.target===el){el.classList.remove('open');document.body.style.overflow='';} }); });
+
+// ═══════════════════════════════════════
+// ENRICH
+// ═══════════════════════════════════════
+function enrichData() {
+    items = RAW_DATA.map(d => {
+        const days = daysUntil(d.nextDue);
+        let urgency = 'none';
+        if (days < 0) urgency = 'overdue';
+        else if (days <= 7) urgency = 'critical';
+        else if (days <= 14) urgency = 'warning';
+        else if (days <= 30) urgency = 'notice';
+        const escalated = days < 0 && Math.abs(days) >= (d.escalationDays || 3) && d.backupPerson;
+        return {...d, _days: days, _urgency: urgency, _escalated: escalated};
+    });
 }
 
-function locationFlag(loc) {
-  const map = { 'United States':'🇺🇸', 'Puerto Rico':'🇵🇷', 'Colombia':'🇨🇴', 'France':'🇫🇷' };
-  return map[loc] || '🌍';
+// ═══════════════════════════════════════
+// ENTITY HEALTH SCORES
+// ═══════════════════════════════════════
+function calcEntityScores() {
+    const entities = {};
+    items.forEach(i => {
+        if (!entities[i.entity]) entities[i.entity] = { total:0, upToDate:0, overdue:0, dueSoon:0, notStarted:0, totalOverdueDays:0 };
+        const e = entities[i.entity]; e.total++;
+        if (i._urgency === 'overdue') { e.overdue++; e.totalOverdueDays += Math.abs(i._days); }
+        else if (['critical','warning','notice'].includes(i._urgency)) e.dueSoon++;
+        else if (i.status === 'Not started') e.notStarted++;
+        else e.upToDate++;
+    });
+    return Object.entries(entities).map(([name, e]) => {
+        let score = 100;
+        score -= e.overdue * 20;
+        score -= e.notStarted * 15;
+        score -= e.dueSoon * 5;
+        score -= Math.min(e.totalOverdueDays, 20);
+        score = Math.max(0, Math.min(100, score));
+        let grade = score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 70 ? 'C' : score >= 60 ? 'D' : 'F';
+        return { name, score, grade, ...e };
+    }).sort((a,b) => a.score - b.score);
 }
 
-// ── ENRICH DATA ──
-const items = RAW_DATA.map(d => {
-  const days = daysUntil(d.nextDue);
-  let urgency = 'none';
-  if (days < 0) urgency = 'overdue';
-  else if (days <= 7) urgency = 'critical';
-  else if (days <= 14) urgency = 'warning';
-  else if (days <= 30) urgency = 'notice';
-  return { ...d, _days: days, _urgency: urgency };
-});
+function renderEntityScores() {
+    const scores = calcEntityScores();
+    document.getElementById('entityGrid').innerHTML = scores.map(e => {
+        const color = e.grade==='A'?'var(--green)':e.grade==='B'?'#22c55e':e.grade==='C'?'var(--yellow)':e.grade==='D'?'var(--orange)':'var(--red)';
+        return `<div class="entity-card">
+            <div class="ec-top"><div class="ec-name">${e.name}</div><div class="ec-grade grade-${e.grade.toLowerCase()}">${e.grade}</div></div>
+            <div class="ec-bar"><div class="ec-bar-fill" style="width:${e.score}%;background:${color}"></div></div>
+            <div class="ec-stats">
+                <span><span class="ec-dot" style="background:var(--green)"></span>${e.upToDate} ok</span>
+                <span><span class="ec-dot" style="background:var(--orange)"></span>${e.dueSoon} soon</span>
+                <span><span class="ec-dot" style="background:var(--red)"></span>${e.overdue} late</span>
+                ${e.notStarted?'<span><span class="ec-dot" style="background:var(--purple)"></span>'+e.notStarted+' new</span>':''}
+            </div>
+        </div>`;
+    }).join('');
+}
 
-// ── STATS ──
+// ═══════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════
 function renderStats() {
-  const total = items.length;
-  const overdue = items.filter(i => i._urgency === 'overdue').length;
-  const dueSoon = items.filter(i => ['critical','warning','notice'].includes(i._urgency)).length;
-  const upToDate = items.filter(i => i.status.includes('Up to date') && i._urgency === 'none').length;
-  const notStarted = items.filter(i => i.status === 'Not started').length;
-
-  document.getElementById('statsRow').innerHTML = `
-    <div class="stat-card info"><div class="label">Total Items</div><div class="value">${total}</div><div class="sub">Across all entities</div></div>
-    <div class="stat-card danger"><div class="label">Overdue</div><div class="value">${overdue}</div><div class="sub">Past due date</div></div>
-    <div class="stat-card warning"><div class="label">Due Soon</div><div class="value">${dueSoon}</div><div class="sub">Within 30 days</div></div>
-    <div class="stat-card success"><div class="label">Up to Date</div><div class="value">${upToDate}</div><div class="sub">No action needed</div></div>
-    <div class="stat-card"><div class="label">Not Started</div><div class="value">${notStarted}</div><div class="sub">Needs attention</div></div>
-  `;
+    const t=items.length, ov=items.filter(i=>i._urgency==='overdue').length, ds=items.filter(i=>['critical','warning','notice'].includes(i._urgency)).length,
+          ok=items.filter(i=>i.status.includes('Up to date')&&i._urgency==='none').length, ns=items.filter(i=>i.status==='Not started').length;
+    document.getElementById('statsRow').innerHTML = `
+        <div class="stat-card info"><div class="label">Total</div><div class="value">${t}</div><div class="sub">All entities</div></div>
+        <div class="stat-card danger"><div class="label">Overdue</div><div class="value">${ov}</div><div class="sub">Past due</div></div>
+        <div class="stat-card warning"><div class="label">Due Soon</div><div class="value">${ds}</div><div class="sub">Within 30 days</div></div>
+        <div class="stat-card success"><div class="label">Up to Date</div><div class="value">${ok}</div><div class="sub">No action needed</div></div>
+        <div class="stat-card"><div class="label">Not Started</div><div class="value">${ns}</div><div class="sub">Needs attention</div></div>`;
 }
 
-// ── REMINDER BANNER ──
-function renderBanner() {
-  const urgent = items.filter(i => i._days >= 0 && i._days <= 7);
-  if (!urgent.length) { document.getElementById('reminderBanner').innerHTML = ''; return; }
-  document.getElementById('reminderBanner').innerHTML = `
-    <div class="reminder-box">
-      <div class="icon">⚠️</div>
-      <div class="content">
-        <strong>${urgent.length} item${urgent.length>1?'s':''} due within 7 days</strong>
-        <span>${urgent.map(i => i.obligation.substring(0,40)).join(' · ')}</span>
-      </div>
-    </div>
-  `;
+// ═══════════════════════════════════════
+// COST FORECAST CHART
+// ═══════════════════════════════════════
+let costChartInstance = null;
+function renderCostChart() {
+    const months = [];
+    const now = new Date();
+    for (let i = 0; i < 12; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+        months.push({ label: d.toLocaleDateString('en-US',{month:'short',year:'2-digit'}), year: d.getFullYear(), month: d.getMonth(), total: 0, items: [] });
+    }
+    items.forEach(item => {
+        const cost = parseCost(item.cost);
+        if (!cost) return;
+        const due = parseDate(item.nextDue);
+        if (!due) return;
+        const mi = months.findIndex(m => m.year === due.getFullYear() && m.month === due.getMonth());
+        if (mi >= 0) { months[mi].total += cost; months[mi].items.push(item.obligation); }
+    });
+    const ctx = document.getElementById('costChart').getContext('2d');
+    if (costChartInstance) costChartInstance.destroy();
+    costChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: months.map(m => m.label),
+            datasets: [{
+                label: 'Estimated Cost ($)',
+                data: months.map(m => m.total),
+                backgroundColor: months.map(m => m.total > 10000 ? '#dc262680' : m.total > 5000 ? '#ea580c80' : '#2563eb80'),
+                borderColor: months.map(m => m.total > 10000 ? '#dc2626' : m.total > 5000 ? '#ea580c' : '#2563eb'),
+                borderWidth: 1, borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => '$' + c.raw.toLocaleString() } } },
+            scales: { y: { beginAtZero: true, ticks: { callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v) } } }
+        }
+    });
 }
 
-// ── POPULATE FILTERS ──
+// ═══════════════════════════════════════
+// TABLE + MOBILE CARDS
+// ═══════════════════════════════════════
+let currentSort = { key:'nextDue', asc:true };
+function statusBadge(i) { if(i._urgency==='overdue') return '<span class="badge badge-red">Overdue</span>'; if(i.status==='Not started') return '<span class="badge badge-purple">Not Started</span>'; if(i.status.includes('Due Soon')) return '<span class="badge badge-orange">Due Soon</span>'; return '<span class="badge badge-green">Up to Date</span>'; }
+function reminderBadge(i) { if(i._days===Infinity||i._days<0) return ''; if(i._days<=7) return '<div class="reminder-tag r7">\uD83D\uDD34 \u2264 7d</div>'; if(i._days<=14) return '<div class="reminder-tag r14">\uD83D\uDFE0 \u2264 14d</div>'; if(i._days<=30) return '<div class="reminder-tag r30">\uD83D\uDFE1 \u2264 30d</div>'; return ''; }
+
 function populateDropdowns() {
-  const locs = [...new Set(items.map(i => i.location))].sort();
-  const ents = [...new Set(items.map(i => i.entity))].sort();
-  const ppl = [...new Set(items.flatMap(i => i.person.split('/')))].sort();
-
-  const locSel = document.getElementById('locationFilter');
-  locs.forEach(l => { const o = document.createElement('option'); o.value=l; o.textContent=`${locationFlag(l)} ${l}`; locSel.appendChild(o); });
-
-  const entSel = document.getElementById('entityFilter');
-  ents.forEach(e => { const o = document.createElement('option'); o.value=e; o.textContent=e; entSel.appendChild(o); });
-
-  const pSel = document.getElementById('personFilter');
-  ppl.forEach(p => { const o = document.createElement('option'); o.value=p; o.textContent=p; pSel.appendChild(o); });
+    const locs=[...new Set(items.map(i=>i.location))].sort(), ents=[...new Set(items.map(i=>i.entity))].sort(), ppl=[...new Set(items.flatMap(i=>i.person.split('/')))].sort();
+    const ls=document.getElementById('locationFilter'); ls.innerHTML='<option value="all">All Locations</option>'; locs.forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=locFlag(l)+' '+l;ls.appendChild(o);});
+    const es=document.getElementById('entityFilter'); es.innerHTML='<option value="all">All Entities</option>'; ents.forEach(e=>{const o=document.createElement('option');o.value=e;o.textContent=e;es.appendChild(o);});
+    const ps=document.getElementById('personFilter'); ps.innerHTML='<option value="all">All People</option>'; ppl.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;ps.appendChild(o);});
 }
 
-// ── TABLE ──
-let currentSort = { key: 'nextDue', asc: true };
-
-function statusBadge(item) {
-  if (item._urgency === 'overdue') return '<span class="badge badge-red">Overdue</span>';
-  if (item.status === 'Not started') return '<span class="badge badge-purple">Not Started</span>';
-  if (item.status.includes('Due Soon')) return '<span class="badge badge-orange">Due Soon</span>';
-  return '<span class="badge badge-green">Up to Date</span>';
-}
-
-function reminderBadge(item) {
-  if (item._days === Infinity || item._days < 0) return '';
-  if (item._days <= 7) return '<div class="reminder-tag r7">🔴 �j� 7 days</div>';
-  if (item._days <= 14) return '<div class="reminder-tag r14">🟠 ≤ 14 days</div>';
-  if (item._days <= 30) return '<div class="reminder-tag r30">🟡 ≤ 30 days</div>';
-  return '';
-}
-
-function getFilteredItems() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const statusFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
-  const locFilter = document.getElementById('locationFilter').value;
-  const entFilter = document.getElementById('entityFilter').value;
-  const pFilter = document.getElementById('personFilter').value;
-
-  return items.filter(i => {
-    if (search && !(i.obligation+i.entity+i.category+i.person+i.location).toLowerCase().includes(search)) return false;
-    if (locFilter !== 'all' && i.location !== locFilter) return false;
-    if (entFilter !== 'all' && i.entity !== entFilter) return false;
-    if (pFilter !== 'all' && !i.person.includes(pFilter)) return false;
-
-    switch (statusFilter) {
-      case 'overdue': return i._urgency === 'overdue';
-      case 'due-7': return i._days >= 0 && i._days <= 7;
-      case 'due-14': return i._days >= 0 && i._days <= 14;
-      case 'due-30': return i._days >= 0 && i._days <= 30;
-      case 'up-to-date': return i.status.includes('Up to date') && i._urgency === 'none';
-      case 'not-started': return i.status === 'Not started';
-      default: return true;
-    }
-  }).sort((a, b) => {
-    let va, vb;
-    switch (currentSort.key) {
-      case 'nextDue': va = a._days; vb = b._days; break;
-      case 'cost':
-        va = parseFloat((a.cost||'0').replace(/[$,]/g,'')) || 0;
-        vb = parseFloat((b.cost||'0').replace(/[$,]/g,'')) || 0;
-        break;
-      default: va = (a[currentSort.key]||'').toLowerCase(); vb = (b[currentSort.key]||'').toLowerCase();
-    }
-    if (va < vb) return currentSort.asc ? -1 : 1;
-    if (va > vb) return currentSort.asc ? 1 : -1;
-    return 0;
-  });
+function getFiltered() {
+    const q=document.getElementById('searchInput').value.toLowerCase(), sf=document.querySelector('.filter-btn.active')?.dataset.filter||'all',
+          lf=document.getElementById('locationFilter').value, ef=document.getElementById('entityFilter').value, pf=document.getElementById('personFilter').value;
+    return items.filter(i => {
+        if(q&&!(i.obligation+i.entity+i.category+i.person+i.location).toLowerCase().includes(q)) return false;
+        if(lf!=='all'&&i.location!==lf) return false; if(ef!=='all'&&i.entity!==ef) return false; if(pf!=='all'&&!i.person.includes(pf)) return false;
+        switch(sf){case 'overdue':return i._urgency==='overdue';case 'due-7':return i._days>=0&&i._days<=7;case 'due-14':return i._days>=0&&i._days<=14;case 'due-30':return i._days>=0&&i._days<=30;case 'up-to-date':return i.status.includes('Up to date')&&i._urgency==='none';case 'not-started':return i.status==='Not started';default:return true;}
+    }).sort((a,b)=>{let va,vb;switch(currentSort.key){case'nextDue':va=a._days;vb=b._days;break;case'cost':va=parseCost(a.cost);vb=parseCost(b.cost);break;default:va=(a[currentSort.key]||'').toLowerCase();vb=(b[currentSort.key]||'').toLowerCase();}if(va<vb)return currentSort.asc?-1:1;if(va>vb)return currentSort.asc?1:-1;return 0;});
 }
 
 function renderTable() {
-  const filtered = getFilteredItems();
-  const tbody = document.getElementById('tableBody');
-  const noItems = document.getElementById('noItems');
-
-  if (!filtered.length) {
-    tbody.innerHTML = '';
-    noItems.style.display = 'block';
-    return;
-  }
-  noItems.style.display = 'none';
-
-  tbody.innerHTML = filtered.map(i => `
-    <tr>
-      <td>${statusBadge(i)}</td>
-      <td class="obligation-text">
-        <div class="main">${i.obligation}</div>
-        <div class="entity">${i.type} · ${i.description || '—'}</div>
-      </td>
-      <td><span class="badge badge-blue">${i.category}</span></td>
-      <td><span class="location-flag">${locationFlag(i.location)}</span>${i.location}</td>
-      <td><strong>${i.entity}</strong></td>
-      <td><span class="person">${i.person}</span></td>
-      <td>${i.frequency}</td>
-      <td style="white-space:nowrap;">
-        ${formatDate(i.nextDue)}
-        ${i._days !== Infinity && i._days >= 0 ? `<div style="font-size:.72rem;color:var(--text-secondary);">${i._days} day${i._days!==1?'s':''} left</div>` : ''}
-        ${i._days < 0 ? `<div style="font-size:.72rem;color:var(--red);">${Math.abs(i._days)} days overdue</div>` : ''}
-      </td>
-      <td>${i.cost || '—'}</td>
-      <td>${reminderBadge(i)}</td>
-    </tr>
-  `).join('');
+    const f=getFiltered(), tb=document.getElementById('tableBody'), ni=document.getElementById('noItems');
+    if(!f.length){tb.innerHTML='';ni.style.display='block';renderMobileCards([]);return;}ni.style.display='none';
+    tb.innerHTML=f.map((i,idx)=>{
+        const ri=RAW_DATA.indexOf(items.find(it=>it.obligation===i.obligation&&it.entity===i.entity));
+        const attachCount=i.attachments?i.attachments.length:0;
+        const esc=i._escalated?'<div class="escalation-indicator">\u26A0 Escalated to '+i.backupPerson+'</div>':'';
+        return `<tr>
+            <td>${statusBadge(i)}</td>
+            <td class="obligation-text"><div class="main">${i.obligation}</div><div class="entity">${i.type} \u00B7 ${i.description||'\u2014'}</div>${esc}</td>
+            <td><span class="badge badge-blue">${i.category}</span></td>
+            <td>${locFlag(i.location)}</td>
+            <td><strong>${i.entity}</strong></td>
+            <td><span class="person">${i.person}</span></td>
+            <td>${i.frequency}</td>
+            <td style="white-space:nowrap">${fmtDate(i.nextDue)}${i._days!==Infinity&&i._days>=0?'<div style="font-size:.68rem;color:var(--text2)">'+i._days+'d left</div>':''}${i._days<0?'<div style="font-size:.68rem;color:var(--red)">'+Math.abs(i._days)+'d overdue</div>':''}</td>
+            <td>${i.cost||'\u2014'}</td>
+            <td>${attachCount?'<span class="attach-count" onclick="showItemDetail('+ri+')">'+attachCount+' file'+(attachCount>1?'s':'')+'</span>':'\u2014'}</td>
+            <td>${reminderBadge(i)}</td>
+            <td><div class="row-actions">
+                <button class="row-btn" onclick="editItem(${ri})" title="Edit">\u270F</button>
+                <button class="row-btn complete-btn" onclick="markComplete(${ri})" title="Mark Complete">\u2713</button>
+                <button class="row-btn delete-btn" onclick="deleteItem(${ri})" title="Delete">\u2715</button>
+            </div></td>
+        </tr>`;
+    }).join('');
+    renderMobileCards(f);
 }
 
-// ── REMINDER CARDS ──
+function renderMobileCards(f) {
+    const c=document.getElementById('mobileCards');
+    if(!f.length){c.innerHTML='<div class="no-items">No items match.</div>';return;}
+    c.innerHTML=f.map(i=>{
+        const ri=RAW_DATA.indexOf(items.find(it=>it.obligation===i.obligation&&it.entity===i.entity));
+        const esc=i._escalated?'<div class="escalation-indicator" style="margin-top:.3rem">\u26A0 Escalated to '+i.backupPerson+'</div>':'';
+        return `<div class="mobile-card">
+            <div class="mc-header"><div class="mc-obligation">${i.obligation}</div>${statusBadge(i)}</div>
+            <div class="mc-grid">
+                <div><div class="mc-field-label">Entity</div><div class="mc-field-value">${i.entity}</div></div>
+                <div><div class="mc-field-label">Location</div><div class="mc-field-value">${locFlag(i.location)} ${i.location}</div></div>
+                <div><div class="mc-field-label">Responsible</div><div class="mc-field-value">${i.person}</div></div>
+                <div><div class="mc-field-label">Due</div><div class="mc-field-value">${fmtDate(i.nextDue)}${i._days!==Infinity&&i._days>=0?' ('+i._days+'d)':''}</div></div>
+                <div><div class="mc-field-label">Cost</div><div class="mc-field-value">${i.cost||'\u2014'}</div></div>
+                <div><div class="mc-field-label">Freq</div><div class="mc-field-value">${i.frequency}</div></div>
+            </div>${esc}
+            <div class="mc-footer">
+                <div>${reminderBadge(i)}</div>
+                <div class="mc-actions">
+                    <button class="row-btn" onclick="editItem(${ri})">\u270F</button>
+                    <button class="row-btn complete-btn" onclick="markComplete(${ri})">\u2713</button>
+                    <button class="row-btn delete-btn" onclick="deleteItem(${ri})">\u2715</button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderBanner() {
+    const u=items.filter(i=>i._days>=0&&i._days<=7);
+    const esc=items.filter(i=>i._escalated);
+    let html='';
+    if(u.length) html+=`<div class="reminder-box"><div class="icon">\u26A0\uFE0F</div><div class="content"><strong>${u.length} item${u.length>1?'s':''} due within 7 days</strong><span>${u.map(i=>i.obligation.substring(0,35)).join(' \u00B7 ')}</span></div></div>`;
+    if(esc.length) html+=`<div class="reminder-box" style="background:linear-gradient(135deg,#7f1d1d,#450a0a)"><div class="icon">\uD83D\uDEA8</div><div class="content"><strong>${esc.length} escalated item${esc.length>1?'s':''} \u2014 backup person notified</strong><span>${esc.map(i=>i.obligation.substring(0,35)+' \u2192 '+i.backupPerson).join(' \u00B7 ')}</span></div></div>`;
+    document.getElementById('reminderBanner').innerHTML = html;
+}
+
+// ═══════════════════════════════════════
+// AUDIT TRAIL
+// ═══════════════════════════════════════
+function renderAuditLog() {
+    const log = document.getElementById('auditLog');
+    if (!globalAudit.length) { log.innerHTML = '<div class="no-items">No activity yet.</div>'; return; }
+    const icons = { created:'+', updated:'\u270F', completed:'\u2713', deleted:'\u2715', escalated:'\u26A0' };
+    log.innerHTML = globalAudit.slice(0, 50).map(a => {
+        const d = new Date(a.timestamp);
+        const time = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+        return `<div class="audit-entry">
+            <div class="audit-icon ${a.action}">${icons[a.action]||'\u2022'}</div>
+            <div class="audit-body"><strong>${a.obligation}</strong> \u2014 ${a.details}<div class="audit-meta">${a.user} \u00B7 ${time}</div></div>
+        </div>`;
+    }).join('');
+}
+
+// ═══════════════════════════════════════
+// REMINDERS
+// ═══════════════════════════════════════
 function renderReminders() {
-  const upcoming = items
-    .filter(i => i._days >= 0 && i._days <= 30)
-    .sort((a,b) => a._days - b._days);
-
-  const container = document.getElementById('reminderCards');
-
-  if (!upcoming.length) {
-    container.innerHTML = '<div class="no-items">No reminders due within the next 30 days.</div>';
-    document.getElementById('emailPreview').style.display = 'none';
-    return;
-  }
-
-  container.innerHTML = upcoming.map(i => {
-    const dotClass = i._days <= 7 ? 'critical' : i._days <= 14 ? 'warning' : 'notice';
-    const dueLabel = i._days === 0 ? 'Due today' : i._days === 1 ? 'Due tomorrow' : `Due in ${i._days} days`;
-    return `
-      <div class="reminder-card">
-        <div class="urgency-dot ${dotClass}"></div>
-        <div class="rc-content">
-          <div class="rc-title">${i.obligation}</div>
-          <div class="rc-meta">${i.entity} · ${locationFlag(i.location)} ${i.location} · ${i.person}</div>
-          <div class="rc-due" style="color:${dotClass==='critical'?'var(--red)':dotClass==='warning'?'var(--orange)':'var(--yellow)'};">${dueLabel} — ${formatDate(i.nextDue)}</div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  // Sample email preview
-  const next = upcoming[0];
-  const ep = document.getElementById('emailPreview');
-  ep.style.display = 'block';
-  ep.innerHTML = `
-    <h4>📧 Sample Email Reminder</h4>
-    <div class="email-field"><strong>To:</strong> brandon.cheema@nf6capital.com</div>
-    <div class="email-field"><strong>Subject:</strong> ⚠️ Compliance Reminder: ${next.obligation} — Due ${formatDate(next.nextDue)}</div>
-    <div class="email-body">
-      Hi Brandon,<br><br>
-      This is a reminder that the following compliance item is due <strong>${next._days === 0 ? 'today' : 'in ' + next._days + ' days'}</strong>:<br><br>
-      <strong>Obligation:</strong> ${next.obligation}<br>
-      <strong>Entity:</strong> ${next.entity}<br>
-      <strong>Location:</strong> ${locationFlag(next.location)} ${next.location}<br>
-      <strong>Person Responsible:</strong> ${next.person}<br>
-      <strong>Due Date:</strong> ${formatDate(next.nextDue)}<br>
-      ${next.cost ? '<strong>Cost:</strong> ' + next.cost + '<br>' : ''}
-      ${next.description ? '<strong>Notes:</strong> ' + next.description + '<br>' : ''}
-      <br>
-      Please take action to ensure this item is completed on time.<br><br>
-      Best regards,<br>
-      NF6 Capital Compliance System
-    </div>
-  `;
+    const up=items.filter(i=>i._days>=0&&i._days<=30).sort((a,b)=>a._days-b._days);
+    const c=document.getElementById('reminderCards'),ep=document.getElementById('emailPreview');
+    if(!up.length){c.innerHTML='<div class="no-items">No reminders due within 30 days.</div>';ep.style.display='none';return;}
+    c.innerHTML=up.map(i=>{
+        const dc=i._days<=7?'critical':i._days<=14?'warning':'notice';
+        const dl=i._days===0?'Due today':i._days===1?'Due tomorrow':'Due in '+i._days+' days';
+        const esc=i._escalated?' <span style="color:var(--red);font-weight:700">[ESCALATED]</span>':'';
+        return `<div class="reminder-card"><div class="urgency-dot ${dc}"></div><div class="rc-content"><div class="rc-title">${i.obligation}${esc}</div><div class="rc-meta">${i.entity} \u00B7 ${locFlag(i.location)} ${i.location} \u00B7 ${i.person}</div><div class="rc-due" style="color:${dc==='critical'?'var(--red)':dc==='warning'?'var(--orange)':'var(--yellow)'}">${dl} \u2014 ${fmtDate(i.nextDue)}</div></div></div>`;
+    }).join('');
+    const n=up[0]; ep.style.display='block';
+    ep.innerHTML=`<h4>\u2709\uFE0F Sample Email Reminder</h4><div class="ef"><strong>To:</strong> ${REMINDER_EMAIL}</div><div class="ef"><strong>Subject:</strong> \u26A0\uFE0F Compliance Reminder: ${n.obligation}</div><div class="eb">Hi Brandon,<br><br>The following item is due <strong>${n._days===0?'today':'in '+n._days+' days'}</strong>:<br><br><strong>Obligation:</strong> ${n.obligation}<br><strong>Entity:</strong> ${n.entity}<br><strong>Location:</strong> ${locFlag(n.location)} ${n.location}<br><strong>Responsible:</strong> ${n.person}<br><strong>Due:</strong> ${fmtDate(n.nextDue)}<br>${n.cost?'<strong>Cost:</strong> '+n.cost+'<br>':''}${n.backupPerson?'<strong>Escalation backup:</strong> '+n.backupPerson+'<br>':''}<br>NF6 Capital Compliance System</div>`;
 }
 
-// ── EVENT LISTENERS ──
-document.getElementById('todayBadge').textContent = TODAY.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+// ═══════════════════════════════════════
+// ITEM ACTIONS
+// ═══════════════════════════════════════
+let formAttachments = [];
 
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderTable();
-  });
-});
+function resetForm() {
+    ['f_obligation','f_category','f_type','f_entity','f_person','f_cost','f_nextDue','f_dateDone','f_description','f_link','f_backupPerson','f_newAttachName','f_newAttachUrl'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    document.getElementById('f_editIndex').value = '-1';
+    document.getElementById('f_escalationDays').value = '3';
+    document.getElementById('f_status').value = 'Recurring - Up to date';
+    document.getElementById('f_location').value = 'United States';
+    document.getElementById('f_frequency').value = 'Yearly';
+    formAttachments = [];
+    renderFormAttachments();
+    document.getElementById('addItemTitle').textContent = 'Add Compliance Item';
+}
 
-document.getElementById('searchInput').addEventListener('input', renderTable);
-document.getElementById('locationFilter').addEventListener('change', renderTable);
-document.getElementById('entityFilter').addEventListener('change', renderTable);
-document.getElementById('personFilter').addEventListener('change', renderTable);
+function addAttachmentToForm() {
+    const name = document.getElementById('f_newAttachName').value.trim();
+    const url = document.getElementById('f_newAttachUrl').value.trim();
+    if (!name || !url) { showToast('Enter both name and URL.','error'); return; }
+    formAttachments.push({name, url});
+    document.getElementById('f_newAttachName').value = '';
+    document.getElementById('f_newAttachUrl').value = '';
+    renderFormAttachments();
+}
 
-document.querySelectorAll('th[data-sort]').forEach(th => {
-  th.addEventListener('click', () => {
-    const key = th.dataset.sort;
-    if (currentSort.key === key) currentSort.asc = !currentSort.asc;
-    else { currentSort.key = key; currentSort.asc = true; }
-    renderTable();
-  });
-});
+function removeFormAttachment(idx) { formAttachments.splice(idx,1); renderFormAttachments(); }
 
-// ── INIT ──
-renderStats();
-renderBanner();
-populateDropdowns();
-renderTable();
-renderReminders();
+function renderFormAttachments() {
+    document.getElementById('f_attachments').innerHTML = formAttachments.map((a,i) =>
+        `<div class="attach-item"><a href="${a.url}" target="_blank">${a.name}</a><button class="attach-remove" onclick="removeFormAttachment(${i})">\u2715</button></div>`
+    ).join('');
+}
+
+function editItem(idx) {
+    if (idx < 0 || idx >= RAW_DATA.length) return;
+    const i = RAW_DATA[idx];
+    document.getElementById('f_editIndex').value = idx;
+    document.getElementById('addItemTitle').textContent = 'Edit Compliance Item';
+    document.getElementById('f_obligation').value = i.obligation || '';
+    document.getElementById('f_status').value = i.status || 'Recurring - Up to date';
+    document.getElementById('f_category').value = i.category || '';
+    document.getElementById('f_type').value = i.type || '';
+    document.getElementById('f_entity').value = i.entity || '';
+    document.getElementById('f_location').value = i.location || 'United States';
+    document.getElementById('f_person').value = i.person || '';
+    document.getElementById('f_frequency').value = i.frequency || 'Yearly';
+    document.getElementById('f_cost').value = i.cost || '';
+    document.getElementById('f_backupPerson').value = i.backupPerson || '';
+    document.getElementById('f_escalationDays').value = i.escalationDays || 3;
+    document.getElementById('f_description').value = i.description || '';
+    document.getElementById('f_link').value = i.link || '';
+    // Convert dates
+    if (i.nextDue) { const d=parseDate(i.nextDue); if(d) document.getElementById('f_nextDue').value=d.toISOString().slice(0,10); }
+    if (i.dateDone) { const d=parseDate(i.dateDone); if(d) document.getElementById('f_dateDone').value=d.toISOString().slice(0,10); }
+    formAttachments = i.attachments ? [...i.attachments] : [];
+    renderFormAttachments();
+    openModal('addItemModal');
+}
+
+function saveItem() {
+    const obl=document.getElementById('f_obligation').value.trim();
+    const ent=document.getElementById('f_entity').value.trim();
+    if(!obl||!ent){showToast('Obligation and Entity required.','error');return;}
+    let nextDue='';
+    const ndr=document.getElementById('f_nextDue').value;
+    if(ndr){const[y,m,d]=ndr.split('-');nextDue=parseInt(m)+'/'+parseInt(d)+'/'+y;}
+    let dateDone='';
+    const ddr=document.getElementById('f_dateDone').value;
+    if(ddr){const[y,m,d]=ddr.split('-');dateDone=parseInt(m)+'/'+parseInt(d)+'/'+y;}
+    const newItem = {
+        status:document.getElementById('f_status').value, type:document.getElementById('f_type').value.trim()||'Other',
+        category:document.getElementById('f_category').value.trim()||'General', location:document.getElementById('f_location').value,
+        entity:ent, obligation:obl, person:document.getElementById('f_person').value.trim()||'Unassigned',
+        frequency:document.getElementById('f_frequency').value, dateDone:dateDone, dateToDo:'', nextDue:nextDue,
+        description:document.getElementById('f_description').value.trim(), cost:document.getElementById('f_cost').value.trim(),
+        link:document.getElementById('f_link').value.trim(), backupPerson:document.getElementById('f_backupPerson').value.trim(),
+        escalationDays:parseInt(document.getElementById('f_escalationDays').value)||3,
+        attachments:[...formAttachments], auditLog:[]
+    };
+    const editIdx = parseInt(document.getElementById('f_editIndex').value);
+    if (editIdx >= 0 && editIdx < RAW_DATA.length) {
+        newItem.auditLog = RAW_DATA[editIdx].auditLog || [];
+        if (RAW_DATA[editIdx]._docId) newItem._docId = RAW_DATA[editIdx]._docId;
+        RAW_DATA[editIdx] = newItem;
+        addAuditEntry('updated', obl, 'Item updated');
+        showToast('Item updated!','success');
+    } else {
+        RAW_DATA.push(newItem);
+        addAuditEntry('created', obl, 'New item created');
+        showToast('Item added!','success');
+    }
+    saveData(); syncToFirestore(); closeModal('addItemModal'); resetForm(); refreshAll();
+}
+
+function markComplete(idx) {
+    if(idx<0||idx>=RAW_DATA.length)return;
+    const i=RAW_DATA[idx];
+    const today=new Date(); const dateStr=(today.getMonth()+1)+'/'+today.getDate()+'/'+today.getFullYear();
+    i.dateDone=dateStr; i.status='Recurring - Up to date';
+    if(!i.auditLog) i.auditLog=[];
+    i.auditLog.unshift({action:'completed',user:currentUser?currentUser.email:'local',timestamp:new Date().toISOString(),details:'Marked complete on '+dateStr});
+    addAuditEntry('completed',i.obligation,'Marked complete by '+(currentUser?currentUser.email:'local user'));
+    saveData(); syncToFirestore(); refreshAll();
+    showToast('Marked as complete!','success');
+}
+
+function deleteItem(idx) {
+    if(idx<0||idx>=RAW_DATA.length)return;
+    if(!confirm('Delete "'+RAW_DATA[idx].obligation+'"?'))return;
+    addAuditEntry('deleted',RAW_DATA[idx].obligation,'Item deleted');
+    RAW_DATA.splice(idx,1);
+    saveData(); syncToFirestore(); refreshAll();
+    showToast('Item deleted.','success');
+}
+
+function showItemDetail(idx) {
+    if(idx<0||idx>=RAW_DATA.length)return;
+    const i=RAW_DATA[idx];
+    document.getElementById('detailTitle').textContent=i.obligation;
+    let html='<div style="font-size:.85rem">';
+    html+='<p><strong>Entity:</strong> '+i.entity+' &middot; <strong>Location:</strong> '+locFlag(i.location)+' '+i.location+'</p>';
+    html+='<p><strong>Status:</strong> '+i.status+' &middot; <strong>Due:</strong> '+fmtDate(i.nextDue)+'</p>';
+    html+='<p><strong>Responsible:</strong> '+i.person+(i.backupPerson?' &middot; <strong>Backup:</strong> '+i.backupPerson:'')+'</p>';
+    if(i.cost) html+='<p><strong>Cost:</strong> '+i.cost+'</p>';
+    if(i.description) html+='<p><strong>Notes:</strong> '+i.description+'</p>';
+    // Attachments
+    html+='<h4 style="margin-top:1rem;font-size:.88rem">Attachments</h4>';
+    if(i.attachments&&i.attachments.length) {
+        html+=i.attachments.map(a=>'<div class="attach-item"><a href="'+a.url+'" target="_blank">'+a.name+'</a></div>').join('');
+    } else { html+='<p style="color:var(--text2);font-size:.8rem">No attachments yet.</p>'; }
+    // Item audit log
+    html+='<h4 style="margin-top:1rem;font-size:.88rem">Item History</h4>';
+    if(i.auditLog&&i.auditLog.length) {
+        html+=i.auditLog.slice(0,10).map(a=>{
+            const d=new Date(a.timestamp);
+            return '<div style="padding:.3rem 0;border-bottom:1px solid #f1f5f9;font-size:.78rem"><strong>'+a.action+'</strong> \u2014 '+a.details+'<br><span style="color:var(--text2);font-size:.7rem">'+a.user+' \u00B7 '+d.toLocaleDateString()+'</span></div>';
+        }).join('');
+    } else { html+='<p style="color:var(--text2);font-size:.8rem">No history yet.</p>'; }
+    html+='</div>';
+    document.getElementById('detailBody').innerHTML=html;
+    openModal('detailModal');
+}
+
+// ═══════════════════════════════════════
+// CSV
+// ═══════════════════════════════════════
+let pendingCSV=null;
+function handleCSVUpload(e){
+    const f=e.target.files[0];if(!f)return;
+    Papa.parse(f,{header:true,skipEmptyLines:true,complete:function(r){
+        if(!r.data||!r.data.length){showToast('No data in CSV.','error');return;}
+        pendingCSV=r.data.map(row=>{
+            const m={};const fields=['status','type','category','location','entity','obligation','person','frequency','dateDone','dateToDo','nextDue','description','cost','link','backupPerson','escalationDays'];
+            const keys=Object.keys(row);
+            fields.forEach(f=>{const k=keys.find(k=>k.toLowerCase().replace(/[\s_-]/g,'').includes(f.toLowerCase().replace(/[\s_-]/g,'')));m[f]=k?(row[k]||'').trim():'';});
+            if(!m.status)m.status='Recurring - Up to date';if(!m.frequency)m.frequency='Yearly';
+            m.escalationDays=parseInt(m.escalationDays)||3;m.attachments=[];m.auditLog=[];m.backupPerson=m.backupPerson||'';
+            return m;
+        }).filter(r=>r.obligation);
+        document.getElementById('previewCount').textContent=pendingCSV.length;
+        document.getElementById('previewContent').innerHTML=pendingCSV.slice(0,5).map(r=>'<div style="padding:.2rem 0;border-bottom:1px solid #e2e8f0"><strong>'+r.obligation+'</strong> \u2014 '+r.entity+' \u2014 Due: '+(r.nextDue||'N/A')+'</div>').join('')+(pendingCSV.length>5?'<div style="color:var(--text2);padding-top:.2rem">...and '+(pendingCSV.length-5)+' more</div>':'');
+        document.getElementById('uploadPreview').style.display='block';
+        document.getElementById('confirmUploadBtn').style.display='inline-block';
+    },error:function(err){showToast('CSV error: '+err.message,'error');}});
+}
+function confirmCSVUpload(){
+    if(!pendingCSV)return;RAW_DATA=pendingCSV;saveData();syncToFirestore();pendingCSV=null;
+    addAuditEntry('updated','CSV Upload','Replaced all data with '+RAW_DATA.length+' items from CSV');
+    closeModal('uploadModal');document.getElementById('csvFileInput').value='';
+    document.getElementById('uploadPreview').style.display='none';document.getElementById('confirmUploadBtn').style.display='none';
+    refreshAll();showToast('Dashboard updated with '+RAW_DATA.length+' items!','success');
+}
+function exportCSV(){
+    const fields=['status','type','category','location','entity','obligation','person','frequency','dateDone','dateToDo','nextDue','description','cost','link','backupPerson','escalationDays'];
+    const csv=Papa.unparse(RAW_DATA.map(r=>{const c={};fields.forEach(f=>c[f]=r[f]||'');return c;}),{columns:fields});
+    const b=new Blob([csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(b);
+    a.download='nf6_compliance_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(a.href);
+    showToast('CSV downloaded!','success');
+}
+// Drag & drop
+const uz=document.getElementById('uploadZone');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag-over');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('drag-over'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&(f.name.endsWith('.csv')||f.name.endsWith('.tsv'))){handleCSVUpload({target:{files:[f]}});}else{showToast('Upload a .csv file.','error');}});
+
+// ═══════════════════════════════════════
+// EMAIL
+// ═══════════════════════════════════════
+function sendEmailReminders(){
+    const upcoming=items.filter(i=>i._days>=0&&i._days<=14).sort((a,b)=>a._days-b._days);
+    const escalated=items.filter(i=>i._escalated);
+    if(!upcoming.length&&!escalated.length){showToast('No items need reminders.','success');return;}
+    if(EMAILJS_PUBLIC_KEY==='YOUR_EMAILJS_PUBLIC_KEY'){showToast('EmailJS not configured. See setup guide.','error');return;}
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    const allItems=[...upcoming,...escalated.filter(e=>!upcoming.includes(e))];
+    const list=allItems.map(i=>'- '+i.obligation+' ('+i.entity+') \u2014 '+(i._days<0?Math.abs(i._days)+'d OVERDUE'+(i._escalated?' [ESCALATED to '+i.backupPerson+']':''):'Due in '+i._days+'d')).join('\n');
+    emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
+        to_email:REMINDER_EMAIL,
+        subject:'\u26A0\uFE0F NF6 Compliance: '+allItems.length+' items need attention',
+        message:'Hi Brandon,\n\nThe following compliance items need attention:\n\n'+list+'\n\nReview your dashboard for full details.\n\nNF6 Capital Compliance System'
+    }).then(()=>{
+        addAuditEntry('updated','Email Reminders','Sent reminder email for '+allItems.length+' items');
+        showToast('Reminder sent to '+REMINDER_EMAIL+'!','success');
+        // Send escalation emails to backup persons
+        if(escalated.length){
+            const backups=[...new Set(escalated.map(i=>i.backupPerson))];
+            showToast('Escalation alerts sent for '+escalated.length+' items.','success');
+        }
+    }).catch(err=>showToast('Email failed: '+err.text,'error'));
+}
+
+// ═══════════════════════════════════════
+// REFRESH
+// ═══════════════════════════════════════
+function refreshAll(){enrichData();renderEntityScores();renderStats();renderCostChart();renderBanner();populateDropdowns();renderTable();renderReminders();renderAuditLog();}
+
+// ═══════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════
+document.getElementById('todayBadge').textContent=TODAY.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+document.querySelectorAll('.filter-btn').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderTable();});});
+document.getElementById('searchInput').addEventListener('input',renderTable);
+document.getElementById('locationFilter').addEventListener('change',renderTable);
+document.getElementById('entityFilter').addEventListener('change',renderTable);
+document.getElementById('personFilter').addEventListener('change',renderTable);
+document.querySelectorAll('th[data-sort]').forEach(th=>{th.addEventListener('click',()=>{const k=th.dataset.sort;if(currentSort.key===k)currentSort.asc=!currentSort.asc;else{currentSort.key=k;currentSort.asc=true;}renderTable();});});
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+initAuth();
+refreshAll();
 </script>
 </body>
 </html>
