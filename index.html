@@ -91,6 +91,10 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
 .quick-links{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.25rem}
 .quick-link{display:inline-flex;align-items:center;gap:.3rem;padding:.3rem .65rem;border:1px solid var(--border);border-radius:6px;font-size:.72rem;font-weight:500;color:var(--text2);text-decoration:none;transition:all .2s;background:var(--card)}
 .quick-link:hover{border-color:var(--accent);color:var(--accent)}
+.quick-link.sheets-link{background:#e8f5e9;color:#2e7d32;border-color:#c8e6c9}
+.quick-link.sheets-link:hover{background:#c8e6c9}
+[data-theme="dark"] .quick-link.sheets-link{background:#1b5e20;color:#a5d6a7;border-color:#2e7d32}
+[data-theme="dark"] .quick-link.sheets-link:hover{background:#2e7d32}
 
 /* ── LAST UPDATED ── */
 .last-updated-bar{position:fixed;bottom:0;right:0;background:rgba(15,23,42,.85);color:#94a3b8;font-size:.65rem;padding:4px 12px;border-radius:8px 0 0 0;z-index:90;backdrop-filter:blur(8px)}
@@ -205,6 +209,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
         <span class="quick-link" onclick="event.preventDefault();window.location='compliance-calendar.html'" data-i18n="nav_calendar">Calendar</span>
         <span class="quick-link" onclick="event.preventDefault();window.location='audit-trail.html'" data-i18n="nav_audit">Audit Trail</span>
         <span class="quick-link" onclick="event.preventDefault();window.location='upload.html'" data-i18n="nav_upload">Upload</span>
+        <span class="quick-link sheets-link" onclick="event.preventDefault();openSheetsConfig('compliance')" data-i18n="nav_gsheets">Google Sheets</span>
       </div>
     </a>
 
@@ -213,6 +218,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
       <div class="module-icon green">&#128176;</div>
       <div class="module-title" data-i18n="mod_finance_title">Finance</div>
       <div class="module-desc" data-i18n="mod_finance_desc">Financial reporting, budgets, cost forecasting, and expense tracking for all entities.</div>
+      <div class="quick-links"><span class="quick-link sheets-link" onclick="event.preventDefault();event.stopPropagation();openSheetsConfig('finance')" data-i18n="nav_gsheets">Google Sheets</span></div>
     </a>
 
     <!-- DORADO RENTAL PROPERTY -->
@@ -220,6 +226,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
       <div class="module-icon purple">&#127968;</div>
       <div class="module-title" data-i18n="mod_dorado_title">Dorado Rental Property</div>
       <div class="module-desc" data-i18n="mod_dorado_desc">Manage rental units, tenants, leases, maintenance requests, and property performance.</div>
+      <div class="quick-links"><span class="quick-link sheets-link" onclick="event.preventDefault();event.stopPropagation();openSheetsConfig('dorado')" data-i18n="nav_gsheets">Google Sheets</span></div>
     </a>
 
     <!-- DOCUMENT FINDER -->
@@ -227,6 +234,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
       <div class="module-icon orange">&#128269;</div>
       <div class="module-title" data-i18n="mod_docfinder_title">Document Finder</div>
       <div class="module-desc" data-i18n="mod_docfinder_desc">Search, organize, and retrieve compliance documents, contracts, and filings across all entities.</div>
+      <div class="quick-links"><span class="quick-link sheets-link" onclick="event.preventDefault();event.stopPropagation();openSheetsConfig('docfinder')" data-i18n="nav_gsheets">Google Sheets</span></div>
     </a>
 
     <!-- ASSETS -->
@@ -235,6 +243,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
       <div class="module-icon blue">&#127974;</div>
       <div class="module-title" data-i18n="mod_assets_title">Assets</div>
       <div class="module-desc" data-i18n="mod_assets_desc">Track and manage all entity assets, valuations, depreciation schedules, and inventory.</div>
+      <div class="quick-links"><span class="quick-link sheets-link" onclick="event.preventDefault();openSheetsConfig('assets')" data-i18n="nav_gsheets">Google Sheets</span></div>
     </div>
 
     <!-- LOANS -->
@@ -243,6 +252,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
       <div class="module-icon green">&#128179;</div>
       <div class="module-title" data-i18n="mod_loans_title">Loans</div>
       <div class="module-desc" data-i18n="mod_loans_desc">Monitor loan balances, payment schedules, interest rates, and amortization across all entities.</div>
+      <div class="quick-links"><span class="quick-link sheets-link" onclick="event.preventDefault();openSheetsConfig('loans')" data-i18n="nav_gsheets">Google Sheets</span></div>
     </div>
 
     <!-- TAX + ANNUAL REPORTS -->
@@ -251,6 +261,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
       <div class="module-icon orange">&#128220;</div>
       <div class="module-title" data-i18n="mod_tax_title">Tax + Annual Reports</div>
       <div class="module-desc" data-i18n="mod_tax_desc">Organize tax filings, annual reports, deadlines, and submission status for all entities.</div>
+      <div class="quick-links"><span class="quick-link sheets-link" onclick="event.preventDefault();openSheetsConfig('tax')" data-i18n="nav_gsheets">Google Sheets</span></div>
     </div>
 
     <!-- CARS -->
@@ -259,6 +270,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
       <div class="module-icon purple">&#128663;</div>
       <div class="module-title" data-i18n="mod_cars_title">Cars</div>
       <div class="module-desc" data-i18n="mod_cars_desc">Manage vehicle registrations, insurance, maintenance logs, and lease or loan details.</div>
+      <div class="quick-links"><span class="quick-link sheets-link" onclick="event.preventDefault();openSheetsConfig('cars')" data-i18n="nav_gsheets">Google Sheets</span></div>
     </div>
 
     <!-- MAIL -->
@@ -267,6 +279,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
       <div class="module-icon blue">&#128232;</div>
       <div class="module-title" data-i18n="mod_mail_title">Mail</div>
       <div class="module-desc" data-i18n="mod_mail_desc">Track incoming and outgoing mail, certified letters, notices, and important correspondence.</div>
+      <div class="quick-links"><span class="quick-link sheets-link" onclick="event.preventDefault();openSheetsConfig('mail')" data-i18n="nav_gsheets">Google Sheets</span></div>
     </div>
 
   </div>
@@ -274,6 +287,30 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
 
 <div class="last-updated-bar" id="lastUpdated"><span data-i18n="last_updated">Last updated:</span> <strong>--</strong></div>
 <div class="toast" id="toast"></div>
+
+<!-- GOOGLE SHEETS CONFIG MODAL -->
+<div style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:.75rem" id="sheetsConfigModal">
+  <div style="background:var(--card);border-radius:16px;max-width:500px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.2)">
+    <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <h3 style="font-size:1rem;font-weight:700" id="sheetsConfigTitle">Google Sheets Setup</h3>
+      <button onclick="closeSheetsConfig()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text2)">&times;</button>
+    </div>
+    <div style="padding:1.25rem">
+      <p style="font-size:.82rem;color:var(--text2);margin-bottom:.75rem">Paste a published Google Sheet URL for this module. The data will sync each time the dashboard loads.</p>
+      <label style="font-size:.7rem;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.03em">Google Sheet URL</label>
+      <input type="url" id="sheetsConfigUrl" placeholder="https://docs.google.com/spreadsheets/d/..." style="width:100%;padding:.5rem .65rem;border:1px solid var(--border);border-radius:8px;font-size:.82rem;font-family:inherit;background:var(--card);outline:none;margin-top:.25rem;box-sizing:border-box">
+      <div id="sheetsConfigSaved" style="margin-top:.4rem;font-size:.72rem;color:var(--text2);display:none">Currently saved: <span id="sheetsConfigSavedText" style="color:var(--accent)"></span></div>
+      <div style="margin-top:.75rem;padding:.5rem .65rem;background:var(--bg);border-radius:8px;font-size:.72rem;color:var(--text2)">
+        <strong>Setup:</strong> File → Share → Publish to web → CSV format → Publish
+      </div>
+      <div id="sheetsConfigStatus" style="margin-top:.5rem;display:none;font-size:.78rem;padding:.35rem .6rem;border-radius:6px"></div>
+    </div>
+    <div style="padding:.75rem 1.25rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.4rem">
+      <button onclick="closeSheetsConfig()" style="padding:.4rem .8rem;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid var(--border);background:var(--card);color:var(--text)">Cancel</button>
+      <button onclick="saveSheetsConfig()" style="padding:.4rem .8rem;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid var(--accent);background:var(--accent);color:#fff">Save URL</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ══════════════════════════════════════
@@ -284,7 +321,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
 const TRANSLATIONS = {
   en: {
     nav_homebase:'HomeBase', nav_dashboard:'Dashboard', nav_calendar:'Calendar',
-    nav_audit:'Audit Trail', nav_upload:'Upload', nav_docfinder:'Documents', nav_signout:'Sign Out',
+    nav_audit:'Audit Trail', nav_upload:'Upload', nav_docfinder:'Documents', nav_signout:'Sign Out', nav_gsheets:'Google Sheets',
     hero_subtitle:'Internal Operations Hub \u2014 All your tools in one place.',
     section_modules:'Modules',
     mod_compliance_title:'Compliance Calendar',
@@ -315,7 +352,7 @@ const TRANSLATIONS = {
   },
   es: {
     nav_homebase:'Inicio', nav_dashboard:'Panel', nav_calendar:'Calendario',
-    nav_audit:'Historial', nav_upload:'Cargar', nav_docfinder:'Documentos', nav_signout:'Cerrar Sesi\u00f3n',
+    nav_audit:'Historial', nav_upload:'Cargar', nav_docfinder:'Documentos', nav_signout:'Cerrar Sesi\u00f3n', nav_gsheets:'Google Sheets',
     hero_subtitle:'Centro de Operaciones Internas \u2014 Todas tus herramientas en un solo lugar.',
     section_modules:'M\u00f3dulos',
     mod_compliance_title:'Calendario de Cumplimiento',
@@ -449,6 +486,58 @@ function signInWithGoogle() {
 }
 function signOutUser() { firebase.auth().signOut(); }
 function showAuthError(msg) { const e = document.getElementById('authError'); e.textContent = msg; e.style.display = 'block'; }
+
+// ── GOOGLE SHEETS CONFIG ──
+let currentSheetsModule = '';
+
+function openSheetsConfig(module) {
+  currentSheetsModule = module;
+  const key = 'nf6_sheets_url_' + module;
+  const saved = localStorage.getItem(key);
+  document.getElementById('sheetsConfigUrl').value = saved || '';
+  document.getElementById('sheetsConfigTitle').textContent = 'Google Sheets — ' + module.charAt(0).toUpperCase() + module.slice(1);
+  if (saved) {
+    document.getElementById('sheetsConfigSaved').style.display = 'block';
+    document.getElementById('sheetsConfigSavedText').textContent = saved.substring(0, 50) + '...';
+  } else {
+    document.getElementById('sheetsConfigSaved').style.display = 'none';
+  }
+  document.getElementById('sheetsConfigStatus').style.display = 'none';
+  document.getElementById('sheetsConfigModal').style.display = 'flex';
+}
+
+function closeSheetsConfig() {
+  document.getElementById('sheetsConfigModal').style.display = 'none';
+  currentSheetsModule = '';
+}
+
+function saveSheetsConfig() {
+  const url = document.getElementById('sheetsConfigUrl').value.trim();
+  const key = 'nf6_sheets_url_' + currentSheetsModule;
+  if (url) {
+    localStorage.setItem(key, url);
+    document.getElementById('sheetsConfigSaved').style.display = 'block';
+    document.getElementById('sheetsConfigSavedText').textContent = url.substring(0, 50) + '...';
+    const statusEl = document.getElementById('sheetsConfigStatus');
+    statusEl.style.display = 'block';
+    statusEl.style.background = 'var(--green-bg)';
+    statusEl.style.color = 'var(--green)';
+    statusEl.textContent = 'URL saved! Data will sync when you visit the ' + currentSheetsModule + ' dashboard.';
+    // For compliance module, also save to the main key used by the dashboard
+    if (currentSheetsModule === 'compliance') {
+      localStorage.setItem('nf6_sheets_url', url);
+    }
+  } else {
+    localStorage.removeItem(key);
+    if (currentSheetsModule === 'compliance') localStorage.removeItem('nf6_sheets_url');
+    document.getElementById('sheetsConfigSaved').style.display = 'none';
+    const statusEl = document.getElementById('sheetsConfigStatus');
+    statusEl.style.display = 'block';
+    statusEl.style.background = 'var(--accent-lt)';
+    statusEl.style.color = 'var(--accent)';
+    statusEl.textContent = 'URL cleared.';
+  }
+}
 
 // ── COMPLIANCE STATS ON CARD ──
 function loadComplianceStats() {
