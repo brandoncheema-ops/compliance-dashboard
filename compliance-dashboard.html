@@ -83,8 +83,19 @@
         .stat-card.danger .value{color:var(--red)}.stat-card.warning .value{color:var(--orange)}.stat-card.success .value{color:var(--green)}.stat-card.info .value{color:var(--accent)}
 
         /* COST FORECAST */
-        .chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
-        .chart-card canvas{max-height:280px}
+        .chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem;position:relative}
+        .chart-card canvas{max-height:280px;cursor:pointer}
+        .chart-detail{display:none;margin-top:.75rem;border-top:1px solid var(--border);padding-top:.75rem}
+        .chart-detail.open{display:block}
+        .chart-detail-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+        .chart-detail-header h4{font-size:.9rem;font-weight:700}
+        .chart-detail-header .close-detail{background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text2);padding:2px 6px}
+        .chart-detail-items{display:grid;gap:.35rem}
+        .chart-detail-item{display:flex;justify-content:space-between;align-items:center;padding:.45rem .65rem;background:var(--bg);border-radius:8px;font-size:.8rem}
+        .chart-detail-item .cdi-left{display:flex;flex-direction:column;gap:1px}
+        .chart-detail-item .cdi-name{font-weight:600}
+        .chart-detail-item .cdi-meta{font-size:.7rem;color:var(--text2)}
+        .chart-detail-item .cdi-cost{font-weight:700;color:var(--accent);white-space:nowrap}
 
         /* REMINDER BANNER */
         .reminder-box{background:linear-gradient(135deg,#1e3a5f,#0f172a);border-radius:12px;padding:1rem 1.25rem;color:#fff;display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
@@ -310,7 +321,16 @@
 
     <!-- COST FORECAST -->
     <h3 class="section-header" data-i18n="sec_cost_forecast">&#128200; Cost Forecast (Next 12 Months)</h3>
-    <div class="chart-card"><canvas id="costChart"></canvas></div>
+    <div class="chart-card">
+        <canvas id="costChart"></canvas>
+        <div class="chart-detail" id="chartDetail">
+            <div class="chart-detail-header">
+                <h4 id="chartDetailTitle">Payments</h4>
+                <button class="close-detail" onclick="closeChartDetail()">&times;</button>
+            </div>
+            <div class="chart-detail-items" id="chartDetailItems"></div>
+        </div>
+    </div>
 
     <!-- REMINDER BANNER -->
     <div id="reminderBanner"></div>
@@ -709,41 +729,60 @@ function renderStats() {
 // COST FORECAST CHART
 // ═══════════════════════════════════════
 let costChartInstance = null;
+let chartMonthsData = [];
 function renderCostChart() {
-    const months = [];
+    chartMonthsData = [];
     const now = new Date();
     for (let i = 0; i < 12; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-        months.push({ label: d.toLocaleDateString('en-US',{month:'short',year:'2-digit'}), year: d.getFullYear(), month: d.getMonth(), total: 0, items: [] });
+        chartMonthsData.push({ label: d.toLocaleDateString('en-US',{month:'long',year:'numeric'}), shortLabel: d.toLocaleDateString('en-US',{month:'short',year:'2-digit'}), year: d.getFullYear(), month: d.getMonth(), total: 0, items: [] });
     }
     items.forEach(item => {
         const cost = parseCost(item.cost);
         if (!cost) return;
         const due = parseDate(item.nextDue);
         if (!due) return;
-        const mi = months.findIndex(m => m.year === due.getFullYear() && m.month === due.getMonth());
-        if (mi >= 0) { months[mi].total += cost; months[mi].items.push(item.obligation); }
+        const mi = chartMonthsData.findIndex(m => m.year === due.getFullYear() && m.month === due.getMonth());
+        if (mi >= 0) { chartMonthsData[mi].total += cost; chartMonthsData[mi].items.push({ obligation: item.obligation, entity: item.entity, person: item.person, cost: item.cost, nextDue: item.nextDue, location: item.location }); }
     });
     const ctx = document.getElementById('costChart').getContext('2d');
     if (costChartInstance) costChartInstance.destroy();
     costChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: months.map(m => m.label),
+            labels: chartMonthsData.map(m => m.shortLabel),
             datasets: [{
                 label: 'Estimated Cost ($)',
-                data: months.map(m => m.total),
-                backgroundColor: months.map(m => m.total > 10000 ? '#dc262680' : m.total > 5000 ? '#ea580c80' : '#2563eb80'),
-                borderColor: months.map(m => m.total > 10000 ? '#dc2626' : m.total > 5000 ? '#ea580c' : '#2563eb'),
+                data: chartMonthsData.map(m => m.total),
+                backgroundColor: chartMonthsData.map(m => m.total > 10000 ? '#dc262680' : m.total > 5000 ? '#ea580c80' : '#2563eb80'),
+                borderColor: chartMonthsData.map(m => m.total > 10000 ? '#dc2626' : m.total > 5000 ? '#ea580c' : '#2563eb'),
                 borderWidth: 1, borderRadius: 6
             }]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => '$' + c.raw.toLocaleString() } } },
+            onClick: function(evt, elements) {
+                if (elements.length > 0) { showChartDetail(elements[0].index); }
+            },
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => '$' + c.raw.toLocaleString() + ' (click for details)' } } },
             scales: { y: { beginAtZero: true, ticks: { callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v) } } }
         }
     });
+    closeChartDetail();
+}
+
+function showChartDetail(monthIdx) {
+    const m = chartMonthsData[monthIdx];
+    if (!m || !m.items.length) { closeChartDetail(); return; }
+    document.getElementById('chartDetailTitle').textContent = m.label + ' \u2014 $' + m.total.toLocaleString();
+    document.getElementById('chartDetailItems').innerHTML = m.items.map(it => {
+        return '<div class="chart-detail-item"><div class="cdi-left"><div class="cdi-name">' + it.obligation + '</div><div class="cdi-meta">' + it.entity + ' \u00B7 ' + (locFlag(it.location)||'') + ' ' + it.person + ' \u00B7 Due: ' + fmtDate(it.nextDue) + '</div></div><div class="cdi-cost">' + it.cost + '</div></div>';
+    }).join('');
+    document.getElementById('chartDetail').classList.add('open');
+}
+
+function closeChartDetail() {
+    document.getElementById('chartDetail').classList.remove('open');
 }
 
 // ═══════════════════════════════════════
@@ -775,7 +814,7 @@ function renderTable() {
     const f=getFiltered(), tb=document.getElementById('tableBody'), ni=document.getElementById('noItems');
     if(!f.length){tb.innerHTML='';ni.style.display='block';renderMobileCards([]);return;}ni.style.display='none';
     tb.innerHTML=f.map((i,idx)=>{
-        const ri=RAW_DATA.indexOf(items.find(it=>it.obligation===i.obligation&&it.entity===i.entity));
+        const ri=RAW_DATA.findIndex(it=>it.obligation===i.obligation&&it.entity===i.entity);
         const attachCount=i.attachments?i.attachments.length:0;
         const esc=i._escalated?'<div class="escalation-indicator">\u26A0 Escalated to '+i.backupPerson+'</div>':'';
         return `<tr style="cursor:pointer" onclick="editItem(${ri})">
@@ -804,7 +843,7 @@ function renderMobileCards(f) {
     const c=document.getElementById('mobileCards');
     if(!f.length){c.innerHTML='<div class="no-items">'+t('no_items')+'</div>';return;}
     c.innerHTML=f.map(i=>{
-        const ri=RAW_DATA.indexOf(items.find(it=>it.obligation===i.obligation&&it.entity===i.entity));
+        const ri=RAW_DATA.findIndex(it=>it.obligation===i.obligation&&it.entity===i.entity);
         const esc=i._escalated?'<div class="escalation-indicator" style="margin-top:.3rem">\u26A0 Escalated to '+i.backupPerson+'</div>':'';
         return `<div class="mobile-card">
             <div class="mc-header"><div class="mc-obligation">${i.obligation}</div>${statusBadge(i)}</div>
