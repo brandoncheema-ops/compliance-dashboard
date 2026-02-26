@@ -639,7 +639,7 @@
 
 <script>
 // == RAW DATA (same as dashboard) ==
-const RAW_DATA = [
+const DEFAULT_CAL_DATA = [
   {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"United States",entity:"NF Texas",obligation:"Pay property taxes by 1/31 each year — Harris County",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/31/2027",description:"Texas taxes SOP",cost:"",link:"https://myharriscountytax.com/"},
   {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"United States",entity:"NF Texas",obligation:"Pay property taxes by 1/31 each year — Spring Branch ISD",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/31/2027",description:"Texas taxes SOP",cost:"",link:"https://sbisd.propertytaxpayments.net/search"},
   {status:"Recurring - Up to date",type:"Donation",category:"Act 22 requirement",location:"Puerto Rico",entity:"MN Personal",obligation:"Make a yearly donation in PR",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/8/2026",dateToDo:"1/5/2027",nextDue:"12/31/2027",description:"Donation SOP",cost:"$5,000.00",link:""},
@@ -676,6 +676,16 @@ const RAW_DATA = [
   {status:"Recurring - Up to date",type:"Property",category:"Real Estate Tax",location:"Colombia",entity:"NF MDE CO",obligation:"Provincia Lot RE Tax (Predial)",person:"Manuela Vallejo",frequency:"Yearly",dateDone:"2/10/2026",dateToDo:"2/10/2027",nextDue:"",description:"Pay RE tax through Alcaldía de Med. portal",cost:"Variable",link:"https://www.medellin.gov.co"},
   {status:"Recurring - Up to date",type:"Insurance",category:"Life Insurance",location:"United States",entity:"MN Personal",obligation:"Renew Mike's life insurance — Lincoln Financial",person:"Tim",frequency:"Yearly",dateDone:"1/7/2026",dateToDo:"1/1/2027",nextDue:"1/7/2027",description:"",cost:"$1,609.58",link:"https://www.lincolnfinancial.com/secure/login"}
 ];
+
+// == DATA LAYER (sync with localStorage) ==
+const CAL_STORAGE_KEY = 'nf6_compliance_data';
+function loadCalData() {
+  try { const s = localStorage.getItem(CAL_STORAGE_KEY); if (s) { const p = JSON.parse(s); if (Array.isArray(p) && p.length) return p; } } catch(e){}
+  return DEFAULT_CAL_DATA.map(d => ({...d}));
+}
+function saveCalData() { try { localStorage.setItem(CAL_STORAGE_KEY, JSON.stringify(RAW_DATA)); } catch(e){} }
+let RAW_DATA = loadCalData();
+saveCalData(); // Persist immediately so HomeBase can read stats
 
 // == HELPERS ==
 const TODAY = new Date();
@@ -955,6 +965,9 @@ function saveEdit() {
   else if (item._days <= 14) item._urgency = 'warning';
   else if (item._days <= 30) item._urgency = 'notice';
   else item._urgency = 'none';
+
+  // Persist changes to localStorage
+  saveCalData();
 
   // Log to shared audit (localStorage)
   if (changes.length) {

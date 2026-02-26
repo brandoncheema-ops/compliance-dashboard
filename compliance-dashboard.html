@@ -305,10 +305,6 @@
         <button class="action-btn" onclick="sendEmailReminders()" data-i18n="btn_send_reminders">&#x2709; Send Reminders</button>
     </div>
 
-    <!-- ENTITY HEALTH SCORES -->
-    <h3 class="section-header" data-i18n="sec_entity_health">&#127978; Entity Health Scores</h3>
-    <div class="entity-grid" id="entityGrid"></div>
-
     <!-- STATS -->
     <div class="stats-row" id="statsRow"></div>
 
@@ -579,6 +575,7 @@ function loadAuditLog() { try { const s = localStorage.getItem(AUDIT_KEY); retur
 function saveAuditLog() { try { localStorage.setItem(AUDIT_KEY, JSON.stringify(globalAudit.slice(0, 200))); } catch(e){} }
 
 let RAW_DATA = loadData();
+saveData(); // Persist to localStorage on load so other pages (HomeBase) can read stats
 let globalAudit = loadAuditLog();
 let items = [];
 
@@ -692,23 +689,6 @@ function calcEntityScores() {
         let grade = score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 70 ? 'C' : score >= 60 ? 'D' : 'F';
         return { name, score, grade, ...e };
     }).sort((a,b) => a.score - b.score);
-}
-
-function renderEntityScores() {
-    const scores = calcEntityScores();
-    document.getElementById('entityGrid').innerHTML = scores.map(e => {
-        const color = e.grade==='A'?'var(--green)':e.grade==='B'?'#22c55e':e.grade==='C'?'var(--yellow)':e.grade==='D'?'var(--orange)':'var(--red)';
-        return `<div class="entity-card">
-            <div class="ec-top"><div class="ec-name">${e.name}</div><div class="ec-grade grade-${e.grade.toLowerCase()}">${e.grade}</div></div>
-            <div class="ec-bar"><div class="ec-bar-fill" style="width:${e.score}%;background:${color}"></div></div>
-            <div class="ec-stats">
-                <span><span class="ec-dot" style="background:var(--green)"></span>${e.upToDate} ${t('ec_ok')}</span>
-                <span><span class="ec-dot" style="background:var(--orange)"></span>${e.dueSoon} ${t('ec_soon')}</span>
-                <span><span class="ec-dot" style="background:var(--red)"></span>${e.overdue} ${t('ec_late')}</span>
-                ${e.notStarted?'<span><span class="ec-dot" style="background:var(--purple)"></span>'+e.notStarted+' '+t('ec_new')+'</span>':''}
-            </div>
-        </div>`;
-    }).join('');
 }
 
 // ═══════════════════════════════════════
@@ -1135,7 +1115,7 @@ function sendEmailReminders(){
 // ═══════════════════════════════════════
 // REFRESH
 // ═══════════════════════════════════════
-function refreshAll(){enrichData();renderEntityScores();renderStats();renderCostChart();renderBanner();populateDropdowns();renderTable();renderReminders();renderAuditLog();}
+function refreshAll(){enrichData();renderStats();renderCostChart();renderBanner();populateDropdowns();renderTable();renderReminders();renderAuditLog();}
 
 // ═══════════════════════════════════════
 // EVENTS
