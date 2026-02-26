@@ -858,7 +858,7 @@ function renderSidebar(filtered) {
 
   const container = document.getElementById('upcomingList');
   const countText = monthItems.length ? monthItems.length + (currentLang === 'es' ? ' elementos' : ' items') : '';
-  document.getElementById('upcomingCount').textContent = countText;
+  var countEl = document.getElementById('upcomingCount'); if (countEl) countEl.textContent = countText;
 
   if (!monthItems.length) {
     const emptyMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['sidebar_empty'] ? TRANSLATIONS[currentLang]['sidebar_empty'] : 'No compliance items due this month.';
