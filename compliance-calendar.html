@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NF6 Capital — Compliance Calendar</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -495,6 +496,27 @@
   .auth-error { color:#ef4444; font-size:.85rem; margin-top:1rem; display:none; }
   .auth-domain { color:#64748b; font-size:.8rem; margin-top:1rem; }
 
+  /* Action Bar & Modals */
+  .cal-action-bar{display:flex;gap:.4rem;padding:0 0 .5rem;flex-wrap:wrap}
+  .cal-action-btn{display:inline-flex;align-items:center;gap:.3rem;padding:.35rem .65rem;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid var(--border-color);background:var(--card-bg);color:var(--text-secondary);transition:all .2s;white-space:nowrap}
+  .cal-action-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .cal-action-btn.sheets-btn{background:#e8f5e9;color:#2e7d32;border-color:#c8e6c9}
+  .cal-action-btn.sheets-btn:hover{background:#c8e6c9}
+  [data-theme="dark"] .cal-action-btn.sheets-btn{background:#1b5e20;color:#a5d6a7;border-color:#2e7d32}
+  [data-theme="dark"] .cal-action-btn.sheets-btn:hover{background:#2e7d32}
+  .cal-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:.75rem}
+  .cal-modal-overlay.open{display:flex}
+  .cal-modal{background:var(--card-bg);border-radius:16px;max-width:520px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+  .cal-modal-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center}
+  .cal-modal-header h3{font-size:1rem;font-weight:700}
+  .cal-modal-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-secondary)}
+  .cal-modal-body{padding:1.25rem}
+  .cal-modal-footer{padding:.75rem 1.25rem;border-top:1px solid var(--border-color);display:flex;justify-content:flex-end;gap:.4rem}
+  .cal-modal-btn{padding:.4rem .8rem;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid var(--border-color);background:var(--card-bg);color:var(--text-primary)}
+  .cal-modal-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .cal-upload-zone{border:2px dashed var(--border-color);border-radius:12px;padding:1.25rem;text-align:center;cursor:pointer;transition:all .2s}
+  .cal-upload-zone:hover,.cal-upload-zone.drag-over{border-color:var(--accent);background:rgba(37,99,235,.05)}
+
   /* Toast */
   .toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; padding:.75rem 1.5rem; border-radius:8px; font-size:.85rem; font-weight:500; z-index:300; opacity:0; transition:opacity .3s; pointer-events:none; }
   .toast.show { opacity:1; }
@@ -550,6 +572,12 @@
 <div class="page-header">
   <h1 data-i18n="page_title">Compliance Calendar</h1>
   <p data-i18n="page_subtitle">Visual timeline of all upcoming compliance deadlines and due dates across all entities.</p>
+</div>
+
+<div class="cal-action-bar">
+  <button class="cal-action-btn" onclick="openCalModal('calUploadModal')">&#x2B06; Upload CSV</button>
+  <button class="cal-action-btn" onclick="exportCalCSV()">&#x2B07; Export CSV</button>
+  <button class="cal-action-btn sheets-btn" onclick="openCalModal('calSheetsModal')">&#x1F4CA; Google Sheets</button>
 </div>
 
 <div class="main-layout">
@@ -633,6 +661,52 @@
   </div>
 </div>
 
+<!-- CSV UPLOAD MODAL -->
+<div class="cal-modal-overlay" id="calUploadModal">
+  <div class="cal-modal">
+    <div class="cal-modal-header"><h3>Upload CSV</h3><button class="cal-modal-close" onclick="closeCalModal('calUploadModal')">&times;</button></div>
+    <div class="cal-modal-body">
+      <div class="cal-upload-zone" id="calUploadZone" onclick="document.getElementById('calCsvInput').click()">
+        <div style="font-size:1.5rem">&#128196;</div>
+        <p style="font-size:.82rem;color:var(--text-secondary);margin-top:.3rem">Drag & drop a CSV file here, or click to browse</p>
+        <p style="font-size:.72rem;color:var(--text-secondary);margin-top:.2rem">File &rarr; Download &rarr; .csv from Google Sheets</p>
+      </div>
+      <input type="file" id="calCsvInput" accept=".csv,.tsv" style="display:none" onchange="handleCalCSV(event)">
+      <div id="calUploadPreview" style="display:none;margin-top:.75rem;padding:.65rem;background:var(--bg);border-radius:8px;font-size:.8rem">
+        <strong id="calPreviewCount">0</strong> items found:
+        <div id="calPreviewContent" style="margin-top:.35rem;max-height:150px;overflow-y:auto"></div>
+      </div>
+      <div id="calUploadStatus" style="display:none;margin-top:.5rem;font-size:.78rem;padding:.35rem .6rem;border-radius:6px"></div>
+    </div>
+    <div class="cal-modal-footer">
+      <button class="cal-modal-btn" onclick="closeCalModal('calUploadModal')">Cancel</button>
+      <button class="cal-modal-btn primary" id="calConfirmUploadBtn" onclick="confirmCalCSVUpload()" style="display:none">Replace Data &amp; Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- GOOGLE SHEETS SYNC MODAL -->
+<div class="cal-modal-overlay" id="calSheetsModal">
+  <div class="cal-modal">
+    <div class="cal-modal-header"><h3>&#x1F4CA; Google Sheets Sync</h3><button class="cal-modal-close" onclick="closeCalModal('calSheetsModal')">&times;</button></div>
+    <div class="cal-modal-body">
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:.75rem">Paste a published Google Sheet URL. Data syncs automatically each time this page loads.</p>
+      <label style="font-size:.7rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.03em">GOOGLE SHEET URL</label>
+      <input type="url" id="calSheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/..." style="width:100%;padding:.5rem .65rem;border:1px solid var(--border-color);border-radius:8px;font-size:.82rem;font-family:inherit;background:var(--card-bg);outline:none;margin-top:.25rem;box-sizing:border-box">
+      <div id="calSheetsSaved" style="margin-top:.4rem;font-size:.72rem;color:var(--text-secondary);display:none">Saved: <span id="calSheetsSavedText" style="color:var(--accent)"></span></div>
+      <div style="margin-top:.6rem;padding:.5rem .65rem;background:var(--bg);border-radius:8px;font-size:.72rem;color:var(--text-secondary)">
+        <strong>Setup:</strong> File &rarr; Share &rarr; Publish to web &rarr; CSV format &rarr; Publish
+      </div>
+      <div id="calSheetsStatus" style="display:none;margin-top:.5rem;font-size:.78rem;padding:.35rem .6rem;border-radius:6px"></div>
+    </div>
+    <div class="cal-modal-footer">
+      <button class="cal-modal-btn" onclick="clearCalSheetsUrl()" style="color:#dc2626;border-color:#dc2626">Clear Saved</button>
+      <button class="cal-modal-btn" onclick="closeCalModal('calSheetsModal')">Cancel</button>
+      <button class="cal-modal-btn primary" onclick="syncCalFromSheets()">&#x1F504; Sync Now</button>
+    </div>
+  </div>
+</div>
+
 <div class="tooltip" id="tooltip"></div>
 <div class="toast" id="toast"></div>
 <div class="last-updated-bar" id="lastUpdated" data-i18n-template="last_updated">Last updated: <strong>--</strong></div>
@@ -686,6 +760,164 @@ function loadCalData() {
 function saveCalData() { try { localStorage.setItem(CAL_STORAGE_KEY, JSON.stringify(RAW_DATA)); } catch(e){} }
 let RAW_DATA = loadCalData();
 saveCalData(); // Persist immediately so HomeBase can read stats
+
+// == CSV UPLOAD & GOOGLE SHEETS SYNC ==
+const CAL_SHEETS_KEY = 'nf6_sheets_url_compliance';
+
+function openCalModal(id) { document.getElementById(id).classList.add('open'); }
+function closeCalModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// CSV Upload
+let pendingCalCSV = null;
+function handleCalCSV(e) {
+  var f = e.target.files[0]; if (!f) return;
+  Papa.parse(f, { header: true, skipEmptyLines: true, complete: function(r) {
+    if (!r.data || !r.data.length) { showToast('No data found in CSV'); return; }
+    pendingCalCSV = r.data.map(function(row) {
+      var m = {};
+      var fields = ['status','type','category','location','entity','obligation','person','frequency','dateDone','dateToDo','nextDue','description','cost','link','backupPerson','escalationDays'];
+      var keys = Object.keys(row);
+      fields.forEach(function(f) { var k = keys.find(function(k) { return k.toLowerCase().replace(/[\s_-]/g,'').indexOf(f.toLowerCase()) >= 0; }); m[f] = k ? (row[k]||'').trim() : ''; });
+      if (!m.status) m.status = 'Recurring - Up to date';
+      if (!m.frequency) m.frequency = 'Yearly';
+      m.escalationDays = parseInt(m.escalationDays) || 3;
+      m.attachments = []; m.auditLog = []; m.backupPerson = m.backupPerson || '';
+      return m;
+    }).filter(function(r) { return r.obligation; });
+    document.getElementById('calPreviewCount').textContent = pendingCalCSV.length;
+    document.getElementById('calPreviewContent').innerHTML = pendingCalCSV.slice(0, 5).map(function(r) {
+      return '<div style="padding:.2rem 0;border-bottom:1px solid var(--border-color)"><strong>' + r.obligation + '</strong> — ' + r.entity + ' — Due: ' + (r.nextDue || 'N/A') + '</div>';
+    }).join('') + (pendingCalCSV.length > 5 ? '<div style="color:var(--text-secondary);padding-top:.2rem">...and ' + (pendingCalCSV.length - 5) + ' more</div>' : '');
+    document.getElementById('calUploadPreview').style.display = 'block';
+    document.getElementById('calConfirmUploadBtn').style.display = 'inline-block';
+  }, error: function(err) { showToast('CSV error: ' + err.message); } });
+}
+function confirmCalCSVUpload() {
+  if (!pendingCalCSV) return;
+  var prevCount = RAW_DATA.length;
+  RAW_DATA = pendingCalCSV;
+  saveCalData(); pendingCalCSV = null;
+  closeCalModal('calUploadModal');
+  document.getElementById('calCsvInput').value = '';
+  document.getElementById('calUploadPreview').style.display = 'none';
+  document.getElementById('calConfirmUploadBtn').style.display = 'none';
+  renderCalendar(); renderSidebar();
+  showToast('Uploaded ' + RAW_DATA.length + ' items (replaced ' + prevCount + ')');
+}
+
+// CSV Export
+function exportCalCSV() {
+  var fields = ['status','type','category','location','entity','obligation','person','frequency','dateDone','dateToDo','nextDue','description','cost','link'];
+  var csv = Papa.unparse(RAW_DATA.map(function(r) { var c = {}; fields.forEach(function(f) { c[f] = r[f] || ''; }); return c; }), { columns: fields });
+  var b = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = 'nf6_compliance_calendar_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click(); URL.revokeObjectURL(a.href);
+  showToast('Exported ' + RAW_DATA.length + ' items to CSV');
+}
+
+// Google Sheets Sync
+function convertCalSheetsUrl(rawUrl) {
+  if (!rawUrl) return null;
+  rawUrl = rawUrl.trim();
+  if (rawUrl.indexOf('output=csv') >= 0 || rawUrl.indexOf('tqx=out:csv') >= 0 || rawUrl.indexOf('export?format=csv') >= 0) return rawUrl;
+  var match = rawUrl.match(/\/d\/e\/([\w-]+)\//);
+  if (match) return 'https://docs.google.com/spreadsheets/d/e/' + match[1] + '/pub?output=csv';
+  match = rawUrl.match(/\/d\/([\w-]+)/);
+  if (match) return 'https://docs.google.com/spreadsheets/d/' + match[1] + '/gviz/tq?tqx=out:csv';
+  return rawUrl;
+}
+
+function loadCalSheetsUrl() {
+  var url = localStorage.getItem(CAL_SHEETS_KEY);
+  if (url) {
+    document.getElementById('calSheetsUrl').value = url;
+    document.getElementById('calSheetsSaved').style.display = 'block';
+    document.getElementById('calSheetsSavedText').textContent = url.substring(0, 50) + '...';
+    autoSyncCalFromSheets(url);
+  }
+}
+
+function clearCalSheetsUrl() {
+  localStorage.removeItem(CAL_SHEETS_KEY);
+  document.getElementById('calSheetsUrl').value = '';
+  document.getElementById('calSheetsSaved').style.display = 'none';
+  var s = document.getElementById('calSheetsStatus');
+  s.style.display = 'block'; s.textContent = 'URL cleared.';
+  s.style.background = 'rgba(37,99,235,.1)'; s.style.color = 'var(--accent)';
+}
+
+function showCalSheetStatus(msg, type) {
+  var el = document.getElementById('calSheetsStatus');
+  el.style.display = 'block'; el.textContent = msg;
+  el.style.background = type === 'success' ? 'rgba(22,163,74,.1)' : type === 'error' ? 'rgba(220,38,38,.1)' : 'rgba(37,99,235,.1)';
+  el.style.color = type === 'success' ? '#16a34a' : type === 'error' ? '#dc2626' : 'var(--accent)';
+}
+
+function syncCalFromSheets() {
+  var rawUrl = document.getElementById('calSheetsUrl').value.trim();
+  if (!rawUrl) { showCalSheetStatus('Please enter a Google Sheet URL.', 'error'); return; }
+  var csvUrl = convertCalSheetsUrl(rawUrl);
+  if (!csvUrl) { showCalSheetStatus('Invalid URL format.', 'error'); return; }
+  showCalSheetStatus('Syncing...', 'info');
+  localStorage.setItem(CAL_SHEETS_KEY, rawUrl);
+  document.getElementById('calSheetsSaved').style.display = 'block';
+  document.getElementById('calSheetsSavedText').textContent = rawUrl.substring(0, 50) + '...';
+  doCalSheetsFetch(csvUrl, false);
+}
+
+function autoSyncCalFromSheets(rawUrl) {
+  var csvUrl = convertCalSheetsUrl(rawUrl);
+  if (!csvUrl) return;
+  doCalSheetsFetch(csvUrl, true);
+}
+
+function doCalSheetsFetch(csvUrl, silent) {
+  fetch(csvUrl)
+    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+    .then(function(csv) {
+      Papa.parse(csv, { header: true, skipEmptyLines: true, complete: function(result) {
+        if (!result.data || !result.data.length) { if (!silent) showCalSheetStatus('No data found.', 'error'); return; }
+        var prevCount = RAW_DATA.length;
+        RAW_DATA = result.data.map(function(row) {
+          var m = {};
+          var fields = ['status','type','category','location','entity','obligation','person','frequency','dateDone','dateToDo','nextDue','description','cost','link','backupPerson','escalationDays'];
+          var keys = Object.keys(row);
+          fields.forEach(function(f) { var k = keys.find(function(k) { return k.toLowerCase().replace(/[\s_-]/g,'').indexOf(f.toLowerCase()) >= 0; }); m[f] = k ? (row[k]||'').trim() : ''; });
+          if (!m.status) m.status = 'Recurring - Up to date';
+          if (!m.frequency) m.frequency = 'Yearly';
+          m.escalationDays = parseInt(m.escalationDays) || 3;
+          m.attachments = []; m.auditLog = []; m.backupPerson = m.backupPerson || '';
+          return m;
+        }).filter(function(r) { return r.obligation; });
+        if (RAW_DATA.length) {
+          saveCalData(); renderCalendar(); renderSidebar();
+          if (!silent) showCalSheetStatus('Loaded ' + RAW_DATA.length + ' items from Google Sheets.', 'success');
+          showToast((silent ? 'Auto-synced ' : 'Synced ') + RAW_DATA.length + ' items from Google Sheets');
+        }
+      }});
+    })
+    .catch(function(err) {
+      if (!silent) showCalSheetStatus('Fetch failed: ' + err.message + '. Make sure the sheet is published to web.', 'error');
+      else console.warn('Auto-sync failed:', err.message);
+    });
+}
+
+// Drag & drop for upload zone
+document.addEventListener('DOMContentLoaded', function() {
+  var uz = document.getElementById('calUploadZone');
+  if (uz) {
+    uz.addEventListener('dragover', function(e) { e.preventDefault(); uz.classList.add('drag-over'); });
+    uz.addEventListener('dragleave', function() { uz.classList.remove('drag-over'); });
+    uz.addEventListener('drop', function(e) {
+      e.preventDefault(); uz.classList.remove('drag-over');
+      var f = e.dataTransfer.files[0];
+      if (f && (f.name.endsWith('.csv') || f.name.endsWith('.tsv'))) { handleCalCSV({ target: { files: [f] } }); }
+      else { showToast('Please upload a CSV or TSV file'); }
+    });
+  }
+});
 
 // == HELPERS ==
 const TODAY = new Date();
@@ -1120,6 +1352,7 @@ setInterval(updateLastUpdated, 60000);
 initAuth();
 populateFilters();
 renderCalendar();
+loadCalSheetsUrl();
 </script>
 </body>
 </html>

@@ -1154,7 +1154,41 @@ function loadSheetsUrl() {
         document.getElementById('sheetsUrl').value = url;
         document.getElementById('sheetsSavedUrl').style.display = 'block';
         document.getElementById('sheetsSavedUrlText').textContent = url.substring(0, 60) + '...';
+        // Auto-sync from Google Sheets on page load
+        autoSyncFromSheets(url);
     }
+}
+
+function autoSyncFromSheets(rawUrl) {
+    const csvUrl = convertSheetsUrl(rawUrl);
+    if (!csvUrl) return;
+    fetch(csvUrl)
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(csv => {
+            Papa.parse(csv, {
+                header: true, skipEmptyLines: true,
+                complete: function(result) {
+                    if (!result.data || !result.data.length) return;
+                    const prevCount = RAW_DATA.length;
+                    RAW_DATA = result.data.map(row => {
+                        const m = {};
+                        const fields = ['status','type','category','location','entity','obligation','person','frequency','dateDone','dateToDo','nextDue','description','cost','link','backupPerson','escalationDays'];
+                        const keys = Object.keys(row);
+                        fields.forEach(f => { const k = keys.find(k => k.toLowerCase().replace(/[\s_-]/g,'').includes(f.toLowerCase().replace(/[\s_-]/g,''))); m[f] = k ? (row[k]||'').trim() : ''; });
+                        if (!m.status) m.status = 'Recurring - Up to date';
+                        if (!m.frequency) m.frequency = 'Yearly';
+                        m.escalationDays = parseInt(m.escalationDays) || 3;
+                        m.attachments = []; m.auditLog = []; m.backupPerson = m.backupPerson || '';
+                        return m;
+                    }).filter(r => r.obligation);
+                    if (RAW_DATA.length) {
+                        saveData(); refreshAll();
+                        showToast('Auto-synced ' + RAW_DATA.length + ' items from Google Sheets', 'success');
+                    }
+                }
+            });
+        })
+        .catch(err => { console.warn('Auto-sync from Sheets failed:', err.message); });
 }
 
 function clearSheetsUrl() {
