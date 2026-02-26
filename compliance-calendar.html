@@ -60,12 +60,196 @@
 
   /* HEADER */
   .page-header {
-    padding: 2rem 2rem 0;
-    max-width: 1400px;
+    padding: 1.5rem 2rem 0;
+    max-width: 1600px;
     margin: 0 auto;
   }
   .page-header h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -.03em; }
   .page-header p { color: var(--text-secondary); margin-top: .25rem; font-size: .925rem; }
+
+  /* MAIN 2-COLUMN LAYOUT */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr 370px;
+    gap: 1.5rem;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 1rem 2rem 2rem;
+    align-items: start;
+  }
+
+  .calendar-col { min-width: 0; }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: sticky;
+    top: 72px;
+    max-height: calc(100vh - 88px);
+    display: flex;
+    flex-direction: column;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .sidebar-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--gray-bg);
+  }
+  .sidebar-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: .75rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  /* LIVE CLOCKS */
+  .live-clocks {
+    display: flex;
+    gap: .5rem;
+  }
+  .clock-box {
+    flex: 1;
+    background: #0f172a;
+    border-radius: 8px;
+    padding: .5rem .6rem;
+    text-align: center;
+  }
+  .clock-label {
+    font-size: .6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #94a3b8;
+    margin-bottom: 2px;
+  }
+  .clock-time {
+    font-family: 'Courier New', monospace;
+    font-size: .85rem;
+    font-weight: 700;
+    color: #60a5fa;
+    letter-spacing: .03em;
+  }
+
+  /* SIDEBAR ITEMS */
+  .sidebar-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: .5rem;
+  }
+  .sidebar-body::-webkit-scrollbar { width: 5px; }
+  .sidebar-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .sidebar-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-secondary);
+    font-size: .875rem;
+  }
+
+  .sb-card {
+    padding: .75rem .85rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-bottom: .5rem;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+  }
+  .sb-card:hover { background: var(--accent-light); border-color: var(--accent); }
+  .sb-card .sb-top { display: flex; gap: .5rem; align-items: flex-start; }
+  .sb-card .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+  .sb-card .sb-info { flex: 1; min-width: 0; }
+  .sb-card .sb-title { font-weight: 600; font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sb-card .sb-meta { font-size: .72rem; color: var(--text-secondary); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sb-card .sb-due { font-size: .72rem; font-weight: 600; margin-top: 3px; }
+  .sb-card .sb-edit-icon {
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    font-size: .7rem;
+    color: var(--accent);
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .sb-card:hover .sb-edit-icon { opacity: 1; }
+
+  .dot.critical { background: var(--red); }
+  .dot.warning { background: var(--orange); }
+  .dot.notice { background: var(--yellow); }
+  .dot.none { background: var(--green); }
+  .dot.notstarted { background: var(--purple); }
+
+  /* EDIT PANEL (inline in sidebar) */
+  .edit-panel {
+    display: none;
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+    background: var(--gray-bg);
+  }
+  .edit-panel.active { display: block; }
+  .edit-panel h3 {
+    font-size: .85rem;
+    font-weight: 700;
+    margin-bottom: .75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .edit-panel .close-edit {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 0 4px;
+  }
+  .edit-panel .close-edit:hover { color: var(--red); }
+  .edit-field {
+    margin-bottom: .6rem;
+  }
+  .edit-field label {
+    display: block;
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 3px;
+  }
+  .edit-field input, .edit-field select {
+    width: 100%;
+    padding: .4rem .6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: .82rem;
+    font-family: inherit;
+    background: var(--card);
+  }
+  .edit-field input:focus, .edit-field select:focus { outline: none; border-color: var(--accent); }
+  .edit-actions {
+    display: flex;
+    gap: .5rem;
+    margin-top: .75rem;
+  }
+  .edit-actions button {
+    flex: 1;
+    padding: .45rem;
+    border-radius: 6px;
+    font-size: .8rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all .2s;
+  }
+  .btn-save { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-save:hover { background: #1d4ed8; }
+  .btn-cancel { background: var(--card); }
+  .btn-cancel:hover { background: var(--gray-bg); }
 
   /* CALENDAR CONTROLS */
   .cal-controls {
@@ -73,22 +257,20 @@
     align-items: center;
     justify-content: center;
     gap: 1.5rem;
-    padding: 1.5rem 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
+    padding: .75rem 0 .75rem;
   }
   .cal-controls .month-label {
-    font-size: 1.35rem;
+    font-size: 1.25rem;
     font-weight: 700;
-    min-width: 220px;
+    min-width: 200px;
     text-align: center;
   }
   .cal-controls button {
-    padding: .5rem 1.25rem;
+    padding: .45rem 1rem;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: var(--card);
-    font-size: .85rem;
+    font-size: .82rem;
     font-family: inherit;
     font-weight: 600;
     cursor: pointer;
@@ -103,19 +285,17 @@
   .filter-row {
     display: flex;
     gap: .5rem;
-    padding: 0 2rem .75rem;
-    max-width: 1400px;
-    margin: 0 auto;
+    padding: 0 0 .75rem;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
   }
   .filter-row select {
-    padding: .45rem .75rem;
+    padding: .4rem .65rem;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: var(--card);
-    font-size: .8rem;
+    font-size: .78rem;
     font-family: inherit;
     font-weight: 500;
     cursor: pointer;
@@ -124,11 +304,6 @@
   }
 
   /* CALENDAR GRID */
-  .cal-wrapper {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2rem 2rem;
-  }
   .cal-grid {
     background: var(--card);
     border: 1px solid var(--border);
@@ -143,8 +318,8 @@
   }
   .cal-header-row .day-label {
     text-align: center;
-    padding: .65rem .5rem;
-    font-size: .75rem;
+    padding: .55rem .5rem;
+    font-size: .72rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .04em;
@@ -155,10 +330,10 @@
     grid-template-columns: repeat(7, 1fr);
   }
   .cal-cell {
-    min-height: 110px;
+    min-height: 100px;
     border-right: 1px solid #f1f5f9;
     border-bottom: 1px solid #f1f5f9;
-    padding: .35rem .45rem;
+    padding: .3rem .4rem;
     position: relative;
     transition: background .15s;
   }
@@ -168,16 +343,16 @@
   .cal-cell.today { background: var(--accent-light); }
   .cal-cell.today .date-num { color: var(--accent); font-weight: 700; }
   .date-num {
-    font-size: .8rem;
+    font-size: .78rem;
     font-weight: 600;
     color: var(--text);
-    margin-bottom: 3px;
+    margin-bottom: 2px;
   }
   .cal-event {
     display: block;
     padding: 2px 5px;
     border-radius: 4px;
-    font-size: .65rem;
+    font-size: .62rem;
     font-weight: 600;
     margin-bottom: 2px;
     white-space: nowrap;
@@ -195,7 +370,7 @@
   .cal-event.urgency-none { background: var(--green-bg); color: var(--green); border-left: 3px solid var(--green); }
   .cal-event.urgency-notstarted { background: var(--purple-bg); color: var(--purple); border-left: 3px solid var(--purple); }
   .cal-more {
-    font-size: .65rem;
+    font-size: .62rem;
     color: var(--accent);
     font-weight: 600;
     padding: 1px 5px;
@@ -238,57 +413,20 @@
   .badge-purple { background: var(--purple-bg); color: var(--purple); }
   .badge-blue { background: var(--accent-light); color: var(--accent); }
 
-  /* UPCOMING LIST */
-  .upcoming-section {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2rem 2rem;
-  }
-  .section-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-  }
-  .upcoming-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: .75rem;
-  }
-  .upcoming-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1rem 1.25rem;
-    display: flex;
-    gap: .75rem;
-    align-items: flex-start;
-    transition: box-shadow .2s;
-  }
-  .upcoming-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-  .upcoming-card .dot {
-    width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0;
-  }
-  .dot.critical { background: var(--red); }
-  .dot.warning { background: var(--orange); }
-  .dot.notice { background: var(--yellow); }
-  .dot.none { background: var(--green); }
-  .upcoming-card .uc-content { flex: 1; }
-  .upcoming-card .uc-title { font-weight: 600; font-size: .875rem; }
-  .upcoming-card .uc-meta { font-size: .78rem; color: var(--text-secondary); margin-top: 2px; }
-  .upcoming-card .uc-due { font-size: .78rem; font-weight: 600; margin-top: 4px; }
-
   /* RESPONSIVE */
+  @media (max-width: 1100px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; max-height: none; }
+  }
   @media (max-width: 900px) {
-    .cal-cell { min-height: 80px; }
-    .cal-event { font-size: .6rem; }
-    .upcoming-list { grid-template-columns: 1fr; }
+    .cal-cell { min-height: 75px; }
+    .cal-event { font-size: .58rem; }
   }
   @media (max-width: 600px) {
     .cal-controls { gap: .75rem; }
-    .cal-controls .month-label { font-size: 1.1rem; min-width: 160px; }
+    .cal-controls .month-label { font-size: 1.05rem; min-width: 150px; }
+    .main-layout { padding: .75rem 1rem 1.5rem; }
+    .live-clocks { flex-direction: column; }
   }
 
   /* AUTH OVERLAY */
@@ -302,6 +440,10 @@
   .google-btn:hover { background:#f1f5f9; }
   .auth-error { color:#ef4444; font-size:.85rem; margin-top:1rem; display:none; }
   .auth-domain { color:#64748b; font-size:.8rem; margin-top:1rem; }
+
+  /* Toast */
+  .toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; padding:.75rem 1.5rem; border-radius:8px; font-size:.85rem; font-weight:500; z-index:300; opacity:0; transition:opacity .3s; pointer-events:none; }
+  .toast.show { opacity:1; }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -337,44 +479,92 @@
   <p>Visual timeline of all upcoming compliance deadlines and due dates across all entities.</p>
 </div>
 
-<div class="cal-controls">
-  <button id="prevBtn">← Prev</button>
-  <button class="today-btn" id="todayBtn">Today</button>
-  <div class="month-label" id="monthLabel"></div>
-  <button id="nextBtn">Next →</button>
-</div>
-
-<div class="filter-row">
-  <select id="calLocFilter"><option value="all">All Locations</option></select>
-  <select id="calEntFilter"><option value="all">All Entities</option></select>
-  <select id="calPersonFilter"><option value="all">All People</option></select>
-  <select id="calCatFilter"><option value="all">All Categories</option></select>
-</div>
-
-<div class="cal-wrapper">
-  <div class="cal-grid">
-    <div class="cal-header-row">
-      <div class="day-label">Sun</div>
-      <div class="day-label">Mon</div>
-      <div class="day-label">Tue</div>
-      <div class="day-label">Wed</div>
-      <div class="day-label">Thu</div>
-      <div class="day-label">Fri</div>
-      <div class="day-label">Sat</div>
+<div class="main-layout">
+  <!-- LEFT: Calendar -->
+  <div class="calendar-col">
+    <div class="cal-controls">
+      <button id="prevBtn">&larr; Prev</button>
+      <button class="today-btn" id="todayBtn">Today</button>
+      <div class="month-label" id="monthLabel"></div>
+      <button id="nextBtn">Next &rarr;</button>
     </div>
-    <div class="cal-body" id="calBody"></div>
+    <div class="filter-row">
+      <select id="calLocFilter"><option value="all">All Locations</option></select>
+      <select id="calEntFilter"><option value="all">All Entities</option></select>
+      <select id="calPersonFilter"><option value="all">All People</option></select>
+      <select id="calCatFilter"><option value="all">All Categories</option></select>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-header-row">
+        <div class="day-label">Sun</div>
+        <div class="day-label">Mon</div>
+        <div class="day-label">Tue</div>
+        <div class="day-label">Wed</div>
+        <div class="day-label">Thu</div>
+        <div class="day-label">Fri</div>
+        <div class="day-label">Sat</div>
+      </div>
+      <div class="cal-body" id="calBody"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">&#128337; Live Clocks</div>
+      <div class="live-clocks">
+        <div class="clock-box">
+          <div class="clock-label">Colombia</div>
+          <div class="clock-time" id="clockColombia">--:--:-- --</div>
+        </div>
+        <div class="clock-box">
+          <div class="clock-label">Eastern / PR</div>
+          <div class="clock-time" id="clockEastern">--:--:-- --</div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-header" style="border-bottom: none; padding-bottom: 0;">
+      <div class="sidebar-title" style="margin-bottom:0;">&#128203; Upcoming This Month <span id="upcomingCount" style="font-size:.75rem;font-weight:500;color:var(--text-secondary);margin-left:auto;"></span></div>
+    </div>
+    <div class="sidebar-body" id="upcomingList"></div>
+    <div class="edit-panel" id="editPanel">
+      <h3>
+        <span id="editTitle">Edit Item</span>
+        <button class="close-edit" onclick="closeEdit()">&times;</button>
+      </h3>
+      <div class="edit-field">
+        <label>Status</label>
+        <select id="editStatus">
+          <option value="Recurring - Up to date">Up to Date</option>
+          <option value="Recurring - Due Soon">Due Soon</option>
+          <option value="Not started">Not Started</option>
+        </select>
+      </div>
+      <div class="edit-field">
+        <label>Next Due Date</label>
+        <input type="date" id="editDueDate">
+      </div>
+      <div class="edit-field">
+        <label>Assigned To</label>
+        <input type="text" id="editPerson">
+      </div>
+      <div class="edit-field">
+        <label>Notes</label>
+        <input type="text" id="editNotes" placeholder="Add a note...">
+      </div>
+      <div class="edit-actions">
+        <button class="btn-cancel" onclick="closeEdit()">Cancel</button>
+        <button class="btn-save" onclick="saveEdit()">Save</button>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="upcoming-section">
-  <div class="section-title">📋 Upcoming This Month</div>
-  <div class="upcoming-list" id="upcomingList"></div>
-</div>
-
 <div class="tooltip" id="tooltip"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-// ── RAW DATA (same as dashboard) ──
+// == RAW DATA (same as dashboard) ==
 const RAW_DATA = [
   {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"United States",entity:"NF Texas",obligation:"Pay property taxes by 1/31 each year — Harris County",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/31/2027",description:"Texas taxes SOP",cost:"",link:"https://myharriscountytax.com/"},
   {status:"Recurring - Up to date",type:"Property",category:"Property Taxes",location:"United States",entity:"NF Texas",obligation:"Pay property taxes by 1/31 each year — Spring Branch ISD",person:"Amanda/Brandon",frequency:"Yearly",dateDone:"1/15/2026",dateToDo:"1/15/2027",nextDue:"1/31/2027",description:"Texas taxes SOP",cost:"",link:"https://sbisd.propertytaxpayments.net/search"},
@@ -413,7 +603,7 @@ const RAW_DATA = [
   {status:"Recurring - Up to date",type:"Insurance",category:"Life Insurance",location:"United States",entity:"MN Personal",obligation:"Renew Mike's life insurance — Lincoln Financial",person:"Tim",frequency:"Yearly",dateDone:"1/7/2026",dateToDo:"1/1/2027",nextDue:"1/7/2027",description:"",cost:"$1,609.58",link:"https://www.lincolnfinancial.com/secure/login"}
 ];
 
-// ── HELPERS ──
+// == HELPERS ==
 const TODAY = new Date();
 TODAY.setHours(0,0,0,0);
 
@@ -437,12 +627,19 @@ function formatDate(dateStr) {
 }
 
 function locationFlag(loc) {
-  const map = { 'United States':'🇺🇸', 'Puerto Rico':'🇵🇷', 'Colombia':'🇨🇴', 'France':'🇫🇷' };
-  return map[loc] || '🌍';
+  const map = { 'United States':'\ud83c\uddfa\ud83c\uddf8', 'Puerto Rico':'\ud83c\uddf5\ud83c\uddf7', 'Colombia':'\ud83c\udde8\ud83c\uddf4', 'France':'\ud83c\uddeb\ud83c\uddf7' };
+  return map[loc] || '\ud83c\udf0d';
 }
 
-// ── ENRICH DATA ──
-const items = RAW_DATA.map(d => {
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// == ENRICH DATA ==
+let items = RAW_DATA.map(d => {
   const days = daysUntil(d.nextDue);
   let urgency = 'none';
   if (d.status === 'Not started') urgency = 'notstarted';
@@ -453,11 +650,23 @@ const items = RAW_DATA.map(d => {
   return { ...d, _days: days, _urgency: urgency, _date: parseDate(d.nextDue) };
 });
 
-// ── STATE ──
+// == STATE ==
 let viewYear = TODAY.getFullYear();
 let viewMonth = TODAY.getMonth();
+let editingIdx = -1;
 
-// ── POPULATE FILTERS ──
+// == LIVE CLOCKS ==
+function updateClocks() {
+  const now = new Date();
+  const optsColombia = { timeZone: 'America/Bogota', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+  const optsEastern = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+  document.getElementById('clockColombia').textContent = now.toLocaleTimeString('en-US', optsColombia);
+  document.getElementById('clockEastern').textContent = now.toLocaleTimeString('en-US', optsEastern);
+}
+setInterval(updateClocks, 1000);
+updateClocks();
+
+// == POPULATE FILTERS ==
 function populateFilters() {
   const locs = [...new Set(items.map(i => i.location))].sort();
   const ents = [...new Set(items.map(i => i.entity))].sort();
@@ -465,7 +674,7 @@ function populateFilters() {
   const cats = [...new Set(items.map(i => i.category))].sort();
 
   const locSel = document.getElementById('calLocFilter');
-  locs.forEach(l => { const o = document.createElement('option'); o.value=l; o.textContent=`${locationFlag(l)} ${l}`; locSel.appendChild(o); });
+  locs.forEach(l => { const o = document.createElement('option'); o.value=l; o.textContent=locationFlag(l)+' '+l; locSel.appendChild(o); });
 
   const entSel = document.getElementById('calEntFilter');
   ents.forEach(e => { const o = document.createElement('option'); o.value=e; o.textContent=e; entSel.appendChild(o); });
@@ -492,10 +701,10 @@ function getFilteredItems() {
   });
 }
 
-// ── RENDER CALENDAR ──
+// == RENDER CALENDAR ==
 function renderCalendar() {
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('monthLabel').textContent = `${monthNames[viewMonth]} ${viewYear}`;
+  document.getElementById('monthLabel').textContent = monthNames[viewMonth] + ' ' + viewYear;
 
   const firstDay = new Date(viewYear, viewMonth, 1);
   const lastDay = new Date(viewYear, viewMonth + 1, 0);
@@ -504,11 +713,10 @@ function renderCalendar() {
 
   const filtered = getFilteredItems();
 
-  // Group items by date key (YYYY-MM-DD)
   const dateMap = {};
   filtered.forEach(i => {
     if (!i._date) return;
-    const key = `${i._date.getFullYear()}-${i._date.getMonth()}-${i._date.getDate()}`;
+    const key = i._date.getFullYear()+'-'+i._date.getMonth()+'-'+i._date.getDate();
     if (!dateMap[key]) dateMap[key] = [];
     dateMap[key].push(i);
   });
@@ -516,129 +724,217 @@ function renderCalendar() {
   const calBody = document.getElementById('calBody');
   let html = '';
 
-  // Previous month padding
   const prevLast = new Date(viewYear, viewMonth, 0).getDate();
   for (let i = startDow - 1; i >= 0; i--) {
-    html += `<div class="cal-cell outside"><div class="date-num">${prevLast - i}</div></div>`;
+    html += '<div class="cal-cell outside"><div class="date-num">'+(prevLast - i)+'</div></div>';
   }
 
-  // Current month days
   for (let d = 1; d <= daysInMonth; d++) {
     const isToday = d === TODAY.getDate() && viewMonth === TODAY.getMonth() && viewYear === TODAY.getFullYear();
-    const key = `${viewYear}-${viewMonth}-${d}`;
+    const key = viewYear+'-'+viewMonth+'-'+d;
     const dayItems = dateMap[key] || [];
     const maxShow = 3;
 
-    html += `<div class="cal-cell${isToday ? ' today' : ''}">`;
-    html += `<div class="date-num">${d}</div>`;
-    dayItems.slice(0, maxShow).forEach(item => {
-      const short = item.obligation.length > 28 ? item.obligation.substring(0,26) + '…' : item.obligation;
-      html += `<div class="cal-event urgency-${item._urgency}" data-idx="${items.indexOf(item)}">${short}</div>`;
+    html += '<div class="cal-cell'+(isToday ? ' today' : '')+'">';
+    html += '<div class="date-num">'+d+'</div>';
+    dayItems.slice(0, maxShow).forEach(function(item) {
+      const short = item.obligation.length > 28 ? item.obligation.substring(0,26) + '\u2026' : item.obligation;
+      html += '<div class="cal-event urgency-'+item._urgency+'" data-idx="'+items.indexOf(item)+'">'+short+'</div>';
     });
     if (dayItems.length > maxShow) {
-      html += `<div class="cal-more">+${dayItems.length - maxShow} more</div>`;
+      html += '<div class="cal-more">+'+(dayItems.length - maxShow)+' more</div>';
     }
-    html += `</div>`;
+    html += '</div>';
   }
 
-  // Next month padding
   const totalCells = startDow + daysInMonth;
   const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
   for (let i = 1; i <= remaining; i++) {
-    html += `<div class="cal-cell outside"><div class="date-num">${i}</div></div>`;
+    html += '<div class="cal-cell outside"><div class="date-num">'+i+'</div></div>';
   }
 
   calBody.innerHTML = html;
-
-  // Upcoming items for this month
-  renderUpcoming(filtered);
+  renderSidebar(filtered);
 }
 
-function renderUpcoming(filtered) {
+// == RENDER SIDEBAR ==
+function renderSidebar(filtered) {
   const monthItems = filtered
-    .filter(i => i._date && i._date.getMonth() === viewMonth && i._date.getFullYear() === viewYear)
-    .sort((a, b) => a._date - b._date);
+    .filter(function(i) { return i._date && i._date.getMonth() === viewMonth && i._date.getFullYear() === viewYear; })
+    .sort(function(a, b) { return a._date - b._date; });
 
   const container = document.getElementById('upcomingList');
+  document.getElementById('upcomingCount').textContent = monthItems.length ? monthItems.length + ' items' : '';
 
   if (!monthItems.length) {
-    container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-secondary);font-size:.9rem;">No compliance items due this month.</div>';
+    container.innerHTML = '<div class="sidebar-empty">No compliance items due this month.</div>';
     return;
   }
 
-  container.innerHTML = monthItems.map(i => {
-    const dotClass = i._urgency === 'notstarted' ? 'notice' : i._urgency === 'overdue' ? 'critical' : i._urgency;
-    const dueLabel = i._days === 0 ? 'Due today' : i._days === 1 ? 'Due tomorrow' : i._days < 0 ? `${Math.abs(i._days)} days overdue` : `Due in ${i._days} days`;
-    const dueColor = i._days <= 0 ? 'var(--red)' : i._days <= 7 ? 'var(--red)' : i._days <= 14 ? 'var(--orange)' : i._days <= 30 ? 'var(--yellow)' : 'var(--green)';
-    return `
-      <div class="upcoming-card">
-        <div class="dot ${dotClass || 'none'}"></div>
-        <div class="uc-content">
-          <div class="uc-title">${i.obligation}</div>
-          <div class="uc-meta">${i.entity} · ${locationFlag(i.location)} ${i.location} · ${i.person}${i.cost ? ' · ' + i.cost : ''}</div>
-          <div class="uc-due" style="color:${dueColor};">${dueLabel} — ${formatDate(i.nextDue)}</div>
-        </div>
-      </div>
-    `;
+  container.innerHTML = monthItems.map(function(i) {
+    var idx = items.indexOf(i);
+    var dotClass = i._urgency === 'notstarted' ? 'notstarted' : i._urgency === 'overdue' ? 'critical' : i._urgency;
+    var dueLabel = i._days === 0 ? 'Due today' : i._days === 1 ? 'Due tomorrow' : i._days < 0 ? Math.abs(i._days)+' days overdue' : 'Due in '+i._days+' days';
+    var dueColor = i._days <= 0 ? 'var(--red)' : i._days <= 7 ? 'var(--red)' : i._days <= 14 ? 'var(--orange)' : i._days <= 30 ? 'var(--yellow)' : 'var(--green)';
+    return '<div class="sb-card" onclick="openEdit('+idx+')">' +
+      '<div class="sb-edit-icon">\u270F\ufe0f Edit</div>' +
+      '<div class="sb-top">' +
+        '<div class="dot '+(dotClass || 'none')+'"></div>' +
+        '<div class="sb-info">' +
+          '<div class="sb-title">'+i.obligation+'</div>' +
+          '<div class="sb-meta">'+i.entity+' \u00b7 '+locationFlag(i.location)+' '+i.location+' \u00b7 '+i.person+(i.cost ? ' \u00b7 '+i.cost : '')+'</div>' +
+          '<div class="sb-due" style="color:'+dueColor+';">'+dueLabel+' \u2014 '+formatDate(i.nextDue)+'</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
   }).join('');
 }
 
-// ── TOOLTIP ──
-document.getElementById('calBody').addEventListener('mouseover', e => {
-  const ev = e.target.closest('.cal-event');
+// == EDIT ITEM ==
+function openEdit(idx) {
+  editingIdx = idx;
+  var item = items[idx];
+  document.getElementById('editTitle').textContent = item.obligation.length > 30 ? item.obligation.substring(0,28)+'\u2026' : item.obligation;
+  document.getElementById('editStatus').value = item.status;
+  document.getElementById('editPerson').value = item.person;
+  document.getElementById('editNotes').value = item.description || '';
+
+  // Convert M/D/YYYY to YYYY-MM-DD for date input
+  if (item.nextDue) {
+    var parts = item.nextDue.split('/');
+    if (parts.length === 3) {
+      document.getElementById('editDueDate').value = parts[2]+'-'+parts[0].padStart(2,'0')+'-'+parts[1].padStart(2,'0');
+    }
+  } else {
+    document.getElementById('editDueDate').value = '';
+  }
+
+  document.getElementById('editPanel').classList.add('active');
+}
+
+function closeEdit() {
+  editingIdx = -1;
+  document.getElementById('editPanel').classList.remove('active');
+}
+
+function saveEdit() {
+  if (editingIdx < 0) return;
+  var item = items[editingIdx];
+  var newStatus = document.getElementById('editStatus').value;
+  var newDateVal = document.getElementById('editDueDate').value;
+  var newPerson = document.getElementById('editPerson').value;
+  var newNotes = document.getElementById('editNotes').value;
+
+  // Convert YYYY-MM-DD back to M/D/YYYY
+  var newDue = item.nextDue;
+  if (newDateVal) {
+    var dp = newDateVal.split('-');
+    newDue = parseInt(dp[1])+'/'+parseInt(dp[2])+'/'+dp[0];
+  }
+
+  // Track changes for audit
+  var changes = [];
+  if (item.status !== newStatus) changes.push('Status: '+item.status+' -> '+newStatus);
+  if (item.nextDue !== newDue) changes.push('Due: '+(item.nextDue||'none')+' -> '+newDue);
+  if (item.person !== newPerson) changes.push('Person: '+item.person+' -> '+newPerson);
+  if ((item.description||'') !== newNotes) changes.push('Notes updated');
+
+  // Update item
+  item.status = newStatus;
+  item.nextDue = newDue;
+  item.person = newPerson;
+  item.description = newNotes;
+
+  // Recalculate urgency
+  item._days = daysUntil(newDue);
+  item._date = parseDate(newDue);
+  if (newStatus === 'Not started') item._urgency = 'notstarted';
+  else if (item._days < 0) item._urgency = 'overdue';
+  else if (item._days <= 7) item._urgency = 'critical';
+  else if (item._days <= 14) item._urgency = 'warning';
+  else if (item._days <= 30) item._urgency = 'notice';
+  else item._urgency = 'none';
+
+  // Log to shared audit (localStorage)
+  if (changes.length) {
+    var audit = [];
+    try { audit = JSON.parse(localStorage.getItem('nf6_audit_log') || '[]'); } catch(e) {}
+    var user = 'local';
+    try { var u = firebase.auth().currentUser; if (u) user = u.email; } catch(e) {}
+    audit.unshift({
+      action: 'updated',
+      obligation: item.obligation,
+      user: user,
+      timestamp: new Date().toISOString(),
+      details: changes.join(' | ')
+    });
+    if (audit.length > 200) audit.length = 200;
+    try { localStorage.setItem('nf6_audit_log', JSON.stringify(audit)); } catch(e) {}
+  }
+
+  closeEdit();
+  renderCalendar();
+  showToast(changes.length ? 'Item updated successfully' : 'No changes made');
+}
+
+// == TOOLTIP ==
+document.getElementById('calBody').addEventListener('mouseover', function(e) {
+  var ev = e.target.closest('.cal-event');
   if (!ev) return;
-  const idx = +ev.dataset.idx;
-  const item = items[idx];
+  var idx = +ev.dataset.idx;
+  var item = items[idx];
   if (!item) return;
 
-  const tt = document.getElementById('tooltip');
-  const urgBadge = item._urgency === 'overdue' ? '<span class="badge badge-red">Overdue</span>'
+  var tt = document.getElementById('tooltip');
+  var urgBadge = item._urgency === 'overdue' ? '<span class="badge badge-red">Overdue</span>'
     : item._urgency === 'notstarted' ? '<span class="badge badge-purple">Not Started</span>'
-    : item._urgency === 'critical' ? '<span class="badge badge-red">Due ≤ 7d</span>'
-    : item._urgency === 'warning' ? '<span class="badge badge-orange">Due ≤ 14d</span>'
-    : item._urgency === 'notice' ? '<span class="badge badge-yellow">Due ≤ 30d</span>'
+    : item._urgency === 'critical' ? '<span class="badge badge-red">Due \u2264 7d</span>'
+    : item._urgency === 'warning' ? '<span class="badge badge-orange">Due \u2264 14d</span>'
+    : item._urgency === 'notice' ? '<span class="badge badge-yellow">Due \u2264 30d</span>'
     : '<span class="badge badge-green">Up to Date</span>';
 
-  tt.innerHTML = `
-    <div class="tt-title">${item.obligation}</div>
-    <div class="tt-row"><div class="tt-label">Status</div><div class="tt-val">${urgBadge}</div></div>
-    <div class="tt-row"><div class="tt-label">Entity</div><div class="tt-val">${item.entity}</div></div>
-    <div class="tt-row"><div class="tt-label">Location</div><div class="tt-val">${locationFlag(item.location)} ${item.location}</div></div>
-    <div class="tt-row"><div class="tt-label">Person</div><div class="tt-val">${item.person}</div></div>
-    <div class="tt-row"><div class="tt-label">Category</div><div class="tt-val"><span class="badge badge-blue">${item.category}</span></div></div>
-    <div class="tt-row"><div class="tt-label">Due</div><div class="tt-val">${formatDate(item.nextDue)}</div></div>
-    ${item.cost ? `<div class="tt-row"><div class="tt-label">Cost</div><div class="tt-val">${item.cost}</div></div>` : ''}
-    ${item.description ? `<div class="tt-row"><div class="tt-label">Notes</div><div class="tt-val">${item.description}</div></div>` : ''}
-  `;
+  tt.innerHTML =
+    '<div class="tt-title">'+item.obligation+'</div>' +
+    '<div class="tt-row"><div class="tt-label">Status</div><div class="tt-val">'+urgBadge+'</div></div>' +
+    '<div class="tt-row"><div class="tt-label">Entity</div><div class="tt-val">'+item.entity+'</div></div>' +
+    '<div class="tt-row"><div class="tt-label">Location</div><div class="tt-val">'+locationFlag(item.location)+' '+item.location+'</div></div>' +
+    '<div class="tt-row"><div class="tt-label">Person</div><div class="tt-val">'+item.person+'</div></div>' +
+    '<div class="tt-row"><div class="tt-label">Category</div><div class="tt-val"><span class="badge badge-blue">'+item.category+'</span></div></div>' +
+    '<div class="tt-row"><div class="tt-label">Due</div><div class="tt-val">'+formatDate(item.nextDue)+'</div></div>' +
+    (item.cost ? '<div class="tt-row"><div class="tt-label">Cost</div><div class="tt-val">'+item.cost+'</div></div>' : '') +
+    (item.description ? '<div class="tt-row"><div class="tt-label">Notes</div><div class="tt-val">'+item.description+'</div></div>' : '');
 
-  const rect = ev.getBoundingClientRect();
+  var rect = ev.getBoundingClientRect();
   tt.style.left = Math.min(rect.right + 8, window.innerWidth - 340) + 'px';
   tt.style.top = Math.max(rect.top - 20, 10) + 'px';
   tt.classList.add('show');
 });
 
-document.getElementById('calBody').addEventListener('mouseout', e => {
-  const ev = e.target.closest('.cal-event');
+document.getElementById('calBody').addEventListener('mouseout', function(e) {
+  var ev = e.target.closest('.cal-event');
   if (!ev) return;
   document.getElementById('tooltip').classList.remove('show');
 });
 
-// ── EVENT LISTENERS ──
+// == EVENT LISTENERS ==
 document.getElementById('todayBadge').textContent = TODAY.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
 
-document.getElementById('prevBtn').addEventListener('click', () => {
+document.getElementById('prevBtn').addEventListener('click', function() {
   viewMonth--;
   if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+  closeEdit();
   renderCalendar();
 });
-document.getElementById('nextBtn').addEventListener('click', () => {
+document.getElementById('nextBtn').addEventListener('click', function() {
   viewMonth++;
   if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+  closeEdit();
   renderCalendar();
 });
-document.getElementById('todayBtn').addEventListener('click', () => {
+document.getElementById('todayBtn').addEventListener('click', function() {
   viewYear = TODAY.getFullYear();
   viewMonth = TODAY.getMonth();
+  closeEdit();
   renderCalendar();
 });
 
@@ -647,7 +943,7 @@ document.getElementById('calEntFilter').addEventListener('change', renderCalenda
 document.getElementById('calPersonFilter').addEventListener('change', renderCalendar);
 document.getElementById('calCatFilter').addEventListener('change', renderCalendar);
 
-// ── AUTH ──
+// == AUTH ==
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAbvvj4qCzfZPdRxU6BtbRSfXDXPitNwkQ",
   authDomain: "nf6-compliance.firebaseapp.com",
@@ -663,7 +959,7 @@ function initAuth() {
   if (!AUTH_ENABLED) { document.getElementById('authOverlay').classList.add('hidden'); return; }
   try {
     firebase.initializeApp(FIREBASE_CONFIG);
-    firebase.auth().onAuthStateChanged(user => {
+    firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
         if (user.email.split('@')[1] === ALLOWED_DOMAIN) {
           document.getElementById('authOverlay').classList.add('hidden');
@@ -676,12 +972,12 @@ function initAuth() {
 }
 function signInWithGoogle() {
   if (!AUTH_ENABLED) return;
-  const p = new firebase.auth.GoogleAuthProvider(); p.setCustomParameters({hd: ALLOWED_DOMAIN});
-  firebase.auth().signInWithPopup(p).catch(e => showAuthError(e.message));
+  var p = new firebase.auth.GoogleAuthProvider(); p.setCustomParameters({hd: ALLOWED_DOMAIN});
+  firebase.auth().signInWithPopup(p).catch(function(e) { showAuthError(e.message); });
 }
-function showAuthError(msg) { const e = document.getElementById('authError'); e.textContent = msg; e.style.display = 'block'; }
+function showAuthError(msg) { var e = document.getElementById('authError'); e.textContent = msg; e.style.display = 'block'; }
 
-// ── INIT ──
+// == INIT ==
 initAuth();
 populateFilters();
 renderCalendar();

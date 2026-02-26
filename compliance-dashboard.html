@@ -928,14 +928,25 @@ function saveItem() {
     };
     const editIdx = parseInt(document.getElementById('f_editIndex').value);
     if (editIdx >= 0 && editIdx < RAW_DATA.length) {
-        newItem.auditLog = RAW_DATA[editIdx].auditLog || [];
-        if (RAW_DATA[editIdx]._docId) newItem._docId = RAW_DATA[editIdx]._docId;
+        const old = RAW_DATA[editIdx];
+        newItem.auditLog = old.auditLog || [];
+        if (old._docId) newItem._docId = old._docId;
+        const changes = [];
+        if (old.status !== newItem.status) changes.push('Status: '+old.status+' -> '+newItem.status);
+        if (old.nextDue !== newItem.nextDue) changes.push('Due: '+(old.nextDue||'none')+' -> '+(newItem.nextDue||'none'));
+        if (old.person !== newItem.person) changes.push('Person: '+old.person+' -> '+newItem.person);
+        if (old.entity !== newItem.entity) changes.push('Entity: '+old.entity+' -> '+newItem.entity);
+        if (old.category !== newItem.category) changes.push('Category: '+old.category+' -> '+newItem.category);
+        if (old.obligation !== newItem.obligation) changes.push('Name: '+old.obligation+' -> '+newItem.obligation);
+        if (old.cost !== newItem.cost) changes.push('Cost: '+(old.cost||'none')+' -> '+(newItem.cost||'none'));
+        if (old.frequency !== newItem.frequency) changes.push('Frequency: '+old.frequency+' -> '+newItem.frequency);
+        if (old.location !== newItem.location) changes.push('Location: '+old.location+' -> '+newItem.location);
         RAW_DATA[editIdx] = newItem;
-        addAuditEntry('updated', obl, 'Item updated');
+        addAuditEntry('updated', obl, changes.length ? changes.join(' | ') : 'Item re-saved (no changes)');
         showToast('Item updated!','success');
     } else {
         RAW_DATA.push(newItem);
-        addAuditEntry('created', obl, 'New item created');
+        addAuditEntry('created', obl, 'New item created | Entity: '+ent+' | Person: '+newItem.person+' | Due: '+(nextDue||'N/A'));
         showToast('Item added!','success');
     }
     saveData(); syncToFirestore(); closeModal('addItemModal'); resetForm(); refreshAll();
@@ -956,7 +967,7 @@ function markComplete(idx) {
 function deleteItem(idx) {
     if(idx<0||idx>=RAW_DATA.length)return;
     if(!confirm('Delete "'+RAW_DATA[idx].obligation+'"?'))return;
-    addAuditEntry('deleted',RAW_DATA[idx].obligation,'Item deleted');
+    addAuditEntry('deleted',RAW_DATA[idx].obligation,'Item deleted | Entity: '+RAW_DATA[idx].entity+' | Category: '+RAW_DATA[idx].category+' | Person: '+RAW_DATA[idx].person);
     RAW_DATA.splice(idx,1);
     saveData(); syncToFirestore(); refreshAll();
     showToast('Item deleted.','success');
@@ -1013,8 +1024,8 @@ function handleCSVUpload(e){
     },error:function(err){showToast('CSV error: '+err.message,'error');}});
 }
 function confirmCSVUpload(){
-    if(!pendingCSV)return;RAW_DATA=pendingCSV;saveData();syncToFirestore();pendingCSV=null;
-    addAuditEntry('updated','CSV Upload','Replaced all data with '+RAW_DATA.length+' items from CSV');
+    if(!pendingCSV)return;var prevCount=RAW_DATA.length;RAW_DATA=pendingCSV;saveData();syncToFirestore();pendingCSV=null;
+    addAuditEntry('updated','CSV Upload','Uploaded CSV with '+RAW_DATA.length+' items (replaced '+prevCount+' previous items)');
     closeModal('uploadModal');document.getElementById('csvFileInput').value='';
     document.getElementById('uploadPreview').style.display='none';document.getElementById('confirmUploadBtn').style.display='none';
     refreshAll();showToast('Dashboard updated with '+RAW_DATA.length+' items!','success');
@@ -1023,7 +1034,9 @@ function exportCSV(){
     const fields=['status','type','category','location','entity','obligation','person','frequency','dateDone','dateToDo','nextDue','description','cost','link','backupPerson','escalationDays'];
     const csv=Papa.unparse(RAW_DATA.map(r=>{const c={};fields.forEach(f=>c[f]=r[f]||'');return c;}),{columns:fields});
     const b=new Blob([csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(b);
-    a.download='nf6_compliance_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(a.href);
+    var fname='nf6_compliance_'+new Date().toISOString().slice(0,10)+'.csv';
+    a.download=fname;a.click();URL.revokeObjectURL(a.href);
+    addAuditEntry('export','CSV Export','Exported '+RAW_DATA.length+' items to '+fname);
     showToast('CSV downloaded!','success');
 }
 // Drag & drop
