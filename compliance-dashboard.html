@@ -305,6 +305,7 @@
         <select class="select-filter" id="locationFilter"><option value="all">All Locations</option></select>
         <select class="select-filter" id="entityFilter"><option value="all">All Entities</option></select>
         <select class="select-filter" id="personFilter"><option value="all">All People</option></select>
+        <select class="select-filter" id="categoryFilter"><option value="all">All Categories</option></select>
     </div>
 
     <!-- TABLE (desktop) -->
@@ -725,18 +726,19 @@ function statusBadge(i) { if(i._urgency==='overdue') return '<span class="badge 
 function reminderBadge(i) { if(i._days===Infinity||i._days<0) return ''; if(i._days<=7) return '<div class="reminder-tag r7">\uD83D\uDD34 \u2264 7d</div>'; if(i._days<=14) return '<div class="reminder-tag r14">\uD83D\uDFE0 \u2264 14d</div>'; if(i._days<=30) return '<div class="reminder-tag r30">\uD83D\uDFE1 \u2264 30d</div>'; return ''; }
 
 function populateDropdowns() {
-    const locs=[...new Set(items.map(i=>i.location))].sort(), ents=[...new Set(items.map(i=>i.entity))].sort(), ppl=[...new Set(items.flatMap(i=>i.person.split('/')))].sort();
+    const locs=[...new Set(items.map(i=>i.location))].sort(), ents=[...new Set(items.map(i=>i.entity))].sort(), ppl=[...new Set(items.flatMap(i=>i.person.split('/')))].sort(), cats=[...new Set(items.map(i=>i.category))].sort();
     const ls=document.getElementById('locationFilter'); ls.innerHTML='<option value="all">All Locations</option>'; locs.forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=locFlag(l)+' '+l;ls.appendChild(o);});
     const es=document.getElementById('entityFilter'); es.innerHTML='<option value="all">All Entities</option>'; ents.forEach(e=>{const o=document.createElement('option');o.value=e;o.textContent=e;es.appendChild(o);});
     const ps=document.getElementById('personFilter'); ps.innerHTML='<option value="all">All People</option>'; ppl.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;ps.appendChild(o);});
+    const cs=document.getElementById('categoryFilter'); cs.innerHTML='<option value="all">All Categories</option>'; cats.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;cs.appendChild(o);});
 }
 
 function getFiltered() {
     const q=document.getElementById('searchInput').value.toLowerCase(), sf=document.querySelector('.filter-btn.active')?.dataset.filter||'all',
-          lf=document.getElementById('locationFilter').value, ef=document.getElementById('entityFilter').value, pf=document.getElementById('personFilter').value;
+          lf=document.getElementById('locationFilter').value, ef=document.getElementById('entityFilter').value, pf=document.getElementById('personFilter').value, cf=document.getElementById('categoryFilter').value;
     return items.filter(i => {
         if(q&&!(i.obligation+i.entity+i.category+i.person+i.location).toLowerCase().includes(q)) return false;
-        if(lf!=='all'&&i.location!==lf) return false; if(ef!=='all'&&i.entity!==ef) return false; if(pf!=='all'&&!i.person.includes(pf)) return false;
+        if(lf!=='all'&&i.location!==lf) return false; if(ef!=='all'&&i.entity!==ef) return false; if(pf!=='all'&&!i.person.includes(pf)) return false; if(cf!=='all'&&i.category!==cf) return false;
         switch(sf){case 'overdue':return i._urgency==='overdue';case 'due-7':return i._days>=0&&i._days<=7;case 'due-14':return i._days>=0&&i._days<=14;case 'due-30':return i._days>=0&&i._days<=30;case 'up-to-date':return i.status.includes('Up to date')&&i._urgency==='none';case 'not-started':return i.status==='Not started';default:return true;}
     }).sort((a,b)=>{let va,vb;switch(currentSort.key){case'nextDue':va=a._days;vb=b._days;break;case'cost':va=parseCost(a.cost);vb=parseCost(b.cost);break;default:va=(a[currentSort.key]||'').toLowerCase();vb=(b[currentSort.key]||'').toLowerCase();}if(va<vb)return currentSort.asc?-1:1;if(va>vb)return currentSort.asc?1:-1;return 0;});
 }
@@ -1068,6 +1070,7 @@ document.getElementById('searchInput').addEventListener('input',renderTable);
 document.getElementById('locationFilter').addEventListener('change',renderTable);
 document.getElementById('entityFilter').addEventListener('change',renderTable);
 document.getElementById('personFilter').addEventListener('change',renderTable);
+document.getElementById('categoryFilter').addEventListener('change',renderTable);
 document.querySelectorAll('th[data-sort]').forEach(th=>{th.addEventListener('click',()=>{const k=th.dataset.sort;if(currentSort.key===k)currentSort.asc=!currentSort.asc;else{currentSort.key=k;currentSort.asc=true;}renderTable();});});
 
 // ═══════════════════════════════════════

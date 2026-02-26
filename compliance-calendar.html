@@ -290,9 +290,36 @@
     .cal-controls { gap: .75rem; }
     .cal-controls .month-label { font-size: 1.1rem; min-width: 160px; }
   }
+
+  /* AUTH OVERLAY */
+  .auth-overlay { position:fixed; inset:0; background:#0f172a; display:flex; align-items:center; justify-content:center; z-index:9999; }
+  .auth-overlay.hidden { display:none; }
+  .auth-box { background:rgba(30,41,59,.85); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:3rem 2.5rem; text-align:center; max-width:400px; width:90%; }
+  .auth-title { font-size:1.75rem; color:#fff; font-weight:700; }
+  .auth-title span { color:#60a5fa; }
+  .auth-sub { color:#94a3b8; font-size:.9rem; margin:.5rem 0 1.5rem; }
+  .google-btn { display:inline-flex; align-items:center; gap:.6rem; background:#fff; border:none; border-radius:8px; padding:.7rem 1.5rem; font-size:.95rem; font-weight:600; cursor:pointer; font-family:inherit; }
+  .google-btn:hover { background:#f1f5f9; }
+  .auth-error { color:#ef4444; font-size:.85rem; margin-top:1rem; display:none; }
+  .auth-domain { color:#64748b; font-size:.8rem; margin-top:1rem; }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 </head>
 <body>
+
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <h1 class="auth-title">NF6 <span>Capital</span></h1>
+    <p class="auth-sub">Compliance Calendar &mdash; Internal Use Only</p>
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Sign in with Google
+    </button>
+    <div class="auth-error" id="authError"></div>
+    <p class="auth-domain">Restricted to @nf6capital.com accounts</p>
+  </div>
+</div>
 
 <nav>
   <div class="brand">NF6 <span>Capital</span></div>
@@ -320,6 +347,7 @@
   <select id="calLocFilter"><option value="all">All Locations</option></select>
   <select id="calEntFilter"><option value="all">All Entities</option></select>
   <select id="calPersonFilter"><option value="all">All People</option></select>
+  <select id="calCatFilter"><option value="all">All Categories</option></select>
 </div>
 
 <div class="cal-wrapper">
@@ -433,6 +461,7 @@ function populateFilters() {
   const locs = [...new Set(items.map(i => i.location))].sort();
   const ents = [...new Set(items.map(i => i.entity))].sort();
   const ppl = [...new Set(items.flatMap(i => i.person.split('/')))].sort();
+  const cats = [...new Set(items.map(i => i.category))].sort();
 
   const locSel = document.getElementById('calLocFilter');
   locs.forEach(l => { const o = document.createElement('option'); o.value=l; o.textContent=`${locationFlag(l)} ${l}`; locSel.appendChild(o); });
@@ -442,17 +471,22 @@ function populateFilters() {
 
   const pSel = document.getElementById('calPersonFilter');
   ppl.forEach(p => { const o = document.createElement('option'); o.value=p; o.textContent=p; pSel.appendChild(o); });
+
+  const catSel = document.getElementById('calCatFilter');
+  cats.forEach(c => { const o = document.createElement('option'); o.value=c; o.textContent=c; catSel.appendChild(o); });
 }
 
 function getFilteredItems() {
   const locF = document.getElementById('calLocFilter').value;
   const entF = document.getElementById('calEntFilter').value;
   const pF = document.getElementById('calPersonFilter').value;
+  const catF = document.getElementById('calCatFilter').value;
   return items.filter(i => {
     if (!i._date) return false;
     if (locF !== 'all' && i.location !== locF) return false;
     if (entF !== 'all' && i.entity !== entF) return false;
     if (pF !== 'all' && !i.person.includes(pF)) return false;
+    if (catF !== 'all' && i.category !== catF) return false;
     return true;
   });
 }
@@ -610,8 +644,44 @@ document.getElementById('todayBtn').addEventListener('click', () => {
 document.getElementById('calLocFilter').addEventListener('change', renderCalendar);
 document.getElementById('calEntFilter').addEventListener('change', renderCalendar);
 document.getElementById('calPersonFilter').addEventListener('change', renderCalendar);
+document.getElementById('calCatFilter').addEventListener('change', renderCalendar);
+
+// ── AUTH ──
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAbvvj4qCzfZPdRxU6BtbRSfXDXPitNwkQ",
+  authDomain: "nf6-compliance.firebaseapp.com",
+  projectId: "nf6-compliance",
+  storageBucket: "nf6-compliance.firebasestorage.app",
+  messagingSenderId: "758076256010",
+  appId: "1:758076256010:web:5799632950c369244c54f3"
+};
+const ALLOWED_DOMAIN = 'nf6capital.com';
+const AUTH_ENABLED = true;
+
+function initAuth() {
+  if (!AUTH_ENABLED) { document.getElementById('authOverlay').classList.add('hidden'); return; }
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        if (user.email.split('@')[1] === ALLOWED_DOMAIN) {
+          document.getElementById('authOverlay').classList.add('hidden');
+        } else {
+          showAuthError('Access restricted to @' + ALLOWED_DOMAIN); firebase.auth().signOut();
+        }
+      } else { document.getElementById('authOverlay').classList.remove('hidden'); }
+    });
+  } catch(e) { console.warn('Firebase:', e.message); document.getElementById('authOverlay').classList.add('hidden'); }
+}
+function signInWithGoogle() {
+  if (!AUTH_ENABLED) return;
+  const p = new firebase.auth.GoogleAuthProvider(); p.setCustomParameters({hd: ALLOWED_DOMAIN});
+  firebase.auth().signInWithPopup(p).catch(e => showAuthError(e.message));
+}
+function showAuthError(msg) { const e = document.getElementById('authError'); e.textContent = msg; e.style.display = 'block'; }
 
 // ── INIT ──
+initAuth();
 populateFilters();
 renderCalendar();
 </script>
