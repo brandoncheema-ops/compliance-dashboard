@@ -5,294 +5,382 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>NF6 Capital &mdash; Compliance Hub</title>
+    <title>NF6 Capital &mdash; Data Upload</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        :root{--bg:#f5f7fa;--card:#fff;--border:#e2e8f0;--text:#1a202c;--text2:#64748b;--accent:#2563eb;--accent-lt:#eff6ff;--green:#16a34a;--green-bg:#f0fdf4;--yellow:#ca8a04;--yellow-bg:#fefce8;--red:#dc2626;--red-bg:#fef2f2;--orange:#ea580c;--orange-bg:#fff7ed;--nav:#0f172a}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom,0)}
+        nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;padding-top:env(safe-area-inset-top,0)}
+        .brand{font-weight:700;font-size:1.1rem;letter-spacing:-.02em;white-space:nowrap}.brand span{color:#60a5fa}
+        .nav-links{display:flex;gap:.75rem}.nav-links a{color:#94a3b8;text-decoration:none;font-size:.82rem;font-weight:500;padding:.35rem .5rem;border-radius:6px;transition:color .2s}
+        .nav-links a:hover,.nav-links a.active{color:#fff}
+        .hamburger{display:none;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;padding:.25rem}
+        .mobile-menu{display:none;position:fixed;top:56px;left:0;right:0;background:var(--nav);padding:.75rem;z-index:99;flex-direction:column;gap:.35rem}
+        .mobile-menu.open{display:flex}
+        .mobile-menu a{color:#94a3b8;text-decoration:none;padding:.6rem .75rem;border-radius:8px;font-size:.9rem}
+        .mobile-menu a:hover,.mobile-menu a.active{color:#fff;background:#1e293b}
+        .container{max-width:960px;margin:0 auto;padding:0 1.25rem}
+        .page-header{padding:1.5rem 0 .5rem}.page-header h1{font-size:1.4rem;font-weight:700;letter-spacing:-.03em}
+        .page-header p{color:var(--text2);margin-top:.15rem;font-size:.85rem}
 
-        :root {
-            --bg: #f5f7fa;
-            --card: #ffffff;
-            --border: #e2e8f0;
-            --text: #1a202c;
-            --text-secondary: #64748b;
-            --accent: #2563eb;
-            --accent-light: #eff6ff;
-            --green: #16a34a;
-            --green-bg: #f0fdf4;
-            --yellow: #ca8a04;
-            --red: #dc2626;
-            --red-bg: #fef2f2;
-            --orange: #ea580c;
-            --orange-bg: #fff7ed;
-            --nav-bg: #0f172a;
-        }
+        /* UPLOAD ZONE */
+        .upload-section{margin:1.25rem 0}
+        .upload-zone{border:2px dashed var(--border);border-radius:14px;padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--card)}
+        .upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:var(--accent-lt)}
+        .upload-zone .icon{font-size:2.5rem;margin-bottom:.5rem}
+        .upload-zone h2{font-size:1.05rem;font-weight:600;margin-bottom:.25rem}
+        .upload-zone p{color:var(--text2);font-size:.82rem}
+        .upload-zone .formats{color:var(--text2);font-size:.72rem;margin-top:.5rem}
+        input[type=file]{display:none}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* STATUS CARDS */
+        .status-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin:1rem 0}
+        .status-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.75rem .875rem}
+        .status-card .label{font-size:.65rem;text-transform:uppercase;letter-spacing:.04em;color:var(--text2);font-weight:600}
+        .status-card .value{font-size:1.3rem;font-weight:700;margin-top:.1rem}
+        .status-card.info .value{color:var(--accent)}.status-card.success .value{color:var(--green)}.status-card.warning .value{color:var(--orange)}.status-card.danger .value{color:var(--red)}
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.5;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            -webkit-font-smoothing: antialiased;
-            padding-bottom: env(safe-area-inset-bottom, 0);
-        }
+        /* UPLOAD LOG */
+        .section-title{font-size:.95rem;font-weight:700;margin:1.5rem 0 .5rem;display:flex;align-items:center;gap:.4rem}
+        .log-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem}
+        .log-entry{padding:.6rem .875rem;border-bottom:1px solid #f1f5f9;display:flex;gap:.6rem;align-items:center;font-size:.78rem}
+        .log-entry:last-child{border-bottom:none}
+        .log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+        .log-dot.success{background:var(--green)}.log-dot.error{background:var(--red)}.log-dot.info{background:var(--accent)}
+        .log-body{flex:1}.log-body strong{font-weight:600}.log-body .meta{color:var(--text2);font-size:.7rem}
+        .empty-log{padding:1.25rem;text-align:center;color:var(--text2);font-size:.82rem}
 
-        /* NAV */
-        nav {
-            background: var(--nav-bg);
-            color: #fff;
-            padding: 0 1.25rem;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding-top: env(safe-area-inset-top, 0);
-        }
-        .brand { font-weight: 700; font-size: 1.15rem; letter-spacing: -.02em; }
-        .brand span { color: #60a5fa; }
-        .brand .sub { color: #94a3b8; font-weight: 400; font-size: .8rem; margin-left: .5rem; }
-        .nav-links { display: flex; gap: 1rem; }
-        .nav-links a {
-            color: #94a3b8; text-decoration: none; font-size: .85rem; font-weight: 500;
-            padding: .4rem .6rem; border-radius: 6px; transition: all .2s;
-        }
-        .nav-links a:hover, .nav-links a.active { color: #fff; background: #1e293b; }
-        .hamburger {
-            display: none; background: none; border: none; color: #fff;
-            font-size: 1.5rem; cursor: pointer;
-        }
-        .mobile-menu {
-            display: none; position: fixed; top: 56px; left: 0; right: 0;
-            background: var(--nav-bg); padding: 1rem; z-index: 99;
-            flex-direction: column; gap: .5rem;
-        }
-        .mobile-menu.open { display: flex; }
-        .mobile-menu a {
-            color: #94a3b8; text-decoration: none; padding: .75rem 1rem;
-            border-radius: 8px; font-size: .95rem;
-        }
-        .mobile-menu a:hover, .mobile-menu a.active { color: #fff; background: #1e293b; }
+        /* PREVIEW TABLE */
+        .preview-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem}
+        .preview-header{padding:.75rem .875rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+        .preview-header h3{font-size:.85rem;font-weight:600}
+        .preview-count{font-size:.72rem;color:var(--text2);background:#f1f5f9;padding:2px 8px;border-radius:6px}
+        .preview-table-wrap{overflow-x:auto;max-height:320px;overflow-y:auto}
+        table{width:100%;border-collapse:collapse;font-size:.72rem}
+        thead th{background:#f8fafc;padding:.5rem .6rem;text-align:left;font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.03em;color:var(--text2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1}
+        tbody tr{border-bottom:1px solid #f1f5f9}tbody tr:hover{background:#f8fafc}
+        tbody td{padding:.45rem .6rem;vertical-align:top;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-        /* HERO */
-        .hero {
-            text-align: center;
-            padding: 3.5rem 1.5rem 2.5rem;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-        .hero h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            letter-spacing: -.03em;
-            color: var(--text);
-            margin-bottom: .5rem;
-        }
-        .hero h1 em {
-            font-style: normal;
-            color: var(--accent);
-        }
-        .hero p {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            max-width: 520px;
-            margin: 0 auto;
-        }
+        /* BUTTONS */
+        .action-bar{display:flex;gap:.5rem;margin:1rem 0;flex-wrap:wrap}
+        .btn{padding:.5rem 1rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid var(--border);background:var(--card);color:var(--text);transition:all .2s;white-space:nowrap;display:inline-flex;align-items:center;gap:.35rem}
+        .btn:hover{border-color:var(--accent);color:var(--accent)}
+        .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn.primary:hover{background:#1d4ed8}
+        .btn.danger{background:var(--red);color:#fff;border-color:var(--red)}.btn.danger:hover{background:#b91c1c}
+        .btn:disabled{opacity:.5;cursor:not-allowed}
 
-        /* STATS */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: .75rem;
-            max-width: 900px;
-            margin: 0 auto 2rem;
-            padding: 0 1.25rem;
-        }
-        .stat-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.25rem;
-            text-align: center;
-        }
-        .stat-card .value {
-            font-size: 2rem;
-            font-weight: 700;
-        }
-        .stat-card .label {
-            font-size: .8rem;
-            color: var(--text-secondary);
-            margin-top: .15rem;
-            font-weight: 500;
-        }
-        .stat-card.info .value { color: var(--accent); }
-        .stat-card.success .value { color: var(--green); }
-        .stat-card.warning .value { color: var(--orange); }
-        .stat-card.danger .value { color: var(--red); }
+        /* COLUMN MAPPING */
+        .mapping-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1rem}
+        .mapping-section h3{font-size:.85rem;font-weight:600;margin-bottom:.5rem}
+        .mapping-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;font-size:.75rem}
+        .mapping-row{display:flex;align-items:center;gap:.3rem;padding:.2rem .4rem;background:#f8fafc;border-radius:6px}
+        .mapping-row .csv-col{font-weight:600;color:var(--accent);min-width:120px}
+        .mapping-row .arrow{color:var(--text2)}
+        .mapping-row .db-col{color:var(--text2)}
 
-        /* CARDS */
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1rem;
-            max-width: 1000px;
-            margin: 0 auto 2rem;
-            padding: 0 1.25rem;
-        }
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 1.75rem;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-            transition: all .2s;
-        }
-        .card:hover {
-            border-color: var(--accent);
-            box-shadow: 0 4px 20px rgba(37, 99, 235, .1);
-            transform: translateY(-2px);
-        }
-        .card-icon { font-size: 2rem; margin-bottom: .75rem; }
-        .card h2 { font-size: 1.15rem; margin-bottom: .4rem; }
-        .card p { color: var(--text-secondary); font-size: .875rem; line-height: 1.5; }
-        .card .badge-link {
-            display: inline-block;
-            margin-top: .75rem;
-            padding: .25rem .75rem;
-            border-radius: 20px;
-            font-size: .75rem;
-            font-weight: 600;
-        }
-        .badge-live { background: var(--green-bg); color: var(--green); }
-        .badge-track { background: var(--accent-light); color: var(--accent); }
-        .badge-download { background: var(--orange-bg); color: var(--orange); }
-
-        /* FOOTER */
-        footer {
-            text-align: center;
-            padding: 2rem 1.25rem;
-            color: var(--text-secondary);
-            font-size: .8rem;
-            margin-top: auto;
-        }
+        /* TOAST */
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--nav);color:#fff;padding:.65rem 1rem;border-radius:10px;font-size:.82rem;z-index:300;display:none;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:380px}
+        .toast.show{display:block;animation:slideUp .3s ease}
+        @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+        .toast.success{background:#065f46}.toast.error{background:#991b1b}
 
         /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .hamburger { display: block; }
-            .nav-links { display: none; }
-            .hero { padding: 2.5rem 1.25rem 1.5rem; }
-            .hero h1 { font-size: 1.5rem; }
-            .hero p { font-size: .9rem; }
-            .stats-row { grid-template-columns: repeat(2, 1fr); gap: .5rem; }
-            .stat-card .value { font-size: 1.5rem; }
-            .cards { grid-template-columns: 1fr; }
-        }
-
-        @supports (-webkit-touch-callout: none) {
-            .card, .nav-links a, .hamburger {
-                -webkit-tap-highlight-color: transparent;
-                touch-action: manipulation;
-            }
+        @media(max-width:768px){
+            .hamburger{display:block}.nav-links{display:none}
+            .status-row{grid-template-columns:repeat(2,1fr)}
+            .mapping-grid{grid-template-columns:1fr}
         }
     </style>
 </head>
 <body>
 
 <nav>
-    <div class="brand">NF6 <span>Capital</span> <span class="sub">Compliance Hub</span></div>
+    <div class="brand">NF6 <span>Capital</span></div>
     <div class="nav-links">
-        <a href="index.html" class="active">Home</a>
+        <a href="index.html" class="active">Upload Data</a>
         <a href="compliance-dashboard.html">Dashboard</a>
         <a href="compliance-calendar.html">Calendar</a>
     </div>
     <button class="hamburger" onclick="document.getElementById('mm').classList.toggle('open')">&#9776;</button>
 </nav>
 <div class="mobile-menu" id="mm">
-    <a href="index.html" class="active">Home</a>
+    <a href="index.html" class="active">Upload Data</a>
     <a href="compliance-dashboard.html">Dashboard</a>
     <a href="compliance-calendar.html">Calendar</a>
 </div>
 
-<section class="hero">
-    <h1>Compliance <em>Command Center</em></h1>
-    <p>Track regulatory deadlines, monitor compliance status, and manage filings &mdash; all in one place.</p>
-</section>
+<div class="container">
+    <div class="page-header">
+        <h1>Upload Compliance Data</h1>
+        <p>Upload your Google Sheets CSV export to refresh the Dashboard and Calendar with fresh data.</p>
+    </div>
 
-<section class="stats-row" id="statsRow">
-    <div class="stat-card info"><div class="value" id="sTot">--</div><div class="label">Total Items</div></div>
-    <div class="stat-card success"><div class="value" id="sOk">--</div><div class="label">Up to Date</div></div>
-    <div class="stat-card warning"><div class="value" id="sDue">--</div><div class="label">Due Soon</div></div>
-    <div class="stat-card danger"><div class="value" id="sOver">--</div><div class="label">Overdue</div></div>
-</section>
+    <!-- STATS -->
+    <div class="status-row">
+        <div class="status-card info"><div class="label">Total Items</div><div class="value" id="sTot">--</div></div>
+        <div class="status-card success"><div class="label">Up to Date</div><div class="value" id="sOk">--</div></div>
+        <div class="status-card warning"><div class="label">Due Soon</div><div class="value" id="sDue">--</div></div>
+        <div class="status-card danger"><div class="label">Overdue</div><div class="value" id="sOver">--</div></div>
+    </div>
 
-<section class="cards">
-    <a href="compliance-dashboard.html" class="card">
-        <div class="card-icon">&#128202;</div>
-        <h2>Compliance Dashboard</h2>
-        <p>View real-time compliance status, track filing progress, and monitor regulatory requirements across all entities.</p>
-        <span class="badge-link badge-live">Live Status</span>
-    </a>
-    <a href="compliance-calendar.html" class="card">
-        <div class="card-icon">&#128197;</div>
-        <h2>Compliance Calendar</h2>
-        <p>Interactive calendar showing upcoming deadlines, filing due dates, and regulatory milestones for the year.</p>
-        <span class="badge-link badge-track">Deadlines</span>
-    </a>
-    <a href="#" class="card" onclick="exportCSV(); return false;">
-        <div class="card-icon">&#128203;</div>
-        <h2>Export to Google Sheets</h2>
-        <p>Download the compliance data as a CSV file for import into Google Sheets, Excel, or your preferred analysis tool.</p>
-        <span class="badge-link badge-download">Download CSV</span>
-    </a>
-</section>
+    <!-- UPLOAD ZONE -->
+    <div class="upload-section">
+        <div class="upload-zone" id="dropZone" onclick="document.getElementById('csvInput').click()">
+            <div class="icon">\u{1F4C1}</div>
+            <h2>Drop your CSV file here</h2>
+            <p>or click to browse &mdash; exported from Google Sheets</p>
+            <div class="formats">Supports .csv and .tsv files</div>
+        </div>
+        <input type="file" id="csvInput" accept=".csv,.tsv,.txt">
+    </div>
 
-<footer>&copy; 2026 NF6 Capital &mdash; Compliance Hub. Internal use only.</footer>
+    <!-- COLUMN MAPPING -->
+    <div class="mapping-section">
+        <h3>\u{1F504} Column Mapping (auto-detected)</h3>
+        <p style="font-size:.75rem;color:var(--text2);margin-bottom:.5rem">Your Google Sheets columns are mapped to the dashboard fields. Headers are matched by name automatically.</p>
+        <div class="mapping-grid">
+            <div class="mapping-row"><span class="csv-col">Status</span><span class="arrow">\u2192</span><span class="db-col">status</span></div>
+            <div class="mapping-row"><span class="csv-col">Category</span><span class="arrow">\u2192</span><span class="db-col">category</span></div>
+            <div class="mapping-row"><span class="csv-col">Entity</span><span class="arrow">\u2192</span><span class="db-col">entity</span></div>
+            <div class="mapping-row"><span class="csv-col">Obligation</span><span class="arrow">\u2192</span><span class="db-col">obligation</span></div>
+            <div class="mapping-row"><span class="csv-col">Person</span><span class="arrow">\u2192</span><span class="db-col">person</span></div>
+            <div class="mapping-row"><span class="csv-col">Frequency</span><span class="arrow">\u2192</span><span class="db-col">frequency</span></div>
+            <div class="mapping-row"><span class="csv-col">Next Due</span><span class="arrow">\u2192</span><span class="db-col">nextDue</span></div>
+            <div class="mapping-row"><span class="csv-col">Cost / Amount</span><span class="arrow">\u2192</span><span class="db-col">cost</span></div>
+            <div class="mapping-row"><span class="csv-col">Location</span><span class="arrow">\u2192</span><span class="db-col">location</span></div>
+            <div class="mapping-row"><span class="csv-col">Type</span><span class="arrow">\u2192</span><span class="db-col">type</span></div>
+        </div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div id="previewSection" style="display:none">
+        <div class="section-title">\u{1F50D} Data Preview</div>
+        <div class="preview-card">
+            <div class="preview-header">
+                <h3>Parsed rows</h3>
+                <span class="preview-count" id="previewCount">0 rows</span>
+            </div>
+            <div class="preview-table-wrap">
+                <table><thead id="previewHead"></thead><tbody id="previewBody"></tbody></table>
+            </div>
+        </div>
+        <div class="action-bar">
+            <button class="btn primary" id="confirmBtn" onclick="confirmUpload()">\u2705 Apply to Dashboard &amp; Calendar</button>
+            <button class="btn" onclick="exportCurrentCSV()">\u{1F4E5} Export Current Data</button>
+            <button class="btn danger" onclick="clearPreview()">\u2716 Cancel</button>
+        </div>
+    </div>
+
+    <!-- ALWAYS-VISIBLE ACTIONS -->
+    <div class="action-bar" id="defaultActions">
+        <button class="btn" onclick="exportCurrentCSV()">\u{1F4E5} Export Current Data as CSV</button>
+        <button class="btn danger" onclick="resetToDefaults()">\u{1F504} Reset to Default Data</button>
+    </div>
+
+    <!-- UPLOAD LOG -->
+    <div class="section-title">\u{1F4CB} Upload History</div>
+    <div class="log-card" id="logCard">
+        <div class="empty-log" id="emptyLog">No uploads yet. Drop a CSV to get started.</div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-    // Load data from localStorage (shared with dashboard)
-    const STORAGE_KEY = 'nf6_compliance_data';
-    let data = [];
-    try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) data = JSON.parse(stored);
-    } catch(e) {}
+const STORAGE_KEY = 'nf6_compliance_data';
+const LOG_KEY = 'nf6_upload_log';
+let pendingData = null;
 
-    if (data.length) {
-        const TODAY = new Date(); TODAY.setHours(0,0,0,0);
-        function parseDate(str) {
-            if (!str) return null;
-            if (str.includes('-')) { const d = new Date(str+'T00:00:00'); return isNaN(d)?null:d; }
-            const p = str.split('/'); return p.length===3 ? new Date(+p[2],+p[0]-1,+p[1]) : null;
+// ── COLUMN NAME MAPPINGS ──
+const COL_MAP = {
+    'status':'status','category':'category','entity':'entity','obligation':'obligation',
+    'person':'person','responsible':'person','assigned':'person','resp':'person','resp.':'person',
+    'frequency':'frequency','freq':'frequency','freq.':'frequency',
+    'next due':'nextDue','nextdue':'nextDue','next_due':'nextDue','due date':'nextDue','due':'nextDue',
+    'cost':'cost','amount':'cost','cost / amount':'cost','cost/amount':'cost',
+    'location':'location','loc':'location','loc.':'location',
+    'type':'type',
+    'description':'description','desc':'description','notes':'description',
+    'link':'link','url':'link',
+    'date done':'dateDone','datedone':'dateDone','date_done':'dateDone','completed':'dateDone',
+    'date to do':'dateToDo','datetodo':'dateToDo','date_to_do':'dateToDo',
+    'backup':'backupPerson','backup person':'backupPerson','backupperson':'backupPerson',
+    'escalation days':'escalationDays','escalationdays':'escalationDays','escalation':'escalationDays'
+};
+
+// ── INIT ──
+loadStats();
+loadLog();
+
+// ── DRAG & DROP ──
+const dropZone = document.getElementById('dropZone');
+const csvInput = document.getElementById('csvInput');
+
+['dragenter','dragover'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.add('drag-over'); }));
+['dragleave','drop'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.remove('drag-over'); }));
+dropZone.addEventListener('drop', ev => { if (ev.dataTransfer.files.length) handleFile(ev.dataTransfer.files[0]); });
+csvInput.addEventListener('change', ev => { if (ev.target.files.length) handleFile(ev.target.files[0]); });
+
+// ── FILE HANDLING ──
+function handleFile(file) {
+    if (!file.name.match(/\.(csv|tsv|txt)$/i)) { showToast('Please upload a .csv or .tsv file','error'); return; }
+    showToast('Parsing ' + file.name + '...');
+    Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+            if (results.errors.length > 3) { showToast('Too many parsing errors. Check your CSV format.','error'); return; }
+            const mapped = mapColumns(results.data);
+            if (!mapped.length) { showToast('No valid rows found. Check column headers.','error'); return; }
+            pendingData = mapped;
+            showPreview(mapped, file.name);
+            showToast('Parsed ' + mapped.length + ' rows from ' + file.name, 'success');
+        },
+        error: function() { showToast('Failed to parse file','error'); }
+    });
+}
+
+function mapColumns(rows) {
+    if (!rows.length) return [];
+    const headers = Object.keys(rows[0]);
+    const mapping = {};
+    headers.forEach(h => {
+        const key = h.trim().toLowerCase();
+        if (COL_MAP[key]) mapping[h] = COL_MAP[key];
+        else {
+            // fuzzy match
+            for (const [pattern, field] of Object.entries(COL_MAP)) {
+                if (key.includes(pattern)) { mapping[h] = field; break; }
+            }
         }
-        function daysUntil(s) { const d = parseDate(s); return d ? Math.ceil((d-TODAY)/(864e5)) : Infinity; }
+    });
+    return rows.map(row => {
+        const item = {status:'',type:'',category:'',location:'',entity:'',obligation:'',person:'',frequency:'',dateDone:'',dateToDo:'',nextDue:'',description:'',cost:'',link:'',backupPerson:'',escalationDays:3,attachments:[],auditLog:[]};
+        for (const [csvCol, dbField] of Object.entries(mapping)) {
+            if (row[csvCol] !== undefined && row[csvCol] !== null) {
+                if (dbField === 'escalationDays') item[dbField] = parseInt(row[csvCol]) || 3;
+                else item[dbField] = String(row[csvCol]).trim();
+            }
+        }
+        // Also grab unmapped columns into description if empty
+        if (!item.obligation && !item.entity) return null;
+        return item;
+    }).filter(Boolean);
+}
 
-        const enriched = data.map(d => ({ ...d, _days: daysUntil(d.nextDue) }));
-        document.getElementById('sTot').textContent = data.length;
-        document.getElementById('sOk').textContent = enriched.filter(i => i.status.includes('Up to date') && i._days > 30).length;
-        document.getElementById('sDue').textContent = enriched.filter(i => i._days >= 0 && i._days <= 30).length;
-        document.getElementById('sOver').textContent = enriched.filter(i => i._days < 0).length;
-    }
+// ── PREVIEW ──
+function showPreview(data, fileName) {
+    document.getElementById('previewSection').style.display = 'block';
+    document.getElementById('defaultActions').style.display = 'none';
+    document.getElementById('previewCount').textContent = data.length + ' rows';
+    const cols = ['status','entity','obligation','category','person','frequency','nextDue','cost'];
+    const thead = document.getElementById('previewHead');
+    const tbody = document.getElementById('previewBody');
+    thead.innerHTML = '<tr>' + cols.map(c => '<th>' + c + '</th>').join('') + '</tr>';
+    tbody.innerHTML = data.slice(0, 50).map(row => '<tr>' + cols.map(c => '<td>' + (row[c]||'') + '</td>').join('') + '</tr>').join('');
+}
 
-    function exportCSV() {
-        if (!data.length) { alert('No data to export. Visit the Dashboard first to load data.'); return; }
-        const fields = ['status','type','category','location','entity','obligation','person','frequency','dateDone','dateToDo','nextDue','description','cost','link'];
-        const header = fields.join(',');
-        const rows = data.map(r => fields.map(f => '"' + ((r[f]||'').replace(/"/g,'""')) + '"').join(','));
-        const csv = header + '\n' + rows.join('\n');
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'nf6_compliance_tracker_' + new Date().toISOString().slice(0,10) + '.csv';
-        a.click();
+function clearPreview() {
+    pendingData = null;
+    document.getElementById('previewSection').style.display = 'none';
+    document.getElementById('defaultActions').style.display = 'flex';
+}
+
+// ── CONFIRM UPLOAD ──
+function confirmUpload() {
+    if (!pendingData || !pendingData.length) return;
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(pendingData));
+        addLog('success', 'Uploaded ' + pendingData.length + ' items', 'Data applied to Dashboard & Calendar');
+        loadStats();
+        showToast('Data saved! Dashboard & Calendar updated with ' + pendingData.length + ' items.', 'success');
+        clearPreview();
+    } catch(e) {
+        showToast('Failed to save: ' + e.message, 'error');
     }
+}
+
+// ── EXPORT ──
+function exportCurrentCSV() {
+    let data = [];
+    try { const s = localStorage.getItem(STORAGE_KEY); if (s) data = JSON.parse(s); } catch(e){}
+    if (!data.length) { showToast('No data to export. Upload a CSV first.','error'); return; }
+    const fields = ['status','type','category','location','entity','obligation','person','frequency','dateDone','dateToDo','nextDue','description','cost','link','backupPerson','escalationDays'];
+    const header = fields.join(',');
+    const rows = data.map(r => fields.map(f => '"' + String(r[f]||'').replace(/"/g,'""') + '"').join(','));
+    const csv = header + '\n' + rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'nf6_compliance_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+    showToast('CSV exported successfully','success');
+}
+
+// ── RESET ──
+function resetToDefaults() {
+    if (!confirm('Reset all data to the built-in defaults? This will overwrite any uploaded data.')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    addLog('info', 'Reset to default data', 'All uploaded data cleared');
+    loadStats();
+    showToast('Data reset to defaults. Dashboard will use built-in data.','success');
+}
+
+// ── STATS ──
+function loadStats() {
+    let data = [];
+    try { const s = localStorage.getItem(STORAGE_KEY); if (s) data = JSON.parse(s); } catch(e){}
+    if (!data.length) { document.getElementById('sTot').textContent='--'; document.getElementById('sOk').textContent='--'; document.getElementById('sDue').textContent='--'; document.getElementById('sOver').textContent='--'; return; }
+    const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+    function parseDate(str) { if(!str)return null; if(str.includes('-')){const d=new Date(str+'T00:00:00');return isNaN(d)?null:d;} const p=str.split('/'); return p.length===3?new Date(+p[2],+p[0]-1,+p[1]):null; }
+    function daysUntil(s) { const d=parseDate(s); return d?Math.ceil((d-TODAY)/864e5):Infinity; }
+    const enriched = data.map(d => ({...d, _days: daysUntil(d.nextDue)}));
+    document.getElementById('sTot').textContent = data.length;
+    document.getElementById('sOk').textContent = enriched.filter(i => (i.status||'').includes('Up to date') && i._days > 30).length;
+    document.getElementById('sDue').textContent = enriched.filter(i => i._days >= 0 && i._days <= 30).length;
+    document.getElementById('sOver').textContent = enriched.filter(i => i._days < 0).length;
+}
+
+// ── LOG ──
+function loadLog() {
+    let logs = [];
+    try { const s = localStorage.getItem(LOG_KEY); if (s) logs = JSON.parse(s); } catch(e){}
+    renderLog(logs);
+}
+function addLog(type, title, detail) {
+    let logs = [];
+    try { const s = localStorage.getItem(LOG_KEY); if (s) logs = JSON.parse(s); } catch(e){}
+    logs.unshift({ type, title, detail, time: new Date().toISOString() });
+    if (logs.length > 20) logs = logs.slice(0, 20);
+    localStorage.setItem(LOG_KEY, JSON.stringify(logs));
+    renderLog(logs);
+}
+function renderLog(logs) {
+    const card = document.getElementById('logCard');
+    const empty = document.getElementById('emptyLog');
+    if (!logs.length) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    const existing = card.querySelectorAll('.log-entry');
+    existing.forEach(e => e.remove());
+    logs.slice(0, 10).forEach(l => {
+        const d = new Date(l.time);
+        const timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        card.insertAdjacentHTML('beforeend',
+            '<div class="log-entry"><div class="log-dot '+l.type+'"></div><div class="log-body"><strong>'+l.title+'</strong><div class="meta">'+l.detail+' \u2022 '+timeStr+'</div></div></div>'
+        );
+    });
+}
+
+// ── TOAST ──
+function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (type ? ' '+type : '');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => t.className = 'toast', 3500);
+}
 </script>
 </body>
 </html>
