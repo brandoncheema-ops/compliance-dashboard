@@ -1,129 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>NF6 Capital &mdash; Data Upload</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        :root{--bg:#f5f7fa;--card:#fff;--border:#e2e8f0;--text:#1a202c;--text2:#64748b;--accent:#2563eb;--accent-lt:#eff6ff;--green:#16a34a;--green-bg:#f0fdf4;--yellow:#ca8a04;--yellow-bg:#fefce8;--red:#dc2626;--red-bg:#fef2f2;--orange:#ea580c;--orange-bg:#fff7ed;--nav:#0f172a}
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom,0)}
-        nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;padding-top:env(safe-area-inset-top,0)}
-        .brand{font-weight:700;font-size:1.1rem;letter-spacing:-.02em;white-space:nowrap}.brand span{color:#60a5fa}
-        .nav-links{display:flex;gap:.75rem}.nav-links a{color:#94a3b8;text-decoration:none;font-size:.82rem;font-weight:500;padding:.35rem .5rem;border-radius:6px;transition:color .2s}
-        .nav-links a:hover,.nav-links a.active{color:#fff}
-        .hamburger{display:none;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;padding:.25rem}
-        .mobile-menu{display:none;position:fixed;top:56px;left:0;right:0;background:var(--nav);padding:.75rem;z-index:99;flex-direction:column;gap:.35rem}
-        .mobile-menu.open{display:flex}
-        .mobile-menu a{color:#94a3b8;text-decoration:none;padding:.6rem .75rem;border-radius:8px;font-size:.9rem}
-        .mobile-menu a:hover,.mobile-menu a.active{color:#fff;background:#1e293b}
-        .container{max-width:960px;margin:0 auto;padding:0 1.25rem}
-        .page-header{padding:1.5rem 0 .5rem}.page-header h1{font-size:1.4rem;font-weight:700;letter-spacing:-.03em}
-        .page-header p{color:var(--text2);margin-top:.15rem;font-size:.85rem}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>NF6 Capital &mdash; HomeBase</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-        /* UPLOAD ZONE */
-        .upload-section{margin:1.25rem 0}
-        .upload-zone{border:2px dashed var(--border);border-radius:14px;padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--card)}
-        .upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:var(--accent-lt)}
-        .upload-zone .icon{font-size:2.5rem;margin-bottom:.5rem}
-        .upload-zone h2{font-size:1.05rem;font-weight:600;margin-bottom:.25rem}
-        .upload-zone p{color:var(--text2);font-size:.82rem}
-        .upload-zone .formats{color:var(--text2);font-size:.72rem;margin-top:.5rem}
-        input[type=file]{display:none}
+/* ── THEME VARIABLES ── */
+:root, [data-theme="light"] {
+  --bg:#f5f7fa;--card:#fff;--border:#e2e8f0;--text:#1a202c;--text2:#64748b;
+  --accent:#2563eb;--accent-lt:#eff6ff;--green:#16a34a;--green-bg:#f0fdf4;
+  --yellow:#ca8a04;--yellow-bg:#fefce8;--red:#dc2626;--red-bg:#fef2f2;
+  --orange:#ea580c;--orange-bg:#fff7ed;--purple:#7c3aed;--purple-bg:#f5f3ff;
+  --nav:#0f172a;--nav-hover:#1e293b;--card-shadow:0 1px 3px rgba(0,0,0,.06);
+  --hero-gradient:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);
+}
+[data-theme="dark"] {
+  --bg:#0f172a;--card:#1e293b;--border:#334155;--text:#e2e8f0;--text2:#94a3b8;
+  --accent:#60a5fa;--accent-lt:#1e3a5f;--green:#4ade80;--green-bg:#064e3b;
+  --yellow:#fbbf24;--yellow-bg:#713f12;--red:#f87171;--red-bg:#7f1d1d;
+  --orange:#fb923c;--orange-bg:#7c2d12;--purple:#a78bfa;--purple-bg:#4c1d95;
+  --nav:#020617;--nav-hover:#0f172a;--card-shadow:0 1px 3px rgba(0,0,0,.3);
+  --hero-gradient:linear-gradient(135deg,#020617 0%,#0f172a 50%,#020617 100%);
+}
 
-        /* STATUS CARDS */
-        .status-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin:1rem 0}
-        .status-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.75rem .875rem}
-        .status-card .label{font-size:.65rem;text-transform:uppercase;letter-spacing:.04em;color:var(--text2);font-weight:600}
-        .status-card .value{font-size:1.3rem;font-weight:700;margin-top:.1rem}
-        .status-card.info .value{color:var(--accent)}.status-card.success .value{color:var(--green)}.status-card.warning .value{color:var(--orange)}.status-card.danger .value{color:var(--red)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
 
-        /* UPLOAD LOG */
-        .section-title{font-size:.95rem;font-weight:700;margin:1.5rem 0 .5rem;display:flex;align-items:center;gap:.4rem}
-        .log-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem}
-        .log-entry{padding:.6rem .875rem;border-bottom:1px solid #f1f5f9;display:flex;gap:.6rem;align-items:center;font-size:.78rem}
-        .log-entry:last-child{border-bottom:none}
-        .log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-        .log-dot.success{background:var(--green)}.log-dot.error{background:var(--red)}.log-dot.info{background:var(--accent)}
-        .log-body{flex:1}.log-body strong{font-weight:600}.log-body .meta{color:var(--text2);font-size:.7rem}
-        .empty-log{padding:1.25rem;text-align:center;color:var(--text2);font-size:.82rem}
+/* ── NAV ── */
+nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;padding-top:env(safe-area-inset-top,0)}
+.brand{font-weight:700;font-size:1.1rem;letter-spacing:-.02em;white-space:nowrap;text-decoration:none;color:#fff}.brand span{color:#60a5fa}
+.nav-links{display:flex;gap:.5rem}.nav-links a{color:#94a3b8;text-decoration:none;font-size:.82rem;font-weight:500;padding:.35rem .5rem;border-radius:6px;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:#fff}
+.nav-right{display:flex;align-items:center;gap:.4rem}
 
-        /* PREVIEW TABLE */
-        .preview-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem}
-        .preview-header{padding:.75rem .875rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-        .preview-header h3{font-size:.85rem;font-weight:600}
-        .preview-count{font-size:.72rem;color:var(--text2);background:#f1f5f9;padding:2px 8px;border-radius:6px}
-        .preview-table-wrap{overflow-x:auto;max-height:320px;overflow-y:auto}
-        table{width:100%;border-collapse:collapse;font-size:.72rem}
-        thead th{background:#f8fafc;padding:.5rem .6rem;text-align:left;font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.03em;color:var(--text2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1}
-        tbody tr{border-bottom:1px solid #f1f5f9}tbody tr:hover{background:#f8fafc}
-        tbody td{padding:.45rem .6rem;vertical-align:top;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* TOGGLES */
+.toggle-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#94a3b8;padding:.3rem .55rem;border-radius:6px;font-size:.7rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:.25rem}
+.toggle-btn:hover{color:#fff;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.2)}
+.toggle-btn .icon{font-size:.8rem}
 
-        /* BUTTONS */
-        .action-bar{display:flex;gap:.5rem;margin:1rem 0;flex-wrap:wrap}
-        .btn{padding:.5rem 1rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid var(--border);background:var(--card);color:var(--text);transition:all .2s;white-space:nowrap;display:inline-flex;align-items:center;gap:.35rem}
-        .btn:hover{border-color:var(--accent);color:var(--accent)}
-        .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn.primary:hover{background:#1d4ed8}
-        .btn.danger{background:var(--red);color:#fff;border-color:var(--red)}.btn.danger:hover{background:#b91c1c}
-        .btn:disabled{opacity:.5;cursor:not-allowed}
+/* CLOCKS */
+.nav-clocks{display:flex;gap:.35rem;align-items:center}
+.clock-circle{width:48px;height:48px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#1e293b,#0f172a);border:2px solid #334155;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(96,165,250,.12),inset 0 1px 2px rgba(0,0,0,.3);position:relative;overflow:hidden}
+.clock-circle::before{content:'';position:absolute;top:-1px;left:-1px;right:-1px;bottom:-1px;border-radius:50%;background:conic-gradient(from 0deg,#60a5fa 0%,#3b82f6 25%,#1e40af 50%,#3b82f6 75%,#60a5fa 100%);opacity:.15;z-index:0}
+.clock-circle .clock-label{font-size:.38rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;z-index:1;line-height:1}
+.clock-circle .clock-time{font-family:'Courier New',monospace;font-size:.55rem;font-weight:700;color:#60a5fa;z-index:1;line-height:1.2;letter-spacing:.02em}
 
-        /* COLUMN MAPPING */
-        .mapping-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1rem}
-        .mapping-section h3{font-size:.85rem;font-weight:600;margin-bottom:.5rem}
-        .mapping-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;font-size:.75rem}
-        .mapping-row{display:flex;align-items:center;gap:.3rem;padding:.2rem .4rem;background:#f8fafc;border-radius:6px}
-        .mapping-row .csv-col{font-weight:600;color:var(--accent);min-width:120px}
-        .mapping-row .arrow{color:var(--text2)}
-        .mapping-row .db-col{color:var(--text2)}
+.today-badge{background:#1e3a5f;color:#93c5fd;font-size:.68rem;padding:3px 8px;border-radius:6px;font-weight:500;white-space:nowrap}
+.sign-out-btn{background:none;border:1px solid #334155;color:#94a3b8;padding:.3rem .55rem;border-radius:6px;font-size:.7rem;cursor:pointer;font-family:inherit;transition:all .2s}
+.sign-out-btn:hover{color:#fff;border-color:#94a3b8}
 
-        /* CIRCULAR CLOCKS */
-        .nav-clocks{display:flex;gap:.5rem;align-items:center}
-        .clock-circle{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#1e293b,#0f172a);border:2px solid #334155;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(96,165,250,.12),inset 0 1px 2px rgba(0,0,0,.3);position:relative;overflow:hidden}
-        .clock-circle::before{content:'';position:absolute;top:-1px;left:-1px;right:-1px;bottom:-1px;border-radius:50%;background:conic-gradient(from 0deg,#60a5fa 0%,#3b82f6 25%,#1e40af 50%,#3b82f6 75%,#60a5fa 100%);opacity:.15;z-index:0}
-        .clock-circle .clock-label{font-size:.42rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;z-index:1;line-height:1}
-        .clock-circle .clock-time{font-family:'Courier New',monospace;font-size:.6rem;font-weight:700;color:#60a5fa;z-index:1;line-height:1.2;letter-spacing:.02em}
-        /* LAST UPDATED */
-        .last-updated-bar{position:fixed;bottom:0;right:0;background:rgba(15,23,42,.85);color:#94a3b8;font-size:.65rem;padding:4px 12px;border-radius:8px 0 0 0;z-index:90;backdrop-filter:blur(8px)}
-        .last-updated-bar strong{color:#60a5fa;font-weight:600}
+.hamburger{display:none;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;padding:.25rem}
+.mobile-menu{display:none;position:fixed;top:56px;left:0;right:0;background:var(--nav);padding:.75rem;z-index:99;flex-direction:column;gap:.35rem}
+.mobile-menu.open{display:flex}
+.mobile-menu a{color:#94a3b8;text-decoration:none;padding:.6rem .75rem;border-radius:8px;font-size:.9rem}
+.mobile-menu a:hover,.mobile-menu a.active{color:#fff;background:#1e293b}
+.mobile-menu .mobile-toggles{display:flex;gap:.5rem;padding:.6rem .75rem}
 
-        /* TOAST */
-        .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--nav);color:#fff;padding:.65rem 1rem;border-radius:10px;font-size:.82rem;z-index:300;display:none;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:380px}
-        .toast.show{display:block;animation:slideUp .3s ease}
-        @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-        .toast.success{background:#065f46}.toast.error{background:#991b1b}
+/* ── HERO ── */
+.hero{background:var(--hero-gradient);padding:3rem 2rem 2.5rem;text-align:center;color:#fff;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(96,165,250,.08) 0%,transparent 70%)}
+.hero h1{font-size:2rem;font-weight:700;letter-spacing:-.03em;margin-bottom:.35rem;position:relative;z-index:1}
+.hero h1 span{color:#60a5fa}
+.hero p{color:#94a3b8;font-size:.95rem;position:relative;z-index:1}
 
-        /* RESPONSIVE */
-        @media(max-width:768px){
-            .hamburger{display:block}.nav-links{display:none}
-            .status-row{grid-template-columns:repeat(2,1fr)}
-            .mapping-grid{grid-template-columns:1fr}
-        }
+/* ── MODULE CARDS ── */
+.container{max-width:1100px;margin:0 auto;padding:2rem 1.25rem 3rem}
+.section-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);font-weight:700;margin-bottom:.75rem}
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+.module-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;transition:all .25s;cursor:pointer;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:.75rem;position:relative;overflow:hidden;box-shadow:var(--card-shadow)}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.1);border-color:var(--accent)}
+.module-card.coming-soon{opacity:.6;cursor:default;pointer-events:none}
+.module-card.coming-soon:hover{transform:none;box-shadow:var(--card-shadow);border-color:var(--border)}
+.module-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+.module-icon.blue{background:var(--accent-lt);color:var(--accent)}
+.module-icon.green{background:var(--green-bg);color:var(--green)}
+.module-icon.purple{background:var(--purple-bg);color:var(--purple)}
+.module-icon.orange{background:var(--orange-bg);color:var(--orange)}
+.module-title{font-size:1.05rem;font-weight:700;letter-spacing:-.02em}
+.module-desc{font-size:.82rem;color:var(--text2);line-height:1.55}
+.coming-badge{position:absolute;top:1rem;right:1rem;background:var(--orange-bg);color:var(--orange);font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em}
+.module-stats{display:flex;gap:1rem;margin-top:.25rem}
+.module-stat{font-size:.72rem;color:var(--text2)}
+.module-stat strong{color:var(--text);font-weight:600}
 
-        /* AUTH OVERLAY */
-        .auth-overlay { position:fixed; inset:0; background:#0f172a; display:flex; align-items:center; justify-content:center; z-index:9999; }
-        .auth-overlay.hidden { display:none; }
-        .auth-box { background:rgba(30,41,59,.85); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:3rem 2.5rem; text-align:center; max-width:400px; width:90%; }
-        .auth-title { font-size:1.75rem; color:#fff; font-weight:700; }
-        .auth-title span { color:#60a5fa; }
-        .auth-sub { color:#94a3b8; font-size:.9rem; margin:.5rem 0 1.5rem; }
-        .google-btn { display:inline-flex; align-items:center; gap:.6rem; background:#fff; border:none; border-radius:8px; padding:.7rem 1.5rem; font-size:.95rem; font-weight:600; cursor:pointer; font-family:inherit; }
-        .google-btn:hover { background:#f1f5f9; }
-        .auth-error { color:#ef4444; font-size:.85rem; margin-top:1rem; display:none; }
-        .auth-domain { color:#64748b; font-size:.8rem; margin-top:1rem; }
-    </style>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+/* ── QUICK LINKS ── */
+.quick-links{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.25rem}
+.quick-link{display:inline-flex;align-items:center;gap:.3rem;padding:.3rem .65rem;border:1px solid var(--border);border-radius:6px;font-size:.72rem;font-weight:500;color:var(--text2);text-decoration:none;transition:all .2s;background:var(--card)}
+.quick-link:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── LAST UPDATED ── */
+.last-updated-bar{position:fixed;bottom:0;right:0;background:rgba(15,23,42,.85);color:#94a3b8;font-size:.65rem;padding:4px 12px;border-radius:8px 0 0 0;z-index:90;backdrop-filter:blur(8px)}
+.last-updated-bar strong{color:#60a5fa;font-weight:600}
+
+/* ── AUTH ── */
+.auth-overlay{position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:9999}
+.auth-overlay.hidden{display:none}
+.auth-box{background:rgba(30,41,59,.85);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:3rem 2.5rem;text-align:center;max-width:400px;width:90%}
+.auth-title{font-size:1.75rem;color:#fff;font-weight:700}.auth-title span{color:#60a5fa}
+.auth-sub{color:#94a3b8;font-size:.9rem;margin:.5rem 0 1.5rem}
+.google-btn{display:inline-flex;align-items:center;gap:.6rem;background:#fff;border:none;border-radius:8px;padding:.7rem 1.5rem;font-size:.95rem;font-weight:600;cursor:pointer;font-family:inherit}
+.google-btn:hover{background:#f1f5f9}
+.auth-error{color:#ef4444;font-size:.85rem;margin-top:1rem;display:none}
+.auth-domain{color:#64748b;font-size:.8rem;margin-top:1rem}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--nav);color:#fff;padding:.65rem 1rem;border-radius:10px;font-size:.82rem;z-index:300;display:none;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:380px}
+.toast.show{display:block;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .hamburger{display:block}.nav-links{display:none}.nav-clocks{display:none}.today-badge{display:none}
+  .hero h1{font-size:1.5rem}.hero p{font-size:.85rem}.hero{padding:2rem 1rem 1.5rem}
+  .modules-grid{grid-template-columns:1fr}
+  .toggle-btn .label-text{display:none}
+}
+@media(min-width:769px){
+  .mobile-menu .mobile-toggles{display:none}
+}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
+<!-- AUTH -->
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-box">
     <h1 class="auth-title">NF6 <span>Capital</span></h1>
-    <p class="auth-sub">Compliance Dashboard &mdash; Internal Use Only</p>
+    <p class="auth-sub">HomeBase &mdash; Internal Use Only</p>
     <button class="google-btn" onclick="signInWithGoogle()">
       <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Sign in with Google
@@ -133,359 +142,258 @@
   </div>
 </div>
 
+<!-- NAV -->
 <nav>
-    <div class="brand">NF6 <span>Capital</span></div>
-    <div class="nav-links">
-        <a href="index.html" class="active">Upload Data</a>
-        <a href="compliance-dashboard.html">Dashboard</a>
-        <a href="compliance-calendar.html">Calendar</a>
-        <a href="audit-trail.html">Audit Trail</a>
+  <a href="index.html" class="brand">NF6 <span>Capital</span></a>
+  <div class="nav-links">
+    <a href="index.html" class="active" data-i18n="nav_homebase">HomeBase</a>
+    <a href="compliance-dashboard.html" data-i18n="nav_dashboard">Dashboard</a>
+    <a href="compliance-calendar.html" data-i18n="nav_calendar">Calendar</a>
+    <a href="audit-trail.html" data-i18n="nav_audit">Audit Trail</a>
+    <a href="upload.html" data-i18n="nav_upload">Upload</a>
+  </div>
+  <div class="nav-right">
+    <button class="toggle-btn" onclick="toggleLang()" id="langToggle" title="Switch language"><span class="icon">&#127760;</span> <span class="label-text" id="langLabel">ES</span></button>
+    <button class="toggle-btn" onclick="toggleTheme()" id="themeToggle" title="Toggle dark/light mode"><span class="icon" id="themeIcon">&#9789;</span> <span class="label-text" id="themeLabel">Dark</span></button>
+    <div class="nav-clocks">
+      <div class="clock-circle"><span class="clock-label">COL</span><span class="clock-time" id="clockColombia">--:--</span></div>
+      <div class="clock-circle"><span class="clock-label">PR</span><span class="clock-time" id="clockPR">--:--</span></div>
     </div>
-    <div style="display:flex;align-items:center;gap:.5rem">
-        <div class="nav-clocks">
-            <div class="clock-circle"><span class="clock-label">COL</span><span class="clock-time" id="clockColombia">--:--</span></div>
-            <div class="clock-circle"><span class="clock-label">PR</span><span class="clock-time" id="clockPR">--:--</span></div>
-        </div>
-    </div>
-    <button class="hamburger" onclick="document.getElementById('mm').classList.toggle('open')">&#9776;</button>
+    <div class="today-badge" id="todayBadge"></div>
+    <button class="sign-out-btn" id="signOutBtn" onclick="signOutUser()" style="display:none" data-i18n="nav_signout">Sign Out</button>
+  </div>
+  <button class="hamburger" onclick="document.getElementById('mm').classList.toggle('open')">&#9776;</button>
 </nav>
 <div class="mobile-menu" id="mm">
-    <a href="index.html" class="active">Upload Data</a>
-    <a href="compliance-dashboard.html">Dashboard</a>
-    <a href="compliance-calendar.html">Calendar</a>
-    <a href="audit-trail.html">Audit Trail</a>
+  <a href="index.html" class="active" data-i18n="nav_homebase">HomeBase</a>
+  <a href="compliance-dashboard.html" data-i18n="nav_dashboard">Dashboard</a>
+  <a href="compliance-calendar.html" data-i18n="nav_calendar">Calendar</a>
+  <a href="audit-trail.html" data-i18n="nav_audit">Audit Trail</a>
+  <a href="upload.html" data-i18n="nav_upload">Upload</a>
+  <div class="mobile-toggles">
+    <button class="toggle-btn" onclick="toggleLang()"><span class="icon">&#127760;</span> <span id="langLabelM">ES</span></button>
+    <button class="toggle-btn" onclick="toggleTheme()"><span class="icon" id="themeIconM">&#9789;</span> <span id="themeLabelM">Dark</span></button>
+  </div>
+  <a href="#" onclick="signOutUser();return false" data-i18n="nav_signout">Sign Out</a>
 </div>
 
+<!-- HERO -->
+<div class="hero">
+  <h1>NF6 <span>Capital</span></h1>
+  <p data-i18n="hero_subtitle">Internal Operations Hub &mdash; All your tools in one place.</p>
+</div>
+
+<!-- MODULES -->
 <div class="container">
-    <div class="page-header">
-        <h1>Upload Compliance Data</h1>
-        <p>Upload your Google Sheets CSV export to refresh the Dashboard and Calendar with fresh data.</p>
+  <div class="section-label" data-i18n="section_modules">Modules</div>
+  <div class="modules-grid">
+
+    <!-- COMPLIANCE CALENDAR -->
+    <a href="compliance-dashboard.html" class="module-card" id="complianceCard">
+      <div class="module-icon blue">&#128203;</div>
+      <div class="module-title" data-i18n="mod_compliance_title">Compliance Calendar</div>
+      <div class="module-desc" data-i18n="mod_compliance_desc">Track obligations, due dates, reminders, and audit trails across all entities and locations.</div>
+      <div class="module-stats" id="complianceStats">
+        <div class="module-stat"><strong id="modTotal">--</strong> items</div>
+        <div class="module-stat"><strong id="modOverdue" style="color:var(--red)">--</strong> overdue</div>
+        <div class="module-stat"><strong id="modDueSoon" style="color:var(--orange)">--</strong> due soon</div>
+      </div>
+      <div class="quick-links">
+        <span class="quick-link" onclick="event.preventDefault();window.location='compliance-dashboard.html'" data-i18n="nav_dashboard">Dashboard</span>
+        <span class="quick-link" onclick="event.preventDefault();window.location='compliance-calendar.html'" data-i18n="nav_calendar">Calendar</span>
+        <span class="quick-link" onclick="event.preventDefault();window.location='audit-trail.html'" data-i18n="nav_audit">Audit Trail</span>
+        <span class="quick-link" onclick="event.preventDefault();window.location='upload.html'" data-i18n="nav_upload">Upload</span>
+      </div>
+    </a>
+
+    <!-- FINANCE -->
+    <div class="module-card coming-soon">
+      <div class="coming-badge" data-i18n="coming_soon">Coming Soon</div>
+      <div class="module-icon green">&#128176;</div>
+      <div class="module-title" data-i18n="mod_finance_title">Finance</div>
+      <div class="module-desc" data-i18n="mod_finance_desc">Financial reporting, budgets, cost forecasting, and expense tracking for all entities.</div>
     </div>
 
-    <!-- STATS -->
-    <div class="status-row">
-        <div class="status-card info"><div class="label">Total Items</div><div class="value" id="sTot">--</div></div>
-        <div class="status-card success"><div class="label">Up to Date</div><div class="value" id="sOk">--</div></div>
-        <div class="status-card warning"><div class="label">Due Soon</div><div class="value" id="sDue">--</div></div>
-        <div class="status-card danger"><div class="label">Overdue</div><div class="value" id="sOver">--</div></div>
+    <!-- DORADO RENTAL PROPERTY -->
+    <div class="module-card coming-soon">
+      <div class="coming-badge" data-i18n="coming_soon">Coming Soon</div>
+      <div class="module-icon purple">&#127968;</div>
+      <div class="module-title" data-i18n="mod_dorado_title">Dorado Rental Property</div>
+      <div class="module-desc" data-i18n="mod_dorado_desc">Manage rental units, tenants, leases, maintenance requests, and property performance.</div>
     </div>
 
-    <!-- UPLOAD ZONE -->
-    <div class="upload-section">
-        <div class="upload-zone" id="dropZone" onclick="document.getElementById('csvInput').click()">
-            <div class="icon">&#x1F4C1;</div>
-            <h2>Drop your CSV file here</h2>
-            <p>or click to browse &mdash; exported from Google Sheets</p>
-            <div class="formats">Supports .csv and .tsv files</div>
-        </div>
-        <input type="file" id="csvInput" accept=".csv,.tsv,.txt">
+    <!-- DOCUMENT FINDER -->
+    <div class="module-card coming-soon">
+      <div class="coming-badge" data-i18n="coming_soon">Coming Soon</div>
+      <div class="module-icon orange">&#128269;</div>
+      <div class="module-title" data-i18n="mod_docfinder_title">Document Finder</div>
+      <div class="module-desc" data-i18n="mod_docfinder_desc">Search, organize, and retrieve compliance documents, contracts, and filings across all entities.</div>
     </div>
 
-    <!-- COLUMN MAPPING -->
-    <div class="mapping-section">
-        <h3>&#x1F504; Column Mapping (auto-detected)</h3>
-        <p style="font-size:.75rem;color:var(--text2);margin-bottom:.5rem">Your Google Sheets columns are mapped to the dashboard fields. Headers are matched by name automatically.</p>
-        <div class="mapping-grid">
-            <div class="mapping-row"><span class="csv-col">Status</span><span class="arrow">&#x2192;</span><span class="db-col">status</span></div>
-            <div class="mapping-row"><span class="csv-col">Category</span><span class="arrow">&#x2192;</span><span class="db-col">category</span></div>
-            <div class="mapping-row"><span class="csv-col">Entity</span><span class="arrow">&#x2192;</span><span class="db-col">entity</span></div>
-            <div class="mapping-row"><span class="csv-col">Obligation</span><span class="arrow">&#x2192;</span><span class="db-col">obligation</span></div>
-            <div class="mapping-row"><span class="csv-col">Person</span><span class="arrow">&#x2192;</span><span class="db-col">person</span></div>
-            <div class="mapping-row"><span class="csv-col">Frequency</span><span class="arrow">&#x2192;</span><span class="db-col">frequency</span></div>
-            <div class="mapping-row"><span class="csv-col">Next Due</span><span class="arrow">&#x2192;</span><span class="db-col">nextDue</span></div>
-            <div class="mapping-row"><span class="csv-col">Cost / Amount</span><span class="arrow">&#x2192;</span><span class="db-col">cost</span></div>
-            <div class="mapping-row"><span class="csv-col">Location</span><span class="arrow">&#x2192;</span><span class="db-col">location</span></div>
-            <div class="mapping-row"><span class="csv-col">Type</span><span class="arrow">&#x2192;</span><span class="db-col">type</span></div>
-        </div>
-    </div>
-
-    <!-- PREVIEW -->
-    <div id="previewSection" style="display:none">
-        <div class="section-title">&#x1F50D; Data Preview</div>
-        <div class="preview-card">
-            <div class="preview-header">
-                <h3>Parsed rows</h3>
-                <span class="preview-count" id="previewCount">0 rows</span>
-            </div>
-            <div class="preview-table-wrap">
-                <table><thead id="previewHead"></thead><tbody id="previewBody"></tbody></table>
-            </div>
-        </div>
-        <div class="action-bar">
-            <button class="btn primary" id="confirmBtn" onclick="confirmUpload()">&#x2705; Apply to Dashboard &amp; Calendar</button>
-            <button class="btn" onclick="exportCurrentCSV()">&#x1F4E5; Export Current Data</button>
-            <button class="btn danger" onclick="clearPreview()">&#x2716; Cancel</button>
-        </div>
-    </div>
-
-    <!-- ALWAYS-VISIBLE ACTIONS -->
-    <div class="action-bar" id="defaultActions">
-        <button class="btn" onclick="exportCurrentCSV()">&#x1F4E5; Export Current Data as CSV</button>
-        <button class="btn danger" onclick="resetToDefaults()">&#x1F504; Reset to Default Data</button>
-    </div>
-
-    <!-- UPLOAD LOG -->
-    <div class="section-title">&#x1F4CB; Upload History</div>
-    <div class="log-card" id="logCard">
-        <div class="empty-log" id="emptyLog">No uploads yet. Drop a CSV to get started.</div>
-    </div>
+  </div>
 </div>
 
+<div class="last-updated-bar" id="lastUpdated">Last updated: <strong>--</strong></div>
 <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'nf6_compliance_data';
-const LOG_KEY = 'nf6_upload_log';
-let pendingData = null;
+// ══════════════════════════════════════
+// SHARED: Theme, Language, Clocks, Auth
+// ══════════════════════════════════════
 
-// ── COLUMN NAME MAPPINGS ──
-const COL_MAP = {
-    'status':'status','category':'category','entity':'entity','obligation':'obligation',
-    'person':'person','responsible':'person','assigned':'person','resp':'person','resp.':'person',
-    'frequency':'frequency','freq':'frequency','freq.':'frequency',
-    'next due':'nextDue','nextdue':'nextDue','next_due':'nextDue','due date':'nextDue','due':'nextDue',
-    'cost':'cost','amount':'cost','cost / amount':'cost','cost/amount':'cost',
-    'location':'location','loc':'location','loc.':'location',
-    'type':'type',
-    'description':'description','desc':'description','notes':'description',
-    'link':'link','url':'link',
-    'date done':'dateDone','datedone':'dateDone','date_done':'dateDone','completed':'dateDone',
-    'date to do':'dateToDo','datetodo':'dateToDo','date_to_do':'dateToDo',
-    'backup':'backupPerson','backup person':'backupPerson','backupperson':'backupPerson',
-    'escalation days':'escalationDays','escalationdays':'escalationDays','escalation':'escalationDays'
+// ── I18N ──
+const TRANSLATIONS = {
+  en: {
+    nav_homebase:'HomeBase', nav_dashboard:'Dashboard', nav_calendar:'Calendar',
+    nav_audit:'Audit Trail', nav_upload:'Upload', nav_signout:'Sign Out',
+    hero_subtitle:'Internal Operations Hub \u2014 All your tools in one place.',
+    section_modules:'Modules',
+    mod_compliance_title:'Compliance Calendar',
+    mod_compliance_desc:'Track obligations, due dates, reminders, and audit trails across all entities and locations.',
+    mod_finance_title:'Finance',
+    mod_finance_desc:'Financial reporting, budgets, cost forecasting, and expense tracking for all entities.',
+    mod_dorado_title:'Dorado Rental Property',
+    mod_dorado_desc:'Manage rental units, tenants, leases, maintenance requests, and property performance.',
+    mod_docfinder_title:'Document Finder',
+    mod_docfinder_desc:'Search, organize, and retrieve compliance documents, contracts, and filings across all entities.',
+    coming_soon:'Coming Soon'
+  },
+  es: {
+    nav_homebase:'Inicio', nav_dashboard:'Panel', nav_calendar:'Calendario',
+    nav_audit:'Historial', nav_upload:'Cargar', nav_signout:'Cerrar Sesi\u00f3n',
+    hero_subtitle:'Centro de Operaciones Internas \u2014 Todas tus herramientas en un solo lugar.',
+    section_modules:'M\u00f3dulos',
+    mod_compliance_title:'Calendario de Cumplimiento',
+    mod_compliance_desc:'Rastree obligaciones, fechas de vencimiento, recordatorios y registros de auditor\u00eda en todas las entidades y ubicaciones.',
+    mod_finance_title:'Finanzas',
+    mod_finance_desc:'Reportes financieros, presupuestos, pron\u00f3sticos de costos y seguimiento de gastos para todas las entidades.',
+    mod_dorado_title:'Propiedad de Alquiler Dorado',
+    mod_dorado_desc:'Administre unidades de alquiler, inquilinos, contratos, solicitudes de mantenimiento y rendimiento de propiedades.',
+    mod_docfinder_title:'Buscador de Documentos',
+    mod_docfinder_desc:'Busque, organice y recupere documentos de cumplimiento, contratos y presentaciones en todas las entidades.',
+    coming_soon:'Pr\u00f3ximamente'
+  }
 };
+
+let currentLang = localStorage.getItem('nf6_lang') || 'en';
+let currentTheme = localStorage.getItem('nf6_theme') || 'light';
+
+function applyLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('nf6_lang', lang);
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) el.textContent = TRANSLATIONS[lang][key];
+  });
+  // Update toggle labels
+  const nextLang = lang === 'en' ? 'ES' : 'EN';
+  ['langLabel','langLabelM'].forEach(id => { const e = document.getElementById(id); if(e) e.textContent = nextLang; });
+}
+
+function toggleLang() {
+  applyLang(currentLang === 'en' ? 'es' : 'en');
+}
+
+function applyTheme(theme) {
+  currentTheme = theme;
+  localStorage.setItem('nf6_theme', theme);
+  document.documentElement.setAttribute('data-theme', theme);
+  const isDark = theme === 'dark';
+  ['themeIcon','themeIconM'].forEach(id => { const e = document.getElementById(id); if(e) e.innerHTML = isDark ? '&#9788;' : '&#9789;'; });
+  ['themeLabel','themeLabelM'].forEach(id => { const e = document.getElementById(id); if(e) e.textContent = isDark ? 'Light' : 'Dark'; });
+}
+
+function toggleTheme() {
+  applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+}
+
+// ── CLOCKS ──
+function updateClocks() {
+  const now = new Date();
+  const fmt = (tz) => now.toLocaleTimeString('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+  const col = document.getElementById('clockColombia');
+  const pr = document.getElementById('clockPR');
+  if(col) col.textContent = fmt('America/Bogota');
+  if(pr) pr.textContent = fmt('America/Puerto_Rico');
+}
+setInterval(updateClocks, 1000);
+updateClocks();
+
+// ── TODAY BADGE ──
+function updateTodayBadge() {
+  const el = document.getElementById('todayBadge');
+  if(!el) return;
+  const now = new Date();
+  el.textContent = now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+}
+updateTodayBadge();
+
+// ── LAST UPDATED ──
+function updateLastUpdated() {
+  const el = document.getElementById('lastUpdated');
+  if(!el) return;
+  el.innerHTML = 'Last updated: <strong>' + new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true}) + '</strong>';
+}
+updateLastUpdated();
+setInterval(updateLastUpdated, 60000);
 
 // ── AUTH ──
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAbvvj4qCzfZPdRxU6BtbRSfXDXPitNwkQ",
-  authDomain: "nf6-compliance.firebaseapp.com",
-  projectId: "nf6-compliance",
-  storageBucket: "nf6-compliance.firebasestorage.app",
-  messagingSenderId: "758076256010",
-  appId: "1:758076256010:web:5799632950c369244c54f3"
+  apiKey:"AIzaSyAbvvj4qCzfZPdRxU6BtbRSfXDXPitNwkQ",
+  authDomain:"nf6-compliance.firebaseapp.com",
+  projectId:"nf6-compliance",
+  storageBucket:"nf6-compliance.firebasestorage.app",
+  messagingSenderId:"758076256010",
+  appId:"1:758076256010:web:5799632950c369244c54f3"
 };
 const ALLOWED_DOMAIN = 'nf6capital.com';
-const AUTH_ENABLED = true;
 
 function initAuth() {
-  if (!AUTH_ENABLED) { document.getElementById('authOverlay').classList.add('hidden'); return; }
   try {
     firebase.initializeApp(FIREBASE_CONFIG);
     firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        if (user.email.split('@')[1] === ALLOWED_DOMAIN) {
+      if(user) {
+        if(user.email.split('@')[1] === ALLOWED_DOMAIN) {
           document.getElementById('authOverlay').classList.add('hidden');
+          document.getElementById('signOutBtn').style.display = '';
         } else {
-          showAuthError('Access restricted to @' + ALLOWED_DOMAIN); firebase.auth().signOut();
+          showAuthError('Access restricted to @' + ALLOWED_DOMAIN);
+          firebase.auth().signOut();
         }
-      } else { document.getElementById('authOverlay').classList.remove('hidden'); }
+      } else {
+        document.getElementById('authOverlay').classList.remove('hidden');
+        document.getElementById('signOutBtn').style.display = 'none';
+      }
     });
   } catch(e) { console.warn('Firebase:', e.message); document.getElementById('authOverlay').classList.add('hidden'); }
 }
 function signInWithGoogle() {
-  if (!AUTH_ENABLED) return;
-  const p = new firebase.auth.GoogleAuthProvider(); p.setCustomParameters({hd: ALLOWED_DOMAIN});
+  const p = new firebase.auth.GoogleAuthProvider();
+  p.setCustomParameters({hd: ALLOWED_DOMAIN});
   firebase.auth().signInWithPopup(p).catch(e => showAuthError(e.message));
 }
+function signOutUser() { firebase.auth().signOut(); }
 function showAuthError(msg) { const e = document.getElementById('authError'); e.textContent = msg; e.style.display = 'block'; }
+
+// ── COMPLIANCE STATS ON CARD ──
+function loadComplianceStats() {
+  let data = [];
+  try { const s = localStorage.getItem('nf6_compliance_data'); if(s) data = JSON.parse(s); } catch(e){}
+  if(!data.length) return;
+  const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+  function parseDate(str) { if(!str)return null; if(str.includes('-')){const d=new Date(str+'T00:00:00');return isNaN(d)?null:d;} const p=str.split('/'); return p.length===3?new Date(+p[2],+p[0]-1,+p[1]):null; }
+  function daysUntil(s) { const d=parseDate(s); return d?Math.ceil((d-TODAY)/864e5):Infinity; }
+  const enriched = data.map(d => ({...d, _days: daysUntil(d.nextDue)}));
+  document.getElementById('modTotal').textContent = data.length;
+  document.getElementById('modOverdue').textContent = enriched.filter(i => i._days < 0).length;
+  document.getElementById('modDueSoon').textContent = enriched.filter(i => i._days >= 0 && i._days <= 30).length;
+}
 
 // ── INIT ──
 initAuth();
-loadStats();
-loadLog();
-
-// ── DRAG & DROP ──
-const dropZone = document.getElementById('dropZone');
-const csvInput = document.getElementById('csvInput');
-
-['dragenter','dragover'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.add('drag-over'); }));
-['dragleave','drop'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.remove('drag-over'); }));
-dropZone.addEventListener('drop', ev => { if (ev.dataTransfer.files.length) handleFile(ev.dataTransfer.files[0]); });
-csvInput.addEventListener('change', ev => { if (ev.target.files.length) handleFile(ev.target.files[0]); });
-
-// ── FILE HANDLING ──
-function handleFile(file) {
-    if (!file.name.match(/\.(csv|tsv|txt)$/i)) { showToast('Please upload a .csv or .tsv file','error'); return; }
-    showToast('Parsing ' + file.name + '...');
-    Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
-            if (results.errors.length > 3) { showToast('Too many parsing errors. Check your CSV format.','error'); return; }
-            const mapped = mapColumns(results.data);
-            if (!mapped.length) { showToast('No valid rows found. Check column headers.','error'); return; }
-            pendingData = mapped;
-            showPreview(mapped, file.name);
-            showToast('Parsed ' + mapped.length + ' rows from ' + file.name, 'success');
-        },
-        error: function() { showToast('Failed to parse file','error'); }
-    });
-}
-
-function mapColumns(rows) {
-    if (!rows.length) return [];
-    const headers = Object.keys(rows[0]);
-    const mapping = {};
-    headers.forEach(h => {
-        const key = h.trim().toLowerCase();
-        if (COL_MAP[key]) mapping[h] = COL_MAP[key];
-        else {
-            // fuzzy match
-            for (const [pattern, field] of Object.entries(COL_MAP)) {
-                if (key.includes(pattern)) { mapping[h] = field; break; }
-            }
-        }
-    });
-    return rows.map(row => {
-        const item = {status:'',type:'',category:'',location:'',entity:'',obligation:'',person:'',frequency:'',dateDone:'',dateToDo:'',nextDue:'',description:'',cost:'',link:'',backupPerson:'',escalationDays:3,attachments:[],auditLog:[]};
-        for (const [csvCol, dbField] of Object.entries(mapping)) {
-            if (row[csvCol] !== undefined && row[csvCol] !== null) {
-                if (dbField === 'escalationDays') item[dbField] = parseInt(row[csvCol]) || 3;
-                else item[dbField] = String(row[csvCol]).trim();
-            }
-        }
-        // Also grab unmapped columns into description if empty
-        if (!item.obligation && !item.entity) return null;
-        return item;
-    }).filter(Boolean);
-}
-
-// ── PREVIEW ──
-function showPreview(data, fileName) {
-    document.getElementById('previewSection').style.display = 'block';
-    document.getElementById('defaultActions').style.display = 'none';
-    document.getElementById('previewCount').textContent = data.length + ' rows';
-    const cols = ['status','entity','obligation','category','person','frequency','nextDue','cost'];
-    const thead = document.getElementById('previewHead');
-    const tbody = document.getElementById('previewBody');
-    thead.innerHTML = '<tr>' + cols.map(c => '<th>' + c + '</th>').join('') + '</tr>';
-    tbody.innerHTML = data.slice(0, 50).map(row => '<tr>' + cols.map(c => '<td>' + (row[c]||'') + '</td>').join('') + '</tr>').join('');
-}
-
-function clearPreview() {
-    pendingData = null;
-    document.getElementById('previewSection').style.display = 'none';
-    document.getElementById('defaultActions').style.display = 'flex';
-}
-
-// ── CONFIRM UPLOAD ──
-function confirmUpload() {
-    if (!pendingData || !pendingData.length) return;
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(pendingData));
-        addLog('success', 'Uploaded ' + pendingData.length + ' items', 'Data applied to Dashboard & Calendar');
-        loadStats();
-        showToast('Data saved! Dashboard & Calendar updated with ' + pendingData.length + ' items.', 'success');
-        clearPreview();
-    } catch(e) {
-        showToast('Failed to save: ' + e.message, 'error');
-    }
-}
-
-// ── EXPORT ──
-function exportCurrentCSV() {
-    let data = [];
-    try { const s = localStorage.getItem(STORAGE_KEY); if (s) data = JSON.parse(s); } catch(e){}
-    if (!data.length) { showToast('No data to export. Upload a CSV first.','error'); return; }
-    const fields = ['status','type','category','location','entity','obligation','person','frequency','dateDone','dateToDo','nextDue','description','cost','link','backupPerson','escalationDays'];
-    const header = fields.join(',');
-    const rows = data.map(r => fields.map(f => '"' + String(r[f]||'').replace(/"/g,'""') + '"').join(','));
-    const csv = header + '\n' + rows.join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'nf6_compliance_' + new Date().toISOString().slice(0,10) + '.csv';
-    a.click();
-    showToast('CSV exported successfully','success');
-}
-
-// ── RESET ──
-function resetToDefaults() {
-    if (!confirm('Reset all data to the built-in defaults? This will overwrite any uploaded data.')) return;
-    localStorage.removeItem(STORAGE_KEY);
-    addLog('info', 'Reset to default data', 'All uploaded data cleared');
-    loadStats();
-    showToast('Data reset to defaults. Dashboard will use built-in data.','success');
-}
-
-// ── STATS ──
-function loadStats() {
-    let data = [];
-    try { const s = localStorage.getItem(STORAGE_KEY); if (s) data = JSON.parse(s); } catch(e){}
-    if (!data.length) { document.getElementById('sTot').textContent='--'; document.getElementById('sOk').textContent='--'; document.getElementById('sDue').textContent='--'; document.getElementById('sOver').textContent='--'; return; }
-    const TODAY = new Date(); TODAY.setHours(0,0,0,0);
-    function parseDate(str) { if(!str)return null; if(str.includes('-')){const d=new Date(str+'T00:00:00');return isNaN(d)?null:d;} const p=str.split('/'); return p.length===3?new Date(+p[2],+p[0]-1,+p[1]):null; }
-    function daysUntil(s) { const d=parseDate(s); return d?Math.ceil((d-TODAY)/864e5):Infinity; }
-    const enriched = data.map(d => ({...d, _days: daysUntil(d.nextDue)}));
-    document.getElementById('sTot').textContent = data.length;
-    document.getElementById('sOk').textContent = enriched.filter(i => (i.status||'').includes('Up to date') && i._days > 30).length;
-    document.getElementById('sDue').textContent = enriched.filter(i => i._days >= 0 && i._days <= 30).length;
-    document.getElementById('sOver').textContent = enriched.filter(i => i._days < 0).length;
-}
-
-// ── LOG ──
-function loadLog() {
-    let logs = [];
-    try { const s = localStorage.getItem(LOG_KEY); if (s) logs = JSON.parse(s); } catch(e){}
-    renderLog(logs);
-}
-function addLog(type, title, detail) {
-    let logs = [];
-    try { const s = localStorage.getItem(LOG_KEY); if (s) logs = JSON.parse(s); } catch(e){}
-    logs.unshift({ type, title, detail, time: new Date().toISOString() });
-    if (logs.length > 20) logs = logs.slice(0, 20);
-    localStorage.setItem(LOG_KEY, JSON.stringify(logs));
-    renderLog(logs);
-}
-function renderLog(logs) {
-    const card = document.getElementById('logCard');
-    const empty = document.getElementById('emptyLog');
-    if (!logs.length) { empty.style.display = 'block'; return; }
-    empty.style.display = 'none';
-    const existing = card.querySelectorAll('.log-entry');
-    existing.forEach(e => e.remove());
-    logs.slice(0, 10).forEach(l => {
-        const d = new Date(l.time);
-        const timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-        card.insertAdjacentHTML('beforeend',
-            '<div class="log-entry"><div class="log-dot '+l.type+'"></div><div class="log-body"><strong>'+l.title+'</strong><div class="meta">'+l.detail+' \u00B7 '+timeStr+'</div></div></div>'
-        );
-    });
-}
-
-// ── TOAST ──
-function showToast(msg, type) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast show' + (type ? ' '+type : '');
-    clearTimeout(window._toastTimer);
-    window._toastTimer = setTimeout(() => t.className = 'toast', 3500);
-}
-</script>
-
-<div class="last-updated-bar" id="lastUpdated">Last updated: <strong>--</strong></div>
-<script>
-// == LIVE CLOCKS ==
-function updateClocks(){
-    const now=new Date();
-    const fmt=(tz)=>now.toLocaleTimeString('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
-    const col=document.getElementById('clockColombia');
-    const pr=document.getElementById('clockPR');
-    if(col)col.textContent=fmt('America/Bogota');
-    if(pr)pr.textContent=fmt('America/Puerto_Rico');
-}
-setInterval(updateClocks,1000);
-updateClocks();
-
-// == LAST UPDATED ==
-function updateLastUpdated(){
-    const el=document.getElementById('lastUpdated');
-    if(!el)return;
-    const now=new Date();
-    el.innerHTML='Last updated: <strong>'+now.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})+'</strong>';
-}
-updateLastUpdated();
-setInterval(updateLastUpdated,60000);
+applyTheme(currentTheme);
+applyLang(currentLang);
+loadComplianceStats();
 </script>
 </body>
 </html>
