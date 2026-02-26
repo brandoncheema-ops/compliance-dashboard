@@ -507,13 +507,13 @@
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-box">
     <h1 class="auth-title">NF6 <span>Capital</span></h1>
-    <p class="auth-sub">Compliance Calendar &mdash; Internal Use Only</p>
-    <button class="google-btn" onclick="signInWithGoogle()">
+    <p class="auth-sub" data-i18n="auth_subtitle">Compliance Calendar &mdash; Internal Use Only</p>
+    <button class="google-btn" onclick="signInWithGoogle()" data-i18n="auth_signin">
       <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Sign in with Google
     </button>
     <div class="auth-error" id="authError"></div>
-    <p class="auth-domain">Restricted to @nf6capital.com accounts</p>
+    <p class="auth-domain" data-i18n="auth_domain">Restricted to @nf6capital.com accounts</p>
   </div>
 </div>
 
@@ -548,34 +548,34 @@
 </div>
 
 <div class="page-header">
-  <h1>Compliance Calendar</h1>
-  <p>Visual timeline of all upcoming compliance deadlines and due dates across all entities.</p>
+  <h1 data-i18n="page_title">Compliance Calendar</h1>
+  <p data-i18n="page_subtitle">Visual timeline of all upcoming compliance deadlines and due dates across all entities.</p>
 </div>
 
 <div class="main-layout">
   <!-- LEFT: Calendar -->
   <div class="calendar-col">
     <div class="cal-controls">
-      <button id="prevBtn">&larr; Prev</button>
-      <button class="today-btn" id="todayBtn">Today</button>
+      <button id="prevBtn" data-i18n="cal_prev">&larr; Prev</button>
+      <button class="today-btn" id="todayBtn" data-i18n="cal_today">Today</button>
       <div class="month-label" id="monthLabel"></div>
-      <button id="nextBtn">Next &rarr;</button>
+      <button id="nextBtn" data-i18n="cal_next">Next &rarr;</button>
     </div>
     <div class="filter-row">
-      <select id="calLocFilter"><option value="all">All Locations</option></select>
-      <select id="calEntFilter"><option value="all">All Entities</option></select>
-      <select id="calPersonFilter"><option value="all">All People</option></select>
-      <select id="calCatFilter"><option value="all">All Categories</option></select>
+      <select id="calLocFilter"><option value="all" data-i18n="filter_all_loc">All Locations</option></select>
+      <select id="calEntFilter"><option value="all" data-i18n="filter_all_ent">All Entities</option></select>
+      <select id="calPersonFilter"><option value="all" data-i18n="filter_all_people">All People</option></select>
+      <select id="calCatFilter"><option value="all" data-i18n="filter_all_cat">All Categories</option></select>
     </div>
     <div class="cal-grid">
       <div class="cal-header-row">
-        <div class="day-label">Sun</div>
-        <div class="day-label">Mon</div>
-        <div class="day-label">Tue</div>
-        <div class="day-label">Wed</div>
-        <div class="day-label">Thu</div>
-        <div class="day-label">Fri</div>
-        <div class="day-label">Sat</div>
+        <div class="day-label" data-i18n="day_sun">Sun</div>
+        <div class="day-label" data-i18n="day_mon">Mon</div>
+        <div class="day-label" data-i18n="day_tue">Tue</div>
+        <div class="day-label" data-i18n="day_wed">Wed</div>
+        <div class="day-label" data-i18n="day_thu">Thu</div>
+        <div class="day-label" data-i18n="day_fri">Fri</div>
+        <div class="day-label" data-i18n="day_sat">Sat</div>
       </div>
       <div class="cal-body" id="calBody"></div>
     </div>
@@ -584,50 +584,50 @@
   <!-- RIGHT: Sidebar -->
   <div class="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-title">&#128337; Live Clocks</div>
+      <div class="sidebar-title" data-i18n="sidebar_clocks">&#128337; Live Clocks</div>
       <div class="live-clocks">
         <div class="clock-circle">
-          <span class="clock-label">Colombia</span>
+          <span class="clock-label" data-i18n="clock_col">Colombia</span>
           <span class="clock-time" id="clockColombia">--:--:--</span>
         </div>
         <div class="clock-circle">
-          <span class="clock-label">Puerto Rico</span>
+          <span class="clock-label" data-i18n="clock_pr">Puerto Rico</span>
           <span class="clock-time" id="clockPR">--:--:--</span>
         </div>
       </div>
     </div>
     <div class="sidebar-header" style="border-bottom: none; padding-bottom: 0;">
-      <div class="sidebar-title" style="margin-bottom:0;">&#128203; Upcoming This Month <span id="upcomingCount" style="font-size:.75rem;font-weight:500;color:var(--text-secondary);margin-left:auto;"></span></div>
+      <div class="sidebar-title" style="margin-bottom:0;" data-i18n="sidebar_upcoming">&#128203; Upcoming This Month <span id="upcomingCount" style="font-size:.75rem;font-weight:500;color:var(--text-secondary);margin-left:auto;"></span></div>
     </div>
     <div class="sidebar-body" id="upcomingList"></div>
     <div class="edit-panel" id="editPanel">
       <h3>
-        <span id="editTitle">Edit Item</span>
+        <span id="editTitle" data-i18n="edit_title">Edit Item</span>
         <button class="close-edit" onclick="closeEdit()">&times;</button>
       </h3>
       <div class="edit-field">
-        <label>Status</label>
+        <label data-i18n="edit_status">Status</label>
         <select id="editStatus">
-          <option value="Recurring - Up to date">Up to Date</option>
-          <option value="Recurring - Due Soon">Due Soon</option>
-          <option value="Not started">Not Started</option>
+          <option value="Recurring - Up to date" data-i18n="status_uptodate">Up to Date</option>
+          <option value="Recurring - Due Soon" data-i18n="status_duesoon">Due Soon</option>
+          <option value="Not started" data-i18n="status_notstarted">Not Started</option>
         </select>
       </div>
       <div class="edit-field">
-        <label>Next Due Date</label>
+        <label data-i18n="edit_duedate">Next Due Date</label>
         <input type="date" id="editDueDate">
       </div>
       <div class="edit-field">
-        <label>Assigned To</label>
+        <label data-i18n="edit_assignedto">Assigned To</label>
         <input type="text" id="editPerson">
       </div>
       <div class="edit-field">
-        <label>Notes</label>
+        <label data-i18n="edit_notes">Notes</label>
         <input type="text" id="editNotes" placeholder="Add a note...">
       </div>
       <div class="edit-actions">
-        <button class="btn-cancel" onclick="closeEdit()">Cancel</button>
-        <button class="btn-save" onclick="saveEdit()">Save</button>
+        <button class="btn-cancel" onclick="closeEdit()" data-i18n="btn_cancel">Cancel</button>
+        <button class="btn-save" onclick="saveEdit()" data-i18n="btn_save">Save</button>
       </div>
     </div>
   </div>
@@ -635,7 +635,7 @@
 
 <div class="tooltip" id="tooltip"></div>
 <div class="toast" id="toast"></div>
-<div class="last-updated-bar" id="lastUpdated">Last updated: <strong>--</strong></div>
+<div class="last-updated-bar" id="lastUpdated" data-i18n-template="last_updated">Last updated: <strong>--</strong></div>
 
 <script>
 // == RAW DATA (same as dashboard) ==
@@ -730,10 +730,10 @@ let viewMonth = TODAY.getMonth();
 let editingIdx = -1;
 
 // ── THEME + LANG ──
-const TRANSLATIONS={en:{nav_homebase:'HomeBase',nav_dashboard:'Dashboard',nav_calendar:'Calendar',nav_audit:'Audit Trail',nav_upload:'Upload',nav_docfinder:'Documents',nav_signout:'Sign Out'},es:{nav_homebase:'Inicio',nav_dashboard:'Panel',nav_calendar:'Calendario',nav_audit:'Historial',nav_upload:'Cargar',nav_docfinder:'Documentos',nav_signout:'Cerrar Sesión'}};
+const TRANSLATIONS={en:{nav_homebase:'HomeBase',nav_dashboard:'Dashboard',nav_calendar:'Calendar',nav_audit:'Audit Trail',nav_upload:'Upload',nav_docfinder:'Documents',nav_signout:'Sign Out',page_title:'Compliance Calendar',page_subtitle:'Visual timeline of all upcoming compliance deadlines and due dates across all entities.',cal_prev:'← Prev',cal_today:'Today',cal_next:'Next →',filter_all_loc:'All Locations',filter_all_ent:'All Entities',filter_all_people:'All People',filter_all_cat:'All Categories',day_sun:'Sun',day_mon:'Mon',day_tue:'Tue',day_wed:'Wed',day_thu:'Thu',day_fri:'Fri',day_sat:'Sat',sidebar_clocks:'🕐 Live Clocks',clock_col:'Colombia',clock_pr:'Puerto Rico',sidebar_upcoming:'📋 Upcoming This Month',edit_title:'Edit Item',edit_status:'Status',status_uptodate:'Up to Date',status_duesoon:'Due Soon',status_notstarted:'Not Started',edit_duedate:'Next Due Date',edit_assignedto:'Assigned To',edit_notes:'Notes',btn_cancel:'Cancel',btn_save:'Save',last_updated:'Last updated:',auth_subtitle:'Compliance Calendar — Internal Use Only',auth_signin:'Sign in with Google',auth_domain:'Restricted to @nf6capital.com accounts',badge_overdue:'Overdue',badge_notstarted:'Not Started',badge_critical:'Due ≤ 7d',badge_warning:'Due ≤ 14d',badge_notice:'Due ≤ 30d',badge_uptodate:'Up to Date',tooltip_status:'Status',tooltip_entity:'Entity',tooltip_location:'Location',tooltip_person:'Person',tooltip_category:'Category',tooltip_due:'Due',tooltip_cost:'Cost',tooltip_notes:'Notes',sidebar_empty:'No compliance items due this month.',duetoday:'Due today',duetomorrow:'Due tomorrow',daysoverdue:'days overdue',dueindaysformat:'Due in',daysleft:'days',item_updated:'Item updated successfully',no_changes:'No changes made'},es:{nav_homebase:'Inicio',nav_dashboard:'Panel',nav_calendar:'Calendario',nav_audit:'Historial',nav_upload:'Cargar',nav_docfinder:'Documentos',nav_signout:'Cerrar Sesión',page_title:'Calendario de Cumplimiento',page_subtitle:'Línea de tiempo visual de todos los plazos de cumplimiento y fechas de vencimiento próximas en todas las entidades.',cal_prev:'← Anterior',cal_today:'Hoy',cal_next:'Siguiente →',filter_all_loc:'Todas las Ubicaciones',filter_all_ent:'Todas las Entidades',filter_all_people:'Todas las Personas',filter_all_cat:'Todas las Categorías',day_sun:'Dom',day_mon:'Lun',day_tue:'Mar',day_wed:'Mié',day_thu:'Jue',day_fri:'Vie',day_sat:'Sáb',sidebar_clocks:'🕐 Relojes en Vivo',clock_col:'Colombia',clock_pr:'Puerto Rico',sidebar_upcoming:'📋 Próximos Este Mes',edit_title:'Editar Elemento',edit_status:'Estado',status_uptodate:'Al Día',status_duesoon:'Próximo a Vencer',status_notstarted:'No Iniciado',edit_duedate:'Próxima Fecha de Vencimiento',edit_assignedto:'Asignado a',edit_notes:'Notas',btn_cancel:'Cancelar',btn_save:'Guardar',last_updated:'Última actualización:',auth_subtitle:'Calendario de Cumplimiento — Uso Interno Solamente',auth_signin:'Iniciar sesión con Google',auth_domain:'Restringido a cuentas @nf6capital.com',badge_overdue:'Vencido',badge_notstarted:'No Iniciado',badge_critical:'Vence ≤ 7d',badge_warning:'Vence ≤ 14d',badge_notice:'Vence ≤ 30d',badge_uptodate:'Al Día',tooltip_status:'Estado',tooltip_entity:'Entidad',tooltip_location:'Ubicación',tooltip_person:'Persona',tooltip_category:'Categoría',tooltip_due:'Vencimiento',tooltip_cost:'Costo',tooltip_notes:'Notas',sidebar_empty:'No hay elementos de cumplimiento vencidos este mes.',duetoday:'Vence hoy',duetomorrow:'Vence mañana',daysoverdue:'días vencidos',dueindaysformat:'Vence en',daysleft:'días',item_updated:'Elemento actualizado exitosamente',no_changes:'Sin cambios realizados'}};
 let currentLang=localStorage.getItem('nf6_lang')||'en';
 let currentTheme=localStorage.getItem('nf6_theme')||'light';
-function applyLang(lang){currentLang=lang;localStorage.setItem('nf6_lang',lang);document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(TRANSLATIONS[lang]&&TRANSLATIONS[lang][k])el.textContent=TRANSLATIONS[lang][k];});const next=lang==='en'?'ES':'EN';const lb=document.getElementById('langLabel');if(lb)lb.textContent=next;}
+function applyLang(lang){currentLang=lang;localStorage.setItem('nf6_lang',lang);document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(TRANSLATIONS[lang]&&TRANSLATIONS[lang][k])el.textContent=TRANSLATIONS[lang][k];});const next=lang==='en'?'ES':'EN';const lb=document.getElementById('langLabel');if(lb)lb.textContent=next;renderCalendar();updateLastUpdated();}
 function toggleLang(){applyLang(currentLang==='en'?'es':'en');}
 function applyTheme(theme){currentTheme=theme;localStorage.setItem('nf6_theme',theme);document.documentElement.setAttribute('data-theme',theme);const isDark=theme==='dark';const ti=document.getElementById('themeIcon');if(ti)ti.innerHTML=isDark?'&#9788;':'&#9789;';const tl=document.getElementById('themeLabel');if(tl)tl.textContent=isDark?'Light':'Dark';}
 function toggleTheme(){applyTheme(currentTheme==='light'?'dark':'light');}
@@ -794,7 +794,9 @@ function getFilteredItems() {
 
 // == RENDER CALENDAR ==
 function renderCalendar() {
-  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const monthNamesEn = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const monthNamesEs = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const monthNames = currentLang === 'es' ? monthNamesEs : monthNamesEn;
   document.getElementById('monthLabel').textContent = monthNames[viewMonth] + ' ' + viewYear;
 
   const firstDay = new Date(viewYear, viewMonth, 1);
@@ -855,20 +857,28 @@ function renderSidebar(filtered) {
     .sort(function(a, b) { return a._date - b._date; });
 
   const container = document.getElementById('upcomingList');
-  document.getElementById('upcomingCount').textContent = monthItems.length ? monthItems.length + ' items' : '';
+  const countText = monthItems.length ? monthItems.length + (currentLang === 'es' ? ' elementos' : ' items') : '';
+  document.getElementById('upcomingCount').textContent = countText;
 
   if (!monthItems.length) {
-    container.innerHTML = '<div class="sidebar-empty">No compliance items due this month.</div>';
+    const emptyMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['sidebar_empty'] ? TRANSLATIONS[currentLang]['sidebar_empty'] : 'No compliance items due this month.';
+    container.innerHTML = '<div class="sidebar-empty">'+emptyMsg+'</div>';
     return;
   }
 
   container.innerHTML = monthItems.map(function(i) {
     var idx = items.indexOf(i);
     var dotClass = i._urgency === 'notstarted' ? 'notstarted' : i._urgency === 'overdue' ? 'critical' : i._urgency;
-    var dueLabel = i._days === 0 ? 'Due today' : i._days === 1 ? 'Due tomorrow' : i._days < 0 ? Math.abs(i._days)+' days overdue' : 'Due in '+i._days+' days';
+    var dueLabel;
+    if (currentLang === 'es') {
+      dueLabel = i._days === 0 ? TRANSLATIONS.es.duetoday : i._days === 1 ? TRANSLATIONS.es.duetomorrow : i._days < 0 ? Math.abs(i._days)+' '+TRANSLATIONS.es.daysoverdue : TRANSLATIONS.es.dueindaysformat+' '+i._days+' '+TRANSLATIONS.es.daysleft;
+    } else {
+      dueLabel = i._days === 0 ? 'Due today' : i._days === 1 ? 'Due tomorrow' : i._days < 0 ? Math.abs(i._days)+' days overdue' : 'Due in '+i._days+' days';
+    }
     var dueColor = i._days <= 0 ? 'var(--red)' : i._days <= 7 ? 'var(--red)' : i._days <= 14 ? 'var(--orange)' : i._days <= 30 ? 'var(--yellow)' : 'var(--green)';
+    var editText = currentLang === 'es' ? 'Editar' : 'Edit';
     return '<div class="sb-card" onclick="openEdit('+idx+')">' +
-      '<div class="sb-edit-icon">\u270F\ufe0f Edit</div>' +
+      '<div class="sb-edit-icon">\u270F\ufe0f '+editText+'</div>' +
       '<div class="sb-top">' +
         '<div class="dot '+(dotClass || 'none')+'"></div>' +
         '<div class="sb-info">' +
@@ -965,7 +975,8 @@ function saveEdit() {
 
   closeEdit();
   renderCalendar();
-  showToast(changes.length ? 'Item updated successfully' : 'No changes made');
+  var toastMsg = changes.length ? (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['item_updated'] ? TRANSLATIONS[currentLang]['item_updated'] : 'Item updated successfully') : (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['no_changes'] ? TRANSLATIONS[currentLang]['no_changes'] : 'No changes made');
+  showToast(toastMsg);
 }
 
 // == TOOLTIP ==
@@ -977,23 +988,36 @@ document.getElementById('calBody').addEventListener('mouseover', function(e) {
   if (!item) return;
 
   var tt = document.getElementById('tooltip');
-  var urgBadge = item._urgency === 'overdue' ? '<span class="badge badge-red">Overdue</span>'
-    : item._urgency === 'notstarted' ? '<span class="badge badge-purple">Not Started</span>'
-    : item._urgency === 'critical' ? '<span class="badge badge-red">Due \u2264 7d</span>'
-    : item._urgency === 'warning' ? '<span class="badge badge-orange">Due \u2264 14d</span>'
-    : item._urgency === 'notice' ? '<span class="badge badge-yellow">Due \u2264 30d</span>'
-    : '<span class="badge badge-green">Up to Date</span>';
+  var transKey = item._urgency === 'overdue' ? 'badge_overdue'
+    : item._urgency === 'notstarted' ? 'badge_notstarted'
+    : item._urgency === 'critical' ? 'badge_critical'
+    : item._urgency === 'warning' ? 'badge_warning'
+    : item._urgency === 'notice' ? 'badge_notice'
+    : 'badge_uptodate';
+  var badgeText = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][transKey] ? TRANSLATIONS[currentLang][transKey] : transKey;
+  var urgBadge = '<span class="badge ' + (item._urgency === 'overdue' || item._urgency === 'critical' ? 'badge-red' : item._urgency === 'notstarted' ? 'badge-purple' : item._urgency === 'warning' ? 'badge-orange' : item._urgency === 'notice' ? 'badge-yellow' : 'badge-green') + '">' + badgeText + '</span>';
+
+  var labels = {
+    status: TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['tooltip_status'] ? TRANSLATIONS[currentLang]['tooltip_status'] : 'Status',
+    entity: TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['tooltip_entity'] ? TRANSLATIONS[currentLang]['tooltip_entity'] : 'Entity',
+    location: TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['tooltip_location'] ? TRANSLATIONS[currentLang]['tooltip_location'] : 'Location',
+    person: TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['tooltip_person'] ? TRANSLATIONS[currentLang]['tooltip_person'] : 'Person',
+    category: TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['tooltip_category'] ? TRANSLATIONS[currentLang]['tooltip_category'] : 'Category',
+    due: TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['tooltip_due'] ? TRANSLATIONS[currentLang]['tooltip_due'] : 'Due',
+    cost: TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['tooltip_cost'] ? TRANSLATIONS[currentLang]['tooltip_cost'] : 'Cost',
+    notes: TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['tooltip_notes'] ? TRANSLATIONS[currentLang]['tooltip_notes'] : 'Notes'
+  };
 
   tt.innerHTML =
     '<div class="tt-title">'+item.obligation+'</div>' +
-    '<div class="tt-row"><div class="tt-label">Status</div><div class="tt-val">'+urgBadge+'</div></div>' +
-    '<div class="tt-row"><div class="tt-label">Entity</div><div class="tt-val">'+item.entity+'</div></div>' +
-    '<div class="tt-row"><div class="tt-label">Location</div><div class="tt-val">'+locationFlag(item.location)+' '+item.location+'</div></div>' +
-    '<div class="tt-row"><div class="tt-label">Person</div><div class="tt-val">'+item.person+'</div></div>' +
-    '<div class="tt-row"><div class="tt-label">Category</div><div class="tt-val"><span class="badge badge-blue">'+item.category+'</span></div></div>' +
-    '<div class="tt-row"><div class="tt-label">Due</div><div class="tt-val">'+formatDate(item.nextDue)+'</div></div>' +
-    (item.cost ? '<div class="tt-row"><div class="tt-label">Cost</div><div class="tt-val">'+item.cost+'</div></div>' : '') +
-    (item.description ? '<div class="tt-row"><div class="tt-label">Notes</div><div class="tt-val">'+item.description+'</div></div>' : '');
+    '<div class="tt-row"><div class="tt-label">'+labels.status+'</div><div class="tt-val">'+urgBadge+'</div></div>' +
+    '<div class="tt-row"><div class="tt-label">'+labels.entity+'</div><div class="tt-val">'+item.entity+'</div></div>' +
+    '<div class="tt-row"><div class="tt-label">'+labels.location+'</div><div class="tt-val">'+locationFlag(item.location)+' '+item.location+'</div></div>' +
+    '<div class="tt-row"><div class="tt-label">'+labels.person+'</div><div class="tt-val">'+item.person+'</div></div>' +
+    '<div class="tt-row"><div class="tt-label">'+labels.category+'</div><div class="tt-val"><span class="badge badge-blue">'+item.category+'</span></div></div>' +
+    '<div class="tt-row"><div class="tt-label">'+labels.due+'</div><div class="tt-val">'+formatDate(item.nextDue)+'</div></div>' +
+    (item.cost ? '<div class="tt-row"><div class="tt-label">'+labels.cost+'</div><div class="tt-val">'+item.cost+'</div></div>' : '') +
+    (item.description ? '<div class="tt-row"><div class="tt-label">'+labels.notes+'</div><div class="tt-val">'+item.description+'</div></div>' : '');
 
   var rect = ev.getBoundingClientRect();
   tt.style.left = Math.min(rect.right + 8, window.innerWidth - 340) + 'px';
@@ -1073,7 +1097,8 @@ function updateLastUpdated() {
   const el = document.getElementById('lastUpdated');
   if (!el) return;
   const now = new Date();
-  el.innerHTML = 'Last updated: <strong>' + now.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) + '</strong>';
+  const prefix = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['last_updated'] ? TRANSLATIONS[currentLang]['last_updated'] : 'Last updated:';
+  el.innerHTML = prefix + ' <strong>' + now.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) + '</strong>';
 }
 updateLastUpdated();
 setInterval(updateLastUpdated, 60000);

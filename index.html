@@ -132,13 +132,13 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-box">
     <h1 class="auth-title">NF6 <span>Capital</span></h1>
-    <p class="auth-sub">HomeBase &mdash; Internal Use Only</p>
-    <button class="google-btn" onclick="signInWithGoogle()">
+    <p class="auth-sub" data-i18n="auth_subtitle">HomeBase &mdash; Internal Use Only</p>
+    <button class="google-btn" onclick="signInWithGoogle()" data-i18n="auth_signin">
       <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Sign in with Google
     </button>
     <div class="auth-error" id="authError"></div>
-    <p class="auth-domain">Restricted to @nf6capital.com accounts</p>
+    <p class="auth-domain" data-i18n="auth_domain">Restricted to @nf6capital.com accounts</p>
   </div>
 </div>
 
@@ -155,7 +155,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
   </div>
   <div class="nav-right">
     <button class="toggle-btn" onclick="toggleLang()" id="langToggle" title="Switch language"><span class="icon">&#127760;</span> <span class="label-text" id="langLabel">ES</span></button>
-    <button class="toggle-btn" onclick="toggleTheme()" id="themeToggle" title="Toggle dark/light mode"><span class="icon" id="themeIcon">&#9789;</span> <span class="label-text" id="themeLabel">Dark</span></button>
+    <button class="toggle-btn" onclick="toggleTheme()" id="themeToggle" title="Toggle dark/light mode"><span class="icon" id="themeIcon">&#9789;</span> <span class="label-text" id="themeLabel" data-i18n="theme_dark">Dark</span></button>
     <div class="nav-clocks">
       <div class="clock-circle"><span class="clock-label">COL</span><span class="clock-time" id="clockColombia">--:--</span></div>
       <div class="clock-circle"><span class="clock-label">PR</span><span class="clock-time" id="clockPR">--:--</span></div>
@@ -174,7 +174,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
   <a href="document-finder.html" data-i18n="nav_docfinder">Documents</a>
   <div class="mobile-toggles">
     <button class="toggle-btn" onclick="toggleLang()"><span class="icon">&#127760;</span> <span id="langLabelM">ES</span></button>
-    <button class="toggle-btn" onclick="toggleTheme()"><span class="icon" id="themeIconM">&#9789;</span> <span id="themeLabelM">Dark</span></button>
+    <button class="toggle-btn" onclick="toggleTheme()"><span class="icon" id="themeIconM">&#9789;</span> <span id="themeLabelM" data-i18n="theme_dark">Dark</span></button>
   </div>
   <a href="#" onclick="signOutUser();return false" data-i18n="nav_signout">Sign Out</a>
 </div>
@@ -196,9 +196,9 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
       <div class="module-title" data-i18n="mod_compliance_title">Compliance Calendar</div>
       <div class="module-desc" data-i18n="mod_compliance_desc">Track obligations, due dates, reminders, and audit trails across all entities and locations.</div>
       <div class="module-stats" id="complianceStats">
-        <div class="module-stat"><strong id="modTotal">--</strong> items</div>
-        <div class="module-stat"><strong id="modOverdue" style="color:var(--red)">--</strong> overdue</div>
-        <div class="module-stat"><strong id="modDueSoon" style="color:var(--orange)">--</strong> due soon</div>
+        <div class="module-stat"><strong id="modTotal">--</strong> <span data-i18n="stat_items">items</span></div>
+        <div class="module-stat"><strong id="modOverdue" style="color:var(--red)">--</strong> <span data-i18n="stat_overdue">overdue</span></div>
+        <div class="module-stat"><strong id="modDueSoon" style="color:var(--orange)">--</strong> <span data-i18n="stat_due_soon">due soon</span></div>
       </div>
       <div class="quick-links">
         <span class="quick-link" onclick="event.preventDefault();window.location='compliance-dashboard.html'" data-i18n="nav_dashboard">Dashboard</span>
@@ -272,7 +272,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
   </div>
 </div>
 
-<div class="last-updated-bar" id="lastUpdated">Last updated: <strong>--</strong></div>
+<div class="last-updated-bar" id="lastUpdated"><span data-i18n="last_updated">Last updated:</span> <strong>--</strong></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -305,7 +305,13 @@ const TRANSLATIONS = {
     mod_cars_desc:'Manage vehicle registrations, insurance, maintenance logs, and lease or loan details.',
     mod_mail_title:'Mail',
     mod_mail_desc:'Track incoming and outgoing mail, certified letters, notices, and important correspondence.',
-    coming_soon:'Coming Soon'
+    coming_soon:'Coming Soon',
+    auth_subtitle:'HomeBase \u2014 Internal Use Only',
+    auth_signin:'Sign in with Google',
+    auth_domain:'Restricted to @nf6capital.com accounts',
+    theme_dark:'Dark', theme_light:'Light',
+    stat_items:'items', stat_overdue:'overdue', stat_due_soon:'due soon',
+    last_updated:'Last updated:'
   },
   es: {
     nav_homebase:'Inicio', nav_dashboard:'Panel', nav_calendar:'Calendario',
@@ -330,7 +336,13 @@ const TRANSLATIONS = {
     mod_cars_desc:'Administre registros de veh\u00edculos, seguros, registros de mantenimiento y detalles de arrendamiento o pr\u00e9stamo.',
     mod_mail_title:'Correo',
     mod_mail_desc:'Rastree correo entrante y saliente, cartas certificadas, avisos y correspondencia importante.',
-    coming_soon:'Pr\u00f3ximamente'
+    coming_soon:'Pr\u00f3ximamente',
+    auth_subtitle:'HomeBase \u2014 Solo para uso interno',
+    auth_signin:'Iniciar sesi\u00f3n con Google',
+    auth_domain:'Restringido a cuentas @nf6capital.com',
+    theme_dark:'Oscuro', theme_light:'Claro',
+    stat_items:'elementos', stat_overdue:'vencidos', stat_due_soon:'pronto vencen',
+    last_updated:'\u00daltima actualización:'
   }
 };
 
@@ -359,7 +371,10 @@ function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   const isDark = theme === 'dark';
   ['themeIcon','themeIconM'].forEach(id => { const e = document.getElementById(id); if(e) e.innerHTML = isDark ? '&#9788;' : '&#9789;'; });
-  ['themeLabel','themeLabelM'].forEach(id => { const e = document.getElementById(id); if(e) e.textContent = isDark ? 'Light' : 'Dark'; });
+  ['themeLabel','themeLabelM'].forEach(id => { const e = document.getElementById(id); if(e) {
+    const key = isDark ? 'theme_light' : 'theme_dark';
+    e.textContent = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key] ? TRANSLATIONS[currentLang][key] : (isDark ? 'Light' : 'Dark');
+  }});
 }
 
 function toggleTheme() {
@@ -391,7 +406,8 @@ updateTodayBadge();
 function updateLastUpdated() {
   const el = document.getElementById('lastUpdated');
   if(!el) return;
-  el.innerHTML = 'Last updated: <strong>' + new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true}) + '</strong>';
+  const label = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['last_updated'] ? TRANSLATIONS[currentLang]['last_updated'] : 'Last updated:';
+  el.innerHTML = label + ' <strong>' + new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true}) + '</strong>';
 }
 updateLastUpdated();
 setInterval(updateLastUpdated, 60000);

@@ -506,7 +506,7 @@
   <div class="auth-overlay" id="authOverlay">
     <div class="auth-box">
       <h1 class="auth-title">NF6 <span>Capital</span></h1>
-      <p class="auth-sub">Audit Trail &mdash; Internal Use Only</p>
+      <p class="auth-sub" data-i18n="auth_sub">Audit Trail &mdash; Internal Use Only</p>
       <button class="google-btn" onclick="signInWithGoogle()">
         <svg viewBox="0 0 24 24" width="20" height="20">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -514,10 +514,10 @@
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
         </svg>
-        Sign in with Google
+        <span data-i18n="auth_btn_signin">Sign in with Google</span>
       </button>
       <div class="auth-error" id="authError"></div>
-      <p class="auth-domain">Restricted to @nf6capital.com accounts</p>
+      <p class="auth-domain" data-i18n="auth_error_domain">Restricted to @nf6capital.com accounts</p>
     </div>
   </div>
 
@@ -554,68 +554,68 @@
 
   <div class="container">
     <div class="page-header">
-      <h1 class="page-title">Audit Trail</h1>
-      <p class="page-subtitle">Complete log of all compliance actions, changes, and email reminders.</p>
+      <h1 class="page-title" data-i18n="audit_title">Audit Trail</h1>
+      <p class="page-subtitle" data-i18n="audit_desc">Complete log of all compliance actions, changes, and email reminders.</p>
     </div>
 
     <div class="stats-grid" id="statsGrid">
       <div class="stat-card">
-        <div class="stat-label">Total Actions</div>
+        <div class="stat-label" data-i18n="audit_stat_actions">Total Actions</div>
         <div class="stat-value" id="totalActions">0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Items Modified</div>
+        <div class="stat-label" data-i18n="audit_stat_modified">Items Modified</div>
         <div class="stat-value" id="itemsModified">0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Email Reminders</div>
+        <div class="stat-label" data-i18n="audit_stat_reminders">Email Reminders</div>
         <div class="stat-value" id="emailReminders">0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Last Activity</div>
+        <div class="stat-label" data-i18n="audit_stat_activity">Last Activity</div>
         <div class="stat-value" id="lastActivity" style="font-size: 1.1rem;">—</div>
       </div>
     </div>
 
     <div class="filters-section">
-      <div class="filters-title">Filters</div>
+      <div class="filters-title" data-i18n="audit_filter_title">Filters</div>
       <div class="filters-grid">
         <div class="filter-group">
-          <label class="filter-label">Search</label>
-          <input type="text" class="filter-input" id="searchInput" placeholder="Obligation or details...">
+          <label class="filter-label" data-i18n="audit_search_label">Search</label>
+          <input type="text" class="filter-input" id="searchInput" placeholder="Obligation or details..." data-i18n-placeholder="audit_search_placeholder">
         </div>
         <div class="filter-group">
-          <label class="filter-label">Action Type</label>
+          <label class="filter-label" data-i18n="audit_actiontype_label">Action Type</label>
           <select class="filter-select" id="actionFilter">
-            <option value="">All Actions</option>
-            <option value="created">Created</option>
-            <option value="updated">Updated</option>
-            <option value="completed">Completed</option>
-            <option value="deleted">Deleted</option>
-            <option value="escalated">Escalated</option>
-            <option value="email">Email Sent</option>
-            <option value="export">Export</option>
+            <option value="" data-i18n="audit_actiontype_all">All Actions</option>
+            <option value="created" data-i18n="audit_actiontype_created">Created</option>
+            <option value="updated" data-i18n="audit_actiontype_updated">Updated</option>
+            <option value="completed" data-i18n="audit_actiontype_completed">Completed</option>
+            <option value="deleted" data-i18n="audit_actiontype_deleted">Deleted</option>
+            <option value="escalated" data-i18n="audit_actiontype_escalated">Escalated</option>
+            <option value="email" data-i18n="audit_actiontype_email">Email Sent</option>
+            <option value="export" data-i18n="audit_actiontype_export">Export</option>
           </select>
         </div>
         <div class="filter-group">
-          <label class="filter-label">Date Range</label>
+          <label class="filter-label" data-i18n="audit_daterange_label">Date Range</label>
           <select class="filter-select" id="dateFilter">
-            <option value="all">All Time</option>
-            <option value="today">Today</option>
-            <option value="7days">Last 7 Days</option>
-            <option value="30days">Last 30 Days</option>
+            <option value="all" data-i18n="audit_daterange_all">All Time</option>
+            <option value="today" data-i18n="audit_daterange_today">Today</option>
+            <option value="7days" data-i18n="audit_daterange_7days">Last 7 Days</option>
+            <option value="30days" data-i18n="audit_daterange_30days">Last 30 Days</option>
           </select>
         </div>
       </div>
       <div class="filters-actions">
-        <button class="btn btn-secondary" onclick="resetFilters()">Reset Filters</button>
-        <button class="btn btn-primary" onclick="exportToCSV()">Export to CSV</button>
+        <button class="btn btn-secondary" onclick="resetFilters()" data-i18n="audit_btn_reset">Reset Filters</button>
+        <button class="btn btn-primary" onclick="exportToCSV()" data-i18n="audit_btn_export">Export to CSV</button>
       </div>
     </div>
 
     <div id="auditTableContainer">
       <div class="loading">
-        <span class="spinner"></span>Loading audit trail...
+        <span class="spinner"></span><span data-i18n="audit_loading">Loading audit trail...</span>
       </div>
     </div>
   </div>
@@ -625,10 +625,10 @@
 
   <script>
     // ── THEME + LANG ──
-    const TRANSLATIONS={en:{nav_homebase:'HomeBase',nav_dashboard:'Dashboard',nav_calendar:'Calendar',nav_audit:'Audit Trail',nav_upload:'Upload',nav_docfinder:'Documents',nav_signout:'Sign Out'},es:{nav_homebase:'Inicio',nav_dashboard:'Panel',nav_calendar:'Calendario',nav_audit:'Historial',nav_upload:'Cargar',nav_docfinder:'Documentos',nav_signout:'Cerrar Sesión'}};
+    const TRANSLATIONS={en:{nav_homebase:'HomeBase',nav_dashboard:'Dashboard',nav_calendar:'Calendar',nav_audit:'Audit Trail',nav_upload:'Upload',nav_docfinder:'Documents',nav_signout:'Sign Out',audit_title:'Audit Trail',audit_desc:'Complete log of all compliance actions, changes, and email reminders.',audit_stat_actions:'Total Actions',audit_stat_modified:'Items Modified',audit_stat_reminders:'Email Reminders',audit_stat_activity:'Last Activity',audit_filter_title:'Filters',audit_search_label:'Search',audit_search_placeholder:'Obligation or details...',audit_actiontype_label:'Action Type',audit_actiontype_all:'All Actions',audit_actiontype_created:'Created',audit_actiontype_updated:'Updated',audit_actiontype_completed:'Completed',audit_actiontype_deleted:'Deleted',audit_actiontype_escalated:'Escalated',audit_actiontype_email:'Email Sent',audit_actiontype_export:'Export',audit_daterange_label:'Date Range',audit_daterange_all:'All Time',audit_daterange_today:'Today',audit_daterange_7days:'Last 7 Days',audit_daterange_30days:'Last 30 Days',audit_btn_reset:'Reset Filters',audit_btn_export:'Export to CSV',audit_th_timestamp:'Timestamp',audit_th_action:'Action',audit_th_obligation:'Obligation',audit_th_details:'Details',audit_th_user:'User',audit_loading:'Loading audit trail...',audit_empty_title:'No audit trail entries yet',audit_empty_text:'Actions taken on the Dashboard will appear here.',audit_lastupdated:'Last updated:',auth_sub:'Audit Trail — Internal Use Only',auth_error_domain:'Restricted to @nf6capital.com accounts',auth_error_message:'Only @nf6capital.com accounts are allowed',auth_btn_signin:'Sign in with Google',auth_error_signin:'Sign in failed. Please try again.'},es:{nav_homebase:'Inicio',nav_dashboard:'Panel',nav_calendar:'Calendario',nav_audit:'Historial',nav_upload:'Cargar',nav_docfinder:'Documentos',nav_signout:'Cerrar Sesión',audit_title:'Historial de Auditoría',audit_desc:'Registro completo de todas las acciones de cumplimiento, cambios y recordatorios de correo electrónico.',audit_stat_actions:'Acciones Totales',audit_stat_modified:'Elementos Modificados',audit_stat_reminders:'Recordatorios por Correo',audit_stat_activity:'Última Actividad',audit_filter_title:'Filtros',audit_search_label:'Búsqueda',audit_search_placeholder:'Obligación o detalles...',audit_actiontype_label:'Tipo de Acción',audit_actiontype_all:'Todas las Acciones',audit_actiontype_created:'Creado',audit_actiontype_updated:'Actualizado',audit_actiontype_completed:'Completado',audit_actiontype_deleted:'Eliminado',audit_actiontype_escalated:'Escalado',audit_actiontype_email:'Correo Enviado',audit_actiontype_export:'Exportación',audit_daterange_label:'Rango de Fechas',audit_daterange_all:'Todo el Tiempo',audit_daterange_today:'Hoy',audit_daterange_7days:'Últimos 7 Días',audit_daterange_30days:'Últimos 30 Días',audit_btn_reset:'Restablecer Filtros',audit_btn_export:'Exportar a CSV',audit_th_timestamp:'Marca de Tiempo',audit_th_action:'Acción',audit_th_obligation:'Obligación',audit_th_details:'Detalles',audit_th_user:'Usuario',audit_loading:'Cargando historial de auditoría...',audit_empty_title:'Sin entradas en el historial de auditoría aún',audit_empty_text:'Las acciones realizadas en el Panel aparecerán aquí.',audit_lastupdated:'Última actualización:',auth_sub:'Historial de Auditoría — Uso Interno Solamente',auth_error_domain:'Restringido a cuentas @nf6capital.com',auth_error_message:'Solo se permiten cuentas @nf6capital.com',auth_btn_signin:'Iniciar sesión con Google',auth_error_signin:'Error al iniciar sesión. Por favor, inténtelo de nuevo.'}};
     let currentLang=localStorage.getItem('nf6_lang')||'en';
     let currentTheme=localStorage.getItem('nf6_theme')||'light';
-    function applyLang(lang){currentLang=lang;localStorage.setItem('nf6_lang',lang);document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(TRANSLATIONS[lang]&&TRANSLATIONS[lang][k])el.textContent=TRANSLATIONS[lang][k];});const next=lang==='en'?'ES':'EN';const lb=document.getElementById('langLabel');if(lb)lb.textContent=next;}
+    function applyLang(lang){currentLang=lang;localStorage.setItem('nf6_lang',lang);document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(TRANSLATIONS[lang]&&TRANSLATIONS[lang][k])el.textContent=TRANSLATIONS[lang][k];});document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const k=el.getAttribute('data-i18n-placeholder');if(TRANSLATIONS[lang]&&TRANSLATIONS[lang][k])el.placeholder=TRANSLATIONS[lang][k];});const next=lang==='en'?'ES':'EN';const lb=document.getElementById('langLabel');if(lb)lb.textContent=next;}
     function toggleLang(){applyLang(currentLang==='en'?'es':'en');}
     function applyTheme(theme){currentTheme=theme;localStorage.setItem('nf6_theme',theme);document.documentElement.setAttribute('data-theme',theme);const isDark=theme==='dark';const ti=document.getElementById('themeIcon');if(ti)ti.innerHTML=isDark?'&#9788;':'&#9789;';const tl=document.getElementById('themeLabel');if(tl)tl.textContent=isDark?'Light':'Dark';}
     function toggleTheme(){applyTheme(currentTheme==='light'?'dark':'light');}
@@ -649,7 +649,9 @@
     function updateLastUpdated() {
       const el = document.getElementById('lastUpdated');
       if (!el) return;
-      el.innerHTML = 'Last updated: <strong>' + new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) + '</strong>';
+      const locale = currentLang === 'es' ? 'es-ES' : 'en-US';
+      const lastUpdatedText = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['audit_lastupdated'] ? TRANSLATIONS[currentLang]['audit_lastupdated'] : 'Last updated:';
+      el.innerHTML = lastUpdatedText + ' <strong>' + new Date().toLocaleString(locale, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) + '</strong>';
     }
     updateLastUpdated();
     setInterval(updateLastUpdated, 60000);
@@ -674,8 +676,9 @@
 
     function setTodayBadge() {
       const today = new Date();
+      const locale = currentLang === 'es' ? 'es-ES' : 'en-US';
       const options = { month: 'short', day: 'numeric', year: 'numeric' };
-      const formattedDate = today.toLocaleDateString('en-US', options);
+      const formattedDate = today.toLocaleDateString(locale, options);
       document.getElementById('todayBadge').textContent = formattedDate;
     }
 
@@ -694,7 +697,8 @@
 
         if (domain !== ALLOWED_DOMAIN) {
           await auth.signOut();
-          showAuthError('Only @nf6capital.com accounts are allowed');
+          const errorMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['auth_error_message'] ? TRANSLATIONS[currentLang]['auth_error_message'] : 'Only @nf6capital.com accounts are allowed';
+          showAuthError(errorMsg);
           return;
         }
 
@@ -703,7 +707,8 @@
         loadAuditTrail();
       } catch (error) {
         console.error('Auth error:', error);
-        showAuthError('Sign in failed. Please try again.');
+        const errorMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['auth_error_signin'] ? TRANSLATIONS[currentLang]['auth_error_signin'] : 'Sign in failed. Please try again.';
+        showAuthError(errorMsg);
       }
     }
 
@@ -785,18 +790,21 @@
       const diffHours = Math.floor(diffMs / 3600000);
       const diffDays = Math.floor(diffMs / 86400000);
 
-      if (diffMins < 1) return 'Just now';
-      if (diffMins < 60) return `${diffMins}m ago`;
-      if (diffHours < 24) return `${diffHours}h ago`;
-      if (diffDays < 7) return `${diffDays}d ago`;
+      const locale = currentLang === 'es' ? 'es-ES' : 'en-US';
+
+      if (diffMins < 1) return currentLang === 'es' ? 'Justo ahora' : 'Just now';
+      if (diffMins < 60) return currentLang === 'es' ? `${diffMins}m hace` : `${diffMins}m ago`;
+      if (diffHours < 24) return currentLang === 'es' ? `${diffHours}h hace` : `${diffHours}h ago`;
+      if (diffDays < 7) return currentLang === 'es' ? `${diffDays}d hace` : `${diffDays}d ago`;
 
       const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-      return date.toLocaleDateString('en-US', options);
+      return date.toLocaleDateString(locale, options);
     }
 
     function formatFullTimestamp(timestamp) {
       if (!timestamp) return '—';
       const date = new Date(timestamp);
+      const locale = currentLang === 'es' ? 'es-ES' : 'en-US';
       const options = {
         month: 'short',
         day: 'numeric',
@@ -805,7 +813,7 @@
         minute: '2-digit',
         second: '2-digit'
       };
-      return date.toLocaleDateString('en-US', options);
+      return date.toLocaleDateString(locale, options);
     }
 
     function applyFilters() {
@@ -848,29 +856,42 @@
       renderAuditTable();
     }
 
+    function getActionTypeTranslation(action) {
+      const key = `audit_actiontype_${action || 'created'}`;
+      return TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key] ? TRANSLATIONS[currentLang][key] : action;
+    }
+
     function renderAuditTable() {
       const container = document.getElementById('auditTableContainer');
 
       if (filteredEntries.length === 0) {
+        const emptyTitle = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['audit_empty_title'] ? TRANSLATIONS[currentLang]['audit_empty_title'] : 'No audit trail entries yet';
+        const emptyText = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['audit_empty_text'] ? TRANSLATIONS[currentLang]['audit_empty_text'] : 'Actions taken on the Dashboard will appear here.';
         container.innerHTML = `
           <div class="empty-state">
-            <div class="empty-state-title">No audit trail entries yet</div>
-            <div class="empty-state-text">Actions taken on the Dashboard will appear here.</div>
+            <div class="empty-state-title">${emptyTitle}</div>
+            <div class="empty-state-text">${emptyText}</div>
           </div>
         `;
         return;
       }
+
+      const thTimestamp = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['audit_th_timestamp'] ? TRANSLATIONS[currentLang]['audit_th_timestamp'] : 'Timestamp';
+      const thAction = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['audit_th_action'] ? TRANSLATIONS[currentLang]['audit_th_action'] : 'Action';
+      const thObligation = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['audit_th_obligation'] ? TRANSLATIONS[currentLang]['audit_th_obligation'] : 'Obligation';
+      const thDetails = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['audit_th_details'] ? TRANSLATIONS[currentLang]['audit_th_details'] : 'Details';
+      const thUser = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['audit_th_user'] ? TRANSLATIONS[currentLang]['audit_th_user'] : 'User';
 
       let tableHTML = `
         <div class="table-container">
           <table>
             <thead>
               <tr>
-                <th>Timestamp</th>
-                <th>Action</th>
-                <th>Obligation</th>
-                <th>Details</th>
-                <th>User</th>
+                <th>${thTimestamp}</th>
+                <th>${thAction}</th>
+                <th>${thObligation}</th>
+                <th>${thDetails}</th>
+                <th>${thUser}</th>
               </tr>
             </thead>
             <tbody>
@@ -882,11 +903,12 @@
         const obligation = entry.obligation || 'N/A';
         const details = entry.details || '—';
         const user = entry.user || 'Unknown';
+        const actionLabel = getActionTypeTranslation(entry.action);
 
         tableHTML += `
           <tr>
             <td><div class="timestamp">${timestamp}</div></td>
-            <td><span class="badge ${badgeClass}">${entry.action}</span></td>
+            <td><span class="badge ${badgeClass}">${actionLabel}</span></td>
             <td>${escapeHtml(obligation)}</td>
             <td>${escapeHtml(details)}</td>
             <td>${escapeHtml(user)}</td>
@@ -916,14 +938,21 @@
 
     function exportToCSV() {
       if (filteredEntries.length === 0) {
-        alert('No entries to export.');
+        const noEntriesMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['audit_empty_title'] ? TRANSLATIONS[currentLang]['audit_empty_title'] : 'No entries to export.';
+        alert(noEntriesMsg);
         return;
       }
 
-      const headers = ['Timestamp', 'Action', 'Obligation', 'Details', 'User'];
+      const thTimestamp = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['audit_th_timestamp'] ? TRANSLATIONS[currentLang]['audit_th_timestamp'] : 'Timestamp';
+      const thAction = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['audit_th_action'] ? TRANSLATIONS[currentLang]['audit_th_action'] : 'Action';
+      const thObligation = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['audit_th_obligation'] ? TRANSLATIONS[currentLang]['audit_th_obligation'] : 'Obligation';
+      const thDetails = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['audit_th_details'] ? TRANSLATIONS[currentLang]['audit_th_details'] : 'Details';
+      const thUser = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['audit_th_user'] ? TRANSLATIONS[currentLang]['audit_th_user'] : 'User';
+
+      const headers = [thTimestamp, thAction, thObligation, thDetails, thUser];
       const rows = filteredEntries.map(entry => [
         formatFullTimestamp(entry.timestamp),
-        entry.action || '—',
+        getActionTypeTranslation(entry.action) || '—',
         entry.obligation || '—',
         entry.details || '—',
         entry.user || '—'
@@ -966,7 +995,8 @@
           } else {
             auth.signOut();
             document.getElementById('authOverlay').classList.remove('hidden');
-            showAuthError('Only @nf6capital.com accounts are allowed');
+            const errorMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['auth_error_message'] ? TRANSLATIONS[currentLang]['auth_error_message'] : 'Only @nf6capital.com accounts are allowed';
+            showAuthError(errorMsg);
           }
         } else {
           document.getElementById('authOverlay').classList.remove('hidden');
@@ -978,6 +1008,6 @@
     initAuth();
   </script>
 
-<div class="last-updated-bar" id="lastUpdated">Last updated: <strong>--</strong></div>
+<div class="last-updated-bar" id="lastUpdated"><span data-i18n="audit_lastupdated">Last updated:</span> <strong>--</strong></div>
 </body>
 </html>

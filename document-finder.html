@@ -244,13 +244,13 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-box">
     <h1 class="auth-title">NF6 <span>Capital</span></h1>
-    <p class="auth-sub">Document Finder &mdash; Internal Use Only</p>
-    <button class="google-btn" onclick="signInWithGoogle()">
+    <p class="auth-sub" data-i18n="doc_auth_subtitle">Document Finder &mdash; Internal Use Only</p>
+    <button class="google-btn" onclick="signInWithGoogle()" data-i18n="doc_auth_signin">
       <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Sign in with Google
     </button>
     <div class="auth-error" id="authError"></div>
-    <p class="auth-domain">Restricted to @nf6capital.com accounts</p>
+    <p class="auth-domain" data-i18n="doc_auth_domain">Restricted to @nf6capital.com accounts</p>
   </div>
 </div>
 
@@ -293,10 +293,10 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
   <!-- SIDEBAR: Folder Tree -->
   <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-title">&#128193; Folders</div>
+      <div class="sidebar-title" data-i18n="doc_sidebar_folders">&#128193; Folders</div>
       <div class="sidebar-count" id="totalDocsCount">0 docs</div>
     </div>
-    <div class="all-docs-btn active" onclick="showAllDocs()">&#128196; All Documents</div>
+    <div class="all-docs-btn active" onclick="showAllDocs()" data-i18n="doc_all_docs">&#128196; All Documents</div>
     <ul class="folder-tree" id="folderTree"></ul>
   </div>
 
@@ -305,22 +305,22 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
     <!-- TOOLBAR -->
     <div class="toolbar">
       <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Search documents by name, entity, category..." oninput="filterDocs()">
+        <input type="text" id="searchInput" placeholder="Search documents by name, entity, category..." oninput="filterDocs()" data-i18n="doc_search_placeholder">
       </div>
-      <button class="toolbar-btn primary" onclick="openUploadModal()">&#x2B06; Upload</button>
-      <button class="toolbar-btn" onclick="exportIndex()">&#x2B07; Export Index</button>
+      <button class="toolbar-btn primary" onclick="openUploadModal()" data-i18n="doc_upload_btn">&#x2B06; Upload</button>
+      <button class="toolbar-btn" onclick="exportIndex()" data-i18n="doc_export_csv">&#x2B07; Export Index</button>
       <div class="view-toggle">
-        <button class="active" id="listViewBtn" onclick="setView('list')">&#9776;</button>
-        <button id="gridViewBtn" onclick="setView('grid')">&#9638;</button>
+        <button class="active" id="listViewBtn" onclick="setView('list')" title="List view">&#9776;</button>
+        <button id="gridViewBtn" onclick="setView('grid')" title="Grid view">&#9638;</button>
       </div>
     </div>
 
     <!-- STATS -->
     <div class="stats-bar" id="statsBar">
-      <div class="stat-pill"><strong id="statTotal">0</strong>&nbsp;total</div>
-      <div class="stat-pill"><strong id="statPdf">0</strong>&nbsp;PDFs</div>
-      <div class="stat-pill"><strong id="statRecent">0</strong>&nbsp;this month</div>
-      <div class="stat-pill"><strong id="statSize">0 MB</strong>&nbsp;stored</div>
+      <div class="stat-pill"><strong id="statTotal">0</strong>&nbsp;<span data-i18n="doc_stat_total">total</span></div>
+      <div class="stat-pill"><strong id="statPdf">0</strong>&nbsp;<span data-i18n="doc_stat_pdfs">PDFs</span></div>
+      <div class="stat-pill"><strong id="statRecent">0</strong>&nbsp;<span data-i18n="doc_stat_month">this month</span></div>
+      <div class="stat-pill"><strong id="statSize">0 MB</strong>&nbsp;<span data-i18n="doc_stat_storage">stored</span></div>
     </div>
 
     <!-- BREADCRUMB -->
@@ -331,7 +331,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
     <!-- FILE DISPLAY -->
     <div id="fileListView">
       <div class="file-list-header">
-        <div>Name</div><div>Entity</div><div>Category</div><div>Date</div><div></div>
+        <div data-i18n="doc_col_name">Name</div><div data-i18n="doc_col_entity">Entity</div><div data-i18n="doc_col_category">Category</div><div data-i18n="doc_col_date">Date</div><div></div>
       </div>
       <div id="fileListBody"></div>
     </div>
@@ -342,8 +342,8 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
     <!-- EMPTY STATE -->
     <div class="empty-state" id="emptyState" style="display:none">
       <div class="empty-icon">&#128194;</div>
-      <h3>No documents yet</h3>
-      <p>Upload your first document to get started. Files are auto-organized by entity and category.</p>
+      <h3 data-i18n="doc_empty_title">No documents yet</h3>
+      <p data-i18n="doc_empty_desc">Upload your first document to get started. Files are auto-organized by entity and category.</p>
     </div>
   </div>
 </div>
@@ -352,22 +352,22 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
 <div class="modal-overlay" id="uploadModal">
   <div class="modal">
     <div class="modal-header">
-      <h2>&#x2B06; Upload Documents</h2>
+      <h2 data-i18n="doc_modal_title">&#x2B06; Upload Documents</h2>
       <button class="modal-close" onclick="closeUploadModal()">&times;</button>
     </div>
     <div class="modal-body">
       <div class="upload-zone" id="modalDropZone" onclick="document.getElementById('fileInput').click()">
         <div class="icon">&#128194;</div>
-        <h3>Drop files here or click to browse</h3>
-        <p>PDF, DOC, DOCX, XLS, XLSX, PNG, JPG &mdash; Max 25MB per file</p>
+        <h3 data-i18n="doc_upload_drop">Drop files here or click to browse</h3>
+        <p data-i18n="doc_upload_help">PDF, DOC, DOCX, XLS, XLSX, PNG, JPG &mdash; Max 25MB per file</p>
       </div>
       <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.txt,.csv" style="display:none">
       <div class="file-drop-list" id="fileDropList"></div>
       <div class="form-row">
         <div class="form-group">
-          <label>Entity</label>
+          <label data-i18n="doc_form_entity">Entity</label>
           <select id="uploadEntity">
-            <option value="">Select entity...</option>
+            <option value="" data-i18n="doc_select_entity">Select entity...</option>
             <option value="NF MDE CO">NF MDE CO</option>
             <option value="MN Personal">MN Personal</option>
             <option value="Paris Thacko">Paris Thacko</option>
@@ -376,40 +376,40 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
           </select>
         </div>
         <div class="form-group">
-          <label>Category</label>
+          <label data-i18n="doc_form_category">Category</label>
           <select id="uploadCategory">
-            <option value="">Select category...</option>
-            <option value="Tax">Tax</option>
-            <option value="Legal">Legal</option>
-            <option value="Insurance">Insurance</option>
-            <option value="Compliance">Compliance</option>
-            <option value="Banking">Banking</option>
-            <option value="Contracts">Contracts</option>
-            <option value="Property">Property</option>
-            <option value="Maintenance">Maintenance</option>
-            <option value="Govt/Permits">Govt/Permits</option>
-            <option value="Other">Other</option>
+            <option value="" data-i18n="doc_select_category">Select category...</option>
+            <option value="Tax" data-i18n="cat_tax">Tax</option>
+            <option value="Legal" data-i18n="cat_legal">Legal</option>
+            <option value="Insurance" data-i18n="cat_insurance">Insurance</option>
+            <option value="Compliance" data-i18n="cat_compliance">Compliance</option>
+            <option value="Banking" data-i18n="cat_banking">Banking</option>
+            <option value="Contracts" data-i18n="cat_contracts">Contracts</option>
+            <option value="Property" data-i18n="cat_property">Property</option>
+            <option value="Maintenance" data-i18n="cat_maintenance">Maintenance</option>
+            <option value="Govt/Permits" data-i18n="cat_govt">Govt/Permits</option>
+            <option value="Other" data-i18n="cat_other">Other</option>
           </select>
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>Document Date</label>
+          <label data-i18n="doc_form_date">Document Date</label>
           <input type="date" id="uploadDate">
         </div>
         <div class="form-group">
-          <label>Custom Name (optional)</label>
-          <input type="text" id="uploadName" placeholder="Auto-generated if blank">
+          <label data-i18n="doc_form_name">Custom Name (optional)</label>
+          <input type="text" id="uploadName" placeholder="Auto-generated if blank" data-i18n="doc_form_name_placeholder">
         </div>
       </div>
       <div class="form-group full" style="margin-top:.3rem">
-        <label>Notes (optional)</label>
-        <input type="text" id="uploadNotes" placeholder="Brief description or notes...">
+        <label data-i18n="doc_form_notes">Notes (optional)</label>
+        <input type="text" id="uploadNotes" placeholder="Brief description or notes..." data-i18n="doc_form_notes_placeholder">
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn" onclick="closeUploadModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="uploadFiles()" id="uploadBtn">Upload &amp; Organize</button>
+      <button class="btn" onclick="closeUploadModal()" data-i18n="doc_btn_cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="uploadFiles()" id="uploadBtn" data-i18n="doc_btn_upload">Upload &amp; Organize</button>
     </div>
   </div>
 </div>
@@ -417,7 +417,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
 <!-- PREVIEW PANEL -->
 <div class="preview-panel" id="previewPanel">
   <div class="preview-header">
-    <h3 id="previewTitle">Document Details</h3>
+    <h3 id="previewTitle" data-i18n="doc_preview_title">Document Details</h3>
     <button class="preview-close" onclick="closePreview()">&times;</button>
   </div>
   <div class="preview-body">
@@ -427,7 +427,7 @@ nav{background:var(--nav);color:#fff;padding:0 1.25rem;height:56px;display:flex;
   <div class="preview-actions" id="previewActions"></div>
 </div>
 
-<div class="last-updated-bar" id="lastUpdated">Last updated: <strong>--</strong></div>
+<div class="last-updated-bar" id="lastUpdated"><span data-i18n="doc_last_updated">Last updated</span>: <strong>--</strong></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -490,7 +490,7 @@ function signOutUser() { firebase.auth().signOut(); }
 // ════════════════════════════════
 // THEME + LANG
 // ════════════════════════════════
-const TRANSLATIONS={en:{nav_homebase:'HomeBase',nav_dashboard:'Dashboard',nav_calendar:'Calendar',nav_audit:'Audit Trail',nav_upload:'Upload',nav_docfinder:'Documents'},es:{nav_homebase:'Inicio',nav_dashboard:'Panel',nav_calendar:'Calendario',nav_audit:'Historial',nav_upload:'Cargar',nav_docfinder:'Documentos'}};
+const TRANSLATIONS={en:{nav_homebase:'HomeBase',nav_dashboard:'Dashboard',nav_calendar:'Calendar',nav_audit:'Audit Trail',nav_upload:'Upload',nav_docfinder:'Documents',doc_sidebar_folders:'Folders',doc_all_docs:'All Documents',doc_search_placeholder:'Search documents by name, entity, category...',doc_upload_btn:'Upload',doc_export_csv:'Export Index',doc_stat_total:'total',doc_stat_pdfs:'PDFs',doc_stat_month:'this month',doc_stat_storage:'stored',doc_col_name:'Name',doc_col_entity:'Entity',doc_col_category:'Category',doc_col_date:'Date',doc_empty_title:'No documents yet',doc_empty_desc:'Upload your first document to get started. Files are auto-organized by entity and category.',doc_modal_title:'Upload Documents',doc_upload_drop:'Drop files here or click to browse',doc_upload_help:'PDF, DOC, DOCX, XLS, XLSX, PNG, JPG — Max 25MB per file',doc_form_entity:'Entity',doc_select_entity:'Select entity...',doc_form_category:'Category',doc_select_category:'Select category...',doc_form_date:'Document Date',doc_form_name:'Custom Name (optional)',doc_form_name_placeholder:'Auto-generated if blank',doc_form_notes:'Notes (optional)',doc_form_notes_placeholder:'Brief description or notes...',doc_btn_cancel:'Cancel',doc_btn_upload:'Upload & Organize',doc_preview_title:'Document Details',doc_last_updated:'Last updated',doc_preview_orig_name:'Original Name',doc_preview_entity:'Entity',doc_preview_category:'Category',doc_preview_doc_date:'Document Date',doc_preview_file_size:'File Size',doc_preview_file_type:'File Type',doc_preview_uploaded:'Uploaded',doc_preview_uploaded_by:'Uploaded By',doc_preview_notes:'Notes',doc_preview_storage:'Storage Path',doc_btn_download:'Download',doc_btn_delete:'Delete',cat_tax:'Tax',cat_legal:'Legal',cat_insurance:'Insurance',cat_compliance:'Compliance',cat_banking:'Banking',cat_contracts:'Contracts',cat_property:'Property',cat_maintenance:'Maintenance',cat_govt:'Govt/Permits',cat_other:'Other',doc_toast_exceed:'exceeds 25MB limit',doc_toast_select_entity:'Please select an entity',doc_toast_select_category:'Please select a category',doc_toast_add_files:'Please add at least one file',doc_toast_uploading:'Uploading...',doc_toast_error_upload:'Error uploading',doc_toast_upload_success:'file(s) successfully!',doc_toast_no_download:'No download URL available. File may be stored locally only.',doc_toast_confirm_delete:'Delete',doc_toast_delete_confirm:'? This cannot be undone.',doc_toast_deleted:'Document deleted',doc_toast_exported:'Document index exported',doc_toast_no_export:'No documents to export',doc_docs_label:'docs',doc_auth_subtitle:'Document Finder — Internal Use Only',doc_auth_signin:'Sign in with Google',doc_auth_domain:'Restricted to @nf6capital.com accounts'},es:{nav_homebase:'Inicio',nav_dashboard:'Panel',nav_calendar:'Calendario',nav_audit:'Historial',nav_upload:'Cargar',nav_docfinder:'Documentos',doc_sidebar_folders:'Carpetas',doc_all_docs:'Todos los Documentos',doc_search_placeholder:'Buscar documentos por nombre, entidad, categoría...',doc_upload_btn:'Cargar',doc_export_csv:'Exportar Índice',doc_stat_total:'total',doc_stat_pdfs:'PDFs',doc_stat_month:'este mes',doc_stat_storage:'almacenado',doc_col_name:'Nombre',doc_col_entity:'Entidad',doc_col_category:'Categoría',doc_col_date:'Fecha',doc_empty_title:'Sin documentos aún',doc_empty_desc:'Cargue su primer documento para comenzar. Los archivos se organizan automáticamente por entidad y categoría.',doc_modal_title:'Cargar Documentos',doc_upload_drop:'Suelte los archivos aquí o haga clic para examinar',doc_upload_help:'PDF, DOC, DOCX, XLS, XLSX, PNG, JPG — Máximo 25MB por archivo',doc_form_entity:'Entidad',doc_select_entity:'Seleccionar entidad...',doc_form_category:'Categoría',doc_select_category:'Seleccionar categoría...',doc_form_date:'Fecha del Documento',doc_form_name:'Nombre Personalizado (opcional)',doc_form_name_placeholder:'Auto-generado si está en blanco',doc_form_notes:'Notas (opcional)',doc_form_notes_placeholder:'Descripción breve o notas...',doc_btn_cancel:'Cancelar',doc_btn_upload:'Cargar y Organizar',doc_preview_title:'Detalles del Documento',doc_last_updated:'Última actualización',doc_preview_orig_name:'Nombre Original',doc_preview_entity:'Entidad',doc_preview_category:'Categoría',doc_preview_doc_date:'Fecha del Documento',doc_preview_file_size:'Tamaño del Archivo',doc_preview_file_type:'Tipo de Archivo',doc_preview_uploaded:'Cargado',doc_preview_uploaded_by:'Cargado Por',doc_preview_notes:'Notas',doc_preview_storage:'Ruta de Almacenamiento',doc_btn_download:'Descargar',doc_btn_delete:'Eliminar',cat_tax:'Impuestos',cat_legal:'Legal',cat_insurance:'Seguros',cat_compliance:'Cumplimiento',cat_banking:'Banca',cat_contracts:'Contratos',cat_property:'Propiedad',cat_maintenance:'Mantenimiento',cat_govt:'Gobierno/Permisos',cat_other:'Otros',doc_toast_exceed:'excede límite de 25MB',doc_toast_select_entity:'Por favor seleccione una entidad',doc_toast_select_category:'Por favor seleccione una categoría',doc_toast_add_files:'Por favor agregue al menos un archivo',doc_toast_uploading:'Cargando...',doc_toast_error_upload:'Error al cargar',doc_toast_upload_success:'archivo(s) cargado(s) exitosamente!',doc_toast_no_download:'URL de descarga no disponible. El archivo puede estar almacenado solo localmente.',doc_toast_confirm_delete:'Eliminar',doc_toast_delete_confirm:'? No se puede deshacer.',doc_toast_deleted:'Documento eliminado',doc_toast_exported:'Índice de documentos exportado',doc_toast_no_export:'Sin documentos para exportar',doc_docs_label:'docs',doc_auth_subtitle:'Buscador de Documentos — Solo Uso Interno',doc_auth_signin:'Iniciar sesión con Google',doc_auth_domain:'Restringido a cuentas @nf6capital.com'}};
 let currentLang=localStorage.getItem('nf6_lang')||'en';
 let currentTheme=localStorage.getItem('nf6_theme')||'light';
 function applyLang(lang){currentLang=lang;localStorage.setItem('nf6_lang',lang);document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(TRANSLATIONS[lang]&&TRANSLATIONS[lang][k])el.textContent=TRANSLATIONS[lang][k];});const lb=document.getElementById('langLabel');if(lb)lb.textContent=lang==='en'?'ES':'EN';}
@@ -505,7 +505,7 @@ function updateClocks(){const now=new Date();const fmt=(tz)=>now.toLocaleTimeStr
 setInterval(updateClocks,1000);updateClocks();
 function updateTodayBadge(){const el=document.getElementById('todayBadge');if(el)el.textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
 updateTodayBadge();
-function updateLastUpdated(){const el=document.getElementById('lastUpdated');if(el)el.innerHTML='Last updated: <strong>'+new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})+'</strong>';}
+function updateLastUpdated(){const el=document.getElementById('lastUpdated');if(el){const lastUpdatedLabel=TRANSLATIONS[currentLang]&&TRANSLATIONS[currentLang]['doc_last_updated']?TRANSLATIONS[currentLang]['doc_last_updated']:'Last updated';el.innerHTML=lastUpdatedLabel+': <strong>'+new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})+'</strong>';}}
 updateLastUpdated();setInterval(updateLastUpdated,60000);
 
 // ════════════════════════════════
@@ -542,6 +542,13 @@ function generateFileName(originalName, entity, category, dateStr) {
 // ════════════════════════════════
 // FOLDER TREE
 // ════════════════════════════════
+function getCategoryLabel(cat) {
+  const key = 'cat_' + cat.toLowerCase().replace('/','_').replace(/ /g,'_');
+  if(TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) {
+    return TRANSLATIONS[currentLang][key];
+  }
+  return cat;
+}
 function buildFolderTree() {
   const tree = document.getElementById('folderTree');
   tree.innerHTML = '';
@@ -562,14 +569,15 @@ function buildFolderTree() {
           if(count === 0) return '';
           return `<li class="folder-cat-item" onclick="filterByFolder('${entity}','${cat}')" data-entity="${entity}" data-cat="${cat}">
             <span class="cat-icon">${CAT_ICONS[cat]||'\u{1F4C1}'}</span>
-            ${cat}
+            ${getCategoryLabel(cat)}
             <span class="cat-count">${count}</span>
           </li>`;
         }).join('')}
       </ul>`;
     tree.appendChild(li);
   });
-  document.getElementById('totalDocsCount').textContent = documents.length + ' docs';
+  const docsLabel = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_docs_label'] ? TRANSLATIONS[currentLang]['doc_docs_label'] : 'docs';
+  document.getElementById('totalDocsCount').textContent = documents.length + ' ' + docsLabel;
 }
 
 function toggleEntity(header) {
@@ -599,12 +607,13 @@ function showAllDocs() {
 
 function updateBreadcrumb() {
   const bc = document.getElementById('breadcrumb');
-  let html = '<a onclick="showAllDocs()">All Documents</a>';
+  const allDocsLabel = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_all_docs'] ? TRANSLATIONS[currentLang]['doc_all_docs'] : 'All Documents';
+  let html = '<a onclick="showAllDocs()">'+allDocsLabel+'</a>';
   if(currentFilter.entity) {
     html += ' <span class="sep">/</span> <a onclick="filterByFolder(\''+currentFilter.entity+'\',null)">' + currentFilter.entity + '</a>';
   }
   if(currentFilter.category) {
-    html += ' <span class="sep">/</span> <span>' + currentFilter.category + '</span>';
+    html += ' <span class="sep">/</span> <span>' + getCategoryLabel(currentFilter.category) + '</span>';
   }
   bc.innerHTML = html;
 }
@@ -650,11 +659,11 @@ function renderFileList() {
         <span class="file-icon">${getFileIcon(doc.originalName)}</span>
         <div class="file-info">
           <div class="name">${doc.displayName}</div>
-          <div class="path">${doc.entity} / ${doc.category}</div>
+          <div class="path">${doc.entity} / ${getCategoryLabel(doc.category)}</div>
         </div>
       </div>
       <div class="file-entity"><span class="badge ${CAT_BADGE[doc.category]||'badge-other'}">${doc.entity}</span></div>
-      <div class="file-category"><span class="badge ${CAT_BADGE[doc.category]||'badge-other'}">${doc.category}</span></div>
+      <div class="file-category"><span class="badge ${CAT_BADGE[doc.category]||'badge-other'}">${getCategoryLabel(doc.category)}</span></div>
       <div class="file-date">${doc.docDate || '--'}</div>
       <div class="file-actions">
         <button class="file-action-btn" onclick="event.stopPropagation();downloadDoc(${documents.indexOf(doc)})" title="Download">&#x2B07;</button>
@@ -668,7 +677,7 @@ function renderFileList() {
     <div class="file-grid-card" onclick="openPreview(${documents.indexOf(doc)})">
       <div class="file-grid-icon">${getFileIcon(doc.originalName)}</div>
       <div class="file-grid-name">${doc.displayName}</div>
-      <div class="file-grid-meta">${doc.entity} &middot; ${doc.category}</div>
+      <div class="file-grid-meta">${doc.entity} &middot; ${getCategoryLabel(doc.category)}</div>
       <div class="file-grid-meta">${doc.docDate || ''} &middot; ${formatSize(doc.size||0)}</div>
     </div>
   `).join('');
@@ -719,8 +728,9 @@ modalDrop.addEventListener('drop', ev => { addPendingFiles(ev.dataTransfer.files
 document.getElementById('fileInput').addEventListener('change', ev => { addPendingFiles(ev.target.files); ev.target.value=''; });
 
 function addPendingFiles(fileList) {
+  const exceedMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_toast_exceed'] ? TRANSLATIONS[currentLang]['doc_toast_exceed'] : 'exceeds 25MB limit';
   for(let f of fileList) {
-    if(f.size > 25*1024*1024) { showToast(f.name + ' exceeds 25MB limit','error'); continue; }
+    if(f.size > 25*1024*1024) { showToast(f.name + ' ' + exceedMsg,'error'); continue; }
     pendingFiles.push(f);
   }
   renderPendingFiles();
@@ -747,13 +757,18 @@ async function uploadFiles() {
   const customName = document.getElementById('uploadName').value.trim();
   const notes = document.getElementById('uploadNotes').value.trim();
 
-  if(!entity) { showToast('Please select an entity','error'); return; }
-  if(!category) { showToast('Please select a category','error'); return; }
-  if(!pendingFiles.length) { showToast('Please add at least one file','error'); return; }
+  const selectEntityMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_toast_select_entity'] ? TRANSLATIONS[currentLang]['doc_toast_select_entity'] : 'Please select an entity';
+  const selectCategoryMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_toast_select_category'] ? TRANSLATIONS[currentLang]['doc_toast_select_category'] : 'Please select a category';
+  const addFilesMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_toast_add_files'] ? TRANSLATIONS[currentLang]['doc_toast_add_files'] : 'Please add at least one file';
+  const uploadingMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_toast_uploading'] ? TRANSLATIONS[currentLang]['doc_toast_uploading'] : 'Uploading...';
+
+  if(!entity) { showToast(selectEntityMsg,'error'); return; }
+  if(!category) { showToast(selectCategoryMsg,'error'); return; }
+  if(!pendingFiles.length) { showToast(addFilesMsg,'error'); return; }
 
   const btn = document.getElementById('uploadBtn');
   btn.disabled = true;
-  btn.textContent = 'Uploading...';
+  btn.textContent = uploadingMsg;
 
   for(const file of pendingFiles) {
     try {
@@ -789,7 +804,8 @@ async function uploadFiles() {
       };
       documents.push(docRecord);
     } catch(e) {
-      showToast('Error uploading ' + file.name + ': ' + e.message, 'error');
+      const errorMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_toast_error_upload'] ? TRANSLATIONS[currentLang]['doc_toast_error_upload'] : 'Error uploading';
+      showToast(errorMsg + ' ' + file.name + ': ' + e.message, 'error');
     }
   }
 
@@ -797,8 +813,10 @@ async function uploadFiles() {
   renderAll();
   closeUploadModal();
   btn.disabled = false;
-  btn.textContent = 'Upload & Organize';
-  showToast('Uploaded ' + pendingFiles.length + ' file(s) successfully!', 'success');
+  const uploadBtnText = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_btn_upload'] ? TRANSLATIONS[currentLang]['doc_btn_upload'] : 'Upload & Organize';
+  btn.textContent = uploadBtnText;
+  const successMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_toast_upload_success'] ? 'Uploaded ' + pendingFiles.length + ' ' + TRANSLATIONS[currentLang]['doc_toast_upload_success'] : 'Uploaded ' + pendingFiles.length + ' file(s) successfully!';
+  showToast(successMsg, 'success');
 }
 
 // ════════════════════════════════
@@ -809,12 +827,17 @@ function downloadDoc(idx) {
   if(doc.downloadURL) {
     window.open(doc.downloadURL, '_blank');
   } else {
-    showToast('No download URL available. File may be stored locally only.', 'error');
+    const noDownloadMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_toast_no_download'] ? TRANSLATIONS[currentLang]['doc_toast_no_download'] : 'No download URL available. File may be stored locally only.';
+    showToast(noDownloadMsg, 'error');
   }
 }
 
 function deleteDoc(idx) {
-  if(!confirm('Delete "' + documents[idx].displayName + '"? This cannot be undone.')) return;
+  const deleteMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_toast_confirm_delete'] ? TRANSLATIONS[currentLang]['doc_toast_confirm_delete'] : 'Delete';
+  const deleteConfirmMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_toast_delete_confirm'] ? TRANSLATIONS[currentLang]['doc_toast_delete_confirm'] : '? This cannot be undone.';
+  const deletedMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_toast_deleted'] ? TRANSLATIONS[currentLang]['doc_toast_deleted'] : 'Document deleted';
+
+  if(!confirm(deleteMsg + ' "' + documents[idx].displayName + '"' + deleteConfirmMsg)) return;
   const doc = documents[idx];
   // Try to delete from Firebase Storage
   if(storageRef && doc.storagePath) {
@@ -824,7 +847,7 @@ function deleteDoc(idx) {
   saveDocs();
   renderAll();
   closePreview();
-  showToast('Document deleted', 'success');
+  showToast(deletedMsg, 'success');
 }
 
 function openPreview(idx) {
@@ -832,28 +855,47 @@ function openPreview(idx) {
   const panel = document.getElementById('previewPanel');
   document.getElementById('previewTitle').textContent = doc.displayName;
   document.getElementById('previewIcon').textContent = getFileIcon(doc.originalName);
+
+  const origNameLabel = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_preview_orig_name'] ? TRANSLATIONS[currentLang]['doc_preview_orig_name'] : 'Original Name';
+  const entityLabel = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_preview_entity'] ? TRANSLATIONS[currentLang]['doc_preview_entity'] : 'Entity';
+  const categoryLabel = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_preview_category'] ? TRANSLATIONS[currentLang]['doc_preview_category'] : 'Category';
+  const docDateLabel = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_preview_doc_date'] ? TRANSLATIONS[currentLang]['doc_preview_doc_date'] : 'Document Date';
+  const fileSizeLabel = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_preview_file_size'] ? TRANSLATIONS[currentLang]['doc_preview_file_size'] : 'File Size';
+  const fileTypeLabel = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_preview_file_type'] ? TRANSLATIONS[currentLang]['doc_preview_file_type'] : 'File Type';
+  const uploadedLabel = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_preview_uploaded'] ? TRANSLATIONS[currentLang]['doc_preview_uploaded'] : 'Uploaded';
+  const uploadedByLabel = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_preview_uploaded_by'] ? TRANSLATIONS[currentLang]['doc_preview_uploaded_by'] : 'Uploaded By';
+  const notesLabel = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_preview_notes'] ? TRANSLATIONS[currentLang]['doc_preview_notes'] : 'Notes';
+  const storageLabel = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_preview_storage'] ? TRANSLATIONS[currentLang]['doc_preview_storage'] : 'Storage Path';
+
   document.getElementById('previewMeta').innerHTML = `
-    <div class="preview-meta-row"><span class="label">Original Name</span><span class="value">${doc.originalName}</span></div>
-    <div class="preview-meta-row"><span class="label">Entity</span><span class="value">${doc.entity}</span></div>
-    <div class="preview-meta-row"><span class="label">Category</span><span class="value"><span class="badge ${CAT_BADGE[doc.category]||'badge-other'}">${doc.category}</span></span></div>
-    <div class="preview-meta-row"><span class="label">Document Date</span><span class="value">${doc.docDate || '--'}</span></div>
-    <div class="preview-meta-row"><span class="label">File Size</span><span class="value">${formatSize(doc.size||0)}</span></div>
-    <div class="preview-meta-row"><span class="label">File Type</span><span class="value">${doc.type || 'Unknown'}</span></div>
-    <div class="preview-meta-row"><span class="label">Uploaded</span><span class="value">${new Date(doc.uploadedAt).toLocaleString()}</span></div>
-    <div class="preview-meta-row"><span class="label">Uploaded By</span><span class="value">${doc.uploadedBy || '--'}</span></div>
-    ${doc.notes ? '<div class="preview-meta-row"><span class="label">Notes</span><span class="value">'+doc.notes+'</span></div>' : ''}
-    <div class="preview-meta-row"><span class="label">Storage Path</span><span class="value" style="font-size:.7rem;word-break:break-all">${doc.storagePath || '--'}</span></div>
+    <div class="preview-meta-row"><span class="label">${origNameLabel}</span><span class="value">${doc.originalName}</span></div>
+    <div class="preview-meta-row"><span class="label">${entityLabel}</span><span class="value">${doc.entity}</span></div>
+    <div class="preview-meta-row"><span class="label">${categoryLabel}</span><span class="value"><span class="badge ${CAT_BADGE[doc.category]||'badge-other'}">${getCategoryLabel(doc.category)}</span></span></div>
+    <div class="preview-meta-row"><span class="label">${docDateLabel}</span><span class="value">${doc.docDate || '--'}</span></div>
+    <div class="preview-meta-row"><span class="label">${fileSizeLabel}</span><span class="value">${formatSize(doc.size||0)}</span></div>
+    <div class="preview-meta-row"><span class="label">${fileTypeLabel}</span><span class="value">${doc.type || 'Unknown'}</span></div>
+    <div class="preview-meta-row"><span class="label">${uploadedLabel}</span><span class="value">${new Date(doc.uploadedAt).toLocaleString()}</span></div>
+    <div class="preview-meta-row"><span class="label">${uploadedByLabel}</span><span class="value">${doc.uploadedBy || '--'}</span></div>
+    ${doc.notes ? '<div class="preview-meta-row"><span class="label">'+notesLabel+'</span><span class="value">'+doc.notes+'</span></div>' : ''}
+    <div class="preview-meta-row"><span class="label">${storageLabel}</span><span class="value" style="font-size:.7rem;word-break:break-all">${doc.storagePath || '--'}</span></div>
   `;
+
+  const downloadBtnLabel = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_btn_download'] ? TRANSLATIONS[currentLang]['doc_btn_download'] : 'Download';
+  const deleteBtnLabel = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_btn_delete'] ? TRANSLATIONS[currentLang]['doc_btn_delete'] : 'Delete';
+
   document.getElementById('previewActions').innerHTML = `
-    <button class="btn btn-primary" style="flex:1" onclick="downloadDoc(${idx})">&#x2B07; Download</button>
-    <button class="btn btn-danger" onclick="deleteDoc(${idx})">&#x1F5D1; Delete</button>
+    <button class="btn btn-primary" style="flex:1" onclick="downloadDoc(${idx})">&#x2B07; ${downloadBtnLabel}</button>
+    <button class="btn btn-danger" onclick="deleteDoc(${idx})">&#x1F5D1; ${deleteBtnLabel}</button>
   `;
   panel.classList.add('open');
 }
 function closePreview() { document.getElementById('previewPanel').classList.remove('open'); }
 
 function exportIndex() {
-  if(!documents.length) { showToast('No documents to export','error'); return; }
+  const noExportMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_toast_no_export'] ? TRANSLATIONS[currentLang]['doc_toast_no_export'] : 'No documents to export';
+  const exportedMsg = TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang]['doc_toast_exported'] ? TRANSLATIONS[currentLang]['doc_toast_exported'] : 'Document index exported';
+
+  if(!documents.length) { showToast(noExportMsg,'error'); return; }
   const header = 'Display Name,Original Name,Entity,Category,Date,Size,Notes,Uploaded At,Uploaded By,Storage Path\n';
   const rows = documents.map(d => [d.displayName,d.originalName,d.entity,d.category,d.docDate,d.size,d.notes||'',d.uploadedAt,d.uploadedBy||'',d.storagePath||''].map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const blob = new Blob([header+rows],{type:'text/csv;charset=utf-8;'});
@@ -861,7 +903,7 @@ function exportIndex() {
   a.href = URL.createObjectURL(blob);
   a.download = 'nf6_document_index_' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
-  showToast('Document index exported','success');
+  showToast(exportedMsg,'success');
 }
 
 // ════════════════════════════════

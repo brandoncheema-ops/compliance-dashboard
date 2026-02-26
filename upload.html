@@ -138,13 +138,13 @@
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-box">
     <h1 class="auth-title">NF6 <span>Capital</span></h1>
-    <p class="auth-sub">Compliance Dashboard &mdash; Internal Use Only</p>
-    <button class="google-btn" onclick="signInWithGoogle()">
+    <p class="auth-sub" data-i18n="auth_upload_subtitle">Upload Data &mdash; Internal Use Only</p>
+    <button class="google-btn" onclick="signInWithGoogle()" data-i18n="auth_signin">
       <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Sign in with Google
     </button>
     <div class="auth-error" id="authError"></div>
-    <p class="auth-domain">Restricted to @nf6capital.com accounts</p>
+    <p class="auth-domain" data-i18n="auth_domain">Restricted to @nf6capital.com accounts</p>
   </div>
 </div>
 
@@ -179,33 +179,33 @@
 
 <div class="container">
     <div class="page-header">
-        <h1>Upload Compliance Data</h1>
-        <p>Upload your Google Sheets CSV export to refresh the Dashboard and Calendar with fresh data.</p>
+        <h1 data-i18n="upload_title">Upload Compliance Data</h1>
+        <p data-i18n="upload_desc">Upload your Google Sheets CSV export to refresh the Dashboard and Calendar with fresh data.</p>
     </div>
 
     <!-- STATS -->
     <div class="status-row">
-        <div class="status-card info"><div class="label">Total Items</div><div class="value" id="sTot">--</div></div>
-        <div class="status-card success"><div class="label">Up to Date</div><div class="value" id="sOk">--</div></div>
-        <div class="status-card warning"><div class="label">Due Soon</div><div class="value" id="sDue">--</div></div>
-        <div class="status-card danger"><div class="label">Overdue</div><div class="value" id="sOver">--</div></div>
+        <div class="status-card info"><div class="label" data-i18n="stat_total_items">Total Items</div><div class="value" id="sTot">--</div></div>
+        <div class="status-card success"><div class="label" data-i18n="stat_up_to_date">Up to Date</div><div class="value" id="sOk">--</div></div>
+        <div class="status-card warning"><div class="label" data-i18n="stat_due_soon">Due Soon</div><div class="value" id="sDue">--</div></div>
+        <div class="status-card danger"><div class="label" data-i18n="stat_overdue">Overdue</div><div class="value" id="sOver">--</div></div>
     </div>
 
     <!-- UPLOAD ZONE -->
     <div class="upload-section">
         <div class="upload-zone" id="dropZone" onclick="document.getElementById('csvInput').click()">
             <div class="icon">&#x1F4C1;</div>
-            <h2>Drop your CSV file here</h2>
-            <p>or click to browse &mdash; exported from Google Sheets</p>
-            <div class="formats">Supports .csv and .tsv files</div>
+            <h2 data-i18n="upload_drop_text">Drop your CSV file here</h2>
+            <p data-i18n="upload_browse">or click to browse &mdash; exported from Google Sheets</p>
+            <div class="formats" data-i18n="upload_formats">Supports .csv and .tsv files</div>
         </div>
         <input type="file" id="csvInput" accept=".csv,.tsv,.txt">
     </div>
 
     <!-- COLUMN MAPPING -->
     <div class="mapping-section">
-        <h3>&#x1F504; Column Mapping (auto-detected)</h3>
-        <p style="font-size:.75rem;color:var(--text2);margin-bottom:.5rem">Your Google Sheets columns are mapped to the dashboard fields. Headers are matched by name automatically.</p>
+        <h3 data-i18n="mapping_title">&#x1F504; Column Mapping (auto-detected)</h3>
+        <p style="font-size:.75rem;color:var(--text2);margin-bottom:.5rem" data-i18n="mapping_desc">Your Google Sheets columns are mapped to the dashboard fields. Headers are matched by name automatically.</p>
         <div class="mapping-grid">
             <div class="mapping-row"><span class="csv-col">Status</span><span class="arrow">&#x2192;</span><span class="db-col">status</span></div>
             <div class="mapping-row"><span class="csv-col">Category</span><span class="arrow">&#x2192;</span><span class="db-col">category</span></div>
@@ -222,10 +222,10 @@
 
     <!-- PREVIEW -->
     <div id="previewSection" style="display:none">
-        <div class="section-title">&#x1F50D; Data Preview</div>
+        <div class="section-title" data-i18n="preview_title">&#x1F50D; Data Preview</div>
         <div class="preview-card">
             <div class="preview-header">
-                <h3>Parsed rows</h3>
+                <h3 data-i18n="preview_parsed_rows">Parsed rows</h3>
                 <span class="preview-count" id="previewCount">0 rows</span>
             </div>
             <div class="preview-table-wrap">
@@ -233,25 +233,26 @@
             </div>
         </div>
         <div class="action-bar">
-            <button class="btn primary" id="confirmBtn" onclick="confirmUpload()">&#x2705; Apply to Dashboard &amp; Calendar</button>
-            <button class="btn" onclick="exportCurrentCSV()">&#x1F4E5; Export Current Data</button>
-            <button class="btn danger" onclick="clearPreview()">&#x2716; Cancel</button>
+            <button class="btn primary" id="confirmBtn" onclick="confirmUpload()" data-i18n="btn_import">&#x2705; Apply to Dashboard &amp; Calendar</button>
+            <button class="btn" onclick="exportCurrentCSV()" data-i18n="btn_export">&#x1F4E5; Export Current Data</button>
+            <button class="btn danger" onclick="clearPreview()" data-i18n="btn_cancel">&#x2716; Cancel</button>
         </div>
     </div>
 
     <!-- ALWAYS-VISIBLE ACTIONS -->
     <div class="action-bar" id="defaultActions">
-        <button class="btn" onclick="exportCurrentCSV()">&#x1F4E5; Export Current Data as CSV</button>
-        <button class="btn danger" onclick="resetToDefaults()">&#x1F504; Reset to Default Data</button>
+        <button class="btn" onclick="exportCurrentCSV()" data-i18n="btn_export_csv">&#x1F4E5; Export Current Data as CSV</button>
+        <button class="btn danger" onclick="resetToDefaults()" data-i18n="btn_reset">&#x1F504; Reset to Default Data</button>
     </div>
 
     <!-- UPLOAD LOG -->
-    <div class="section-title">&#x1F4CB; Upload History</div>
+    <div class="section-title" data-i18n="upload_history_title">&#x1F4CB; Upload History</div>
     <div class="log-card" id="logCard">
-        <div class="empty-log" id="emptyLog">No uploads yet. Drop a CSV to get started.</div>
+        <div class="empty-log" id="emptyLog" data-i18n="upload_history_empty">No uploads yet. Drop a CSV to get started.</div>
     </div>
 </div>
 
+<div class="last-updated-bar" id="lastUpdated"><span data-i18n="last_updated">Last updated:</span> <strong>--</strong></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -487,12 +488,39 @@ function showToast(msg, type) {
 <div class="last-updated-bar" id="lastUpdated">Last updated: <strong>--</strong></div>
 <script>
 // ── THEME + LANG ──
-const TRANSLATIONS={en:{nav_homebase:'HomeBase',nav_dashboard:'Dashboard',nav_calendar:'Calendar',nav_audit:'Audit Trail',nav_upload:'Upload',nav_docfinder:'Documents',nav_signout:'Sign Out'},es:{nav_homebase:'Inicio',nav_dashboard:'Panel',nav_calendar:'Calendario',nav_audit:'Historial',nav_upload:'Cargar',nav_docfinder:'Documentos',nav_signout:'Cerrar Sesión'}};
+const TRANSLATIONS={
+  en:{
+    nav_homebase:'HomeBase',nav_dashboard:'Dashboard',nav_calendar:'Calendar',nav_audit:'Audit Trail',nav_upload:'Upload',nav_docfinder:'Documents',nav_signout:'Sign Out',
+    auth_signin:'Sign in with Google', auth_domain:'Restricted to @nf6capital.com accounts', auth_upload_subtitle:'Upload Data \u2014 Internal Use Only',
+    theme_dark:'Dark', theme_light:'Light',
+    upload_title:'Upload Compliance Data', upload_desc:'Upload your Google Sheets CSV export to refresh the Dashboard and Calendar with fresh data.',
+    upload_drop_text:'Drop your CSV file here', upload_browse:'or click to browse \u2014 exported from Google Sheets', upload_formats:'Supports .csv and .tsv files',
+    stat_total_items:'Total Items', stat_up_to_date:'Up to Date', stat_due_soon:'Due Soon', stat_overdue:'Overdue',
+    mapping_title:'Column Mapping (auto-detected)', mapping_desc:'Your Google Sheets columns are mapped to the dashboard fields. Headers are matched by name automatically.',
+    preview_title:'Data Preview', preview_parsed_rows:'Parsed rows',
+    btn_import:'Apply to Dashboard & Calendar', btn_export:'Export Current Data', btn_cancel:'Cancel', btn_export_csv:'Export Current Data as CSV', btn_reset:'Reset to Default Data',
+    upload_history_title:'Upload History', upload_history_empty:'No uploads yet. Drop a CSV to get started.',
+    last_updated:'Last updated:'
+  },
+  es:{
+    nav_homebase:'Inicio',nav_dashboard:'Panel',nav_calendar:'Calendario',nav_audit:'Historial',nav_upload:'Cargar',nav_docfinder:'Documentos',nav_signout:'Cerrar Sesión',
+    auth_signin:'Iniciar sesi\u00f3n con Google', auth_domain:'Restringido a cuentas @nf6capital.com', auth_upload_subtitle:'Cargar datos \u2014 Solo para uso interno',
+    theme_dark:'Oscuro', theme_light:'Claro',
+    upload_title:'Cargar Datos de Cumplimiento', upload_desc:'Cargue su exportaci\u00f3n CSV de Google Sheets para actualizar el Panel y Calendario con datos frescos.',
+    upload_drop_text:'Suelte su archivo CSV aqu\u00ed', upload_browse:'o haga clic para explorar \u2014 exportado desde Google Sheets', upload_formats:'Compatible con archivos .csv y .tsv',
+    stat_total_items:'Total de elementos', stat_up_to_date:'Al d\u00eda', stat_due_soon:'Pronto vencen', stat_overdue:'Vencidos',
+    mapping_title:'Mapeo de columnas (detectado autom\u00e1ticamente)', mapping_desc:'Sus columnas de Google Sheets se asignan a los campos del panel. Los encabezados se emparejan autom\u00e1ticamente por nombre.',
+    preview_title:'Vista previa de datos', preview_parsed_rows:'Filas analizadas',
+    btn_import:'Aplicar al Panel y Calendario', btn_export:'Exportar datos actuales', btn_cancel:'Cancelar', btn_export_csv:'Exportar datos actuales como CSV', btn_reset:'Restablecer datos predeterminados',
+    upload_history_title:'Historial de cargas', upload_history_empty:'Sin cargas a\u00fan. Suelte un CSV para comenzar.',
+    last_updated:'\u00daltima actualizaci\u00f3n:'
+  }
+};
 let currentLang=localStorage.getItem('nf6_lang')||'en';
 let currentTheme=localStorage.getItem('nf6_theme')||'light';
 function applyLang(lang){currentLang=lang;localStorage.setItem('nf6_lang',lang);document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(TRANSLATIONS[lang]&&TRANSLATIONS[lang][k])el.textContent=TRANSLATIONS[lang][k];});const next=lang==='en'?'ES':'EN';const lb=document.getElementById('langLabel');if(lb)lb.textContent=next;}
 function toggleLang(){applyLang(currentLang==='en'?'es':'en');}
-function applyTheme(theme){currentTheme=theme;localStorage.setItem('nf6_theme',theme);document.documentElement.setAttribute('data-theme',theme);const isDark=theme==='dark';const ti=document.getElementById('themeIcon');if(ti)ti.innerHTML=isDark?'&#9788;':'&#9789;';const tl=document.getElementById('themeLabel');if(tl)tl.textContent=isDark?'Light':'Dark';}
+function applyTheme(theme){currentTheme=theme;localStorage.setItem('nf6_theme',theme);document.documentElement.setAttribute('data-theme',theme);const isDark=theme==='dark';const ti=document.getElementById('themeIcon');if(ti)ti.innerHTML=isDark?'&#9788;':'&#9789;';const tl=document.getElementById('themeLabel');if(tl){const key=isDark?'theme_light':'theme_dark';tl.textContent=TRANSLATIONS[currentLang]&&TRANSLATIONS[currentLang][key]?TRANSLATIONS[currentLang][key]:(isDark?'Light':'Dark');}}
 function toggleTheme(){applyTheme(currentTheme==='light'?'dark':'light');}
 applyTheme(currentTheme);applyLang(currentLang);
 
@@ -501,7 +529,7 @@ function updateClocks(){const now=new Date();const fmt=(tz)=>now.toLocaleTimeStr
 setInterval(updateClocks,1000);updateClocks();
 
 // ── LAST UPDATED ──
-function updateLastUpdated(){const el=document.getElementById('lastUpdated');if(!el)return;el.innerHTML='Last updated: <strong>'+new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})+'</strong>';}
+function updateLastUpdated(){const el=document.getElementById('lastUpdated');if(!el)return;const label=TRANSLATIONS[currentLang]&&TRANSLATIONS[currentLang]['last_updated']?TRANSLATIONS[currentLang]['last_updated']:'Last updated:';el.innerHTML=label+' <strong>'+new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})+'</strong>';}
 updateLastUpdated();setInterval(updateLastUpdated,60000);
 </script>
 </body>
