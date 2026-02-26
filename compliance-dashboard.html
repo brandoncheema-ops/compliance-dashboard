@@ -249,6 +249,7 @@
         <a href="index.html">Home</a>
         <a href="compliance-dashboard.html" class="active">Dashboard</a>
         <a href="compliance-calendar.html">Calendar</a>
+        <a href="audit-trail.html">Audit Trail</a>
     </div>
     <div class="nav-right">
         <div class="today-badge" id="todayBadge"></div>
@@ -260,6 +261,7 @@
     <a href="index.html">Home</a>
     <a href="compliance-dashboard.html" class="active">Dashboard</a>
     <a href="compliance-calendar.html">Calendar</a>
+    <a href="audit-trail.html">Audit Trail</a>
     <a href="#" onclick="signOutUser();return false">Sign Out</a>
 </div>
 
@@ -462,7 +464,7 @@ const FIREBASE_CONFIG = {
 const ALLOWED_DOMAIN = 'nf6capital.com';
 const EMAILJS_PUBLIC_KEY = 'USwgqgHcXPGUVEGN5';
 const EMAILJS_SERVICE_ID = 'service_ih0557y';
-const EMAILJS_TEMPLATE_ID = 'template_zefa3ok';
+const EMAILJS_TEMPLATE_ID = 'template_q1uyl21';
 const REMINDER_EMAIL = 'brandoncheema@gmail.com';
 const AUTH_ENABLED = true; // Firebase Auth is configured
 const FIRESTORE_ENABLED = false; // Set true after Firestore setup
@@ -1040,20 +1042,43 @@ function sendEmailReminders(){
     if(EMAILJS_PUBLIC_KEY==='YOUR_EMAILJS_PUBLIC_KEY'){showToast('EmailJS not configured. See setup guide.','error');return;}
     emailjs.init(EMAILJS_PUBLIC_KEY);
     const allItems=[...upcoming,...escalated.filter(e=>!upcoming.includes(e))];
-    const list=allItems.map(i=>'- '+i.obligation+' ('+i.entity+') \u2014 '+(i._days<0?Math.abs(i._days)+'d OVERDUE'+(i._escalated?' [ESCALATED to '+i.backupPerson+']':''):'Due in '+i._days+'d')).join('\n');
-    emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
-        to_email:REMINDER_EMAIL,
-        subject:'\u26A0\uFE0F NF6 Compliance: '+allItems.length+' items need attention',
-        message:'Hi Brandon,\n\nThe following compliance items need attention:\n\n'+list+'\n\nReview your dashboard for full details.\n\nNF6 Capital Compliance System'
-    }).then(()=>{
-        addAuditEntry('updated','Email Reminders','Sent reminder email for '+allItems.length+' items');
-        showToast('Reminder sent to '+REMINDER_EMAIL+'!','success');
-        // Send escalation emails to backup persons
-        if(escalated.length){
-            const backups=[...new Set(escalated.map(i=>i.backupPerson))];
-            showToast('Escalation alerts sent for '+escalated.length+' items.','success');
+    let sent=0, failed=0;
+    const sendNext=(idx)=>{
+        if(idx>=allItems.length){
+            addAuditEntry('updated','Email Reminders','Sent '+sent+' reminder email(s)');
+            showToast('Sent '+sent+' reminder(s) to '+REMINDER_EMAIL+(failed?' ('+failed+' failed)':''),'success');
+            return;
         }
-    }).catch(err=>showToast('Email failed: '+err.text,'error'));
+        const i=allItems[idx];
+        const dueStr=i._days<0?Math.abs(i._days)+' days OVERDUE':i._days===0?'Due TODAY':i._days===1?'Due TOMORROW':'Due in '+i._days+' days';
+        const dueDateDisplay=(i.nextDue||'N/A').replace(/\//g,'-');
+        const subjectLine='NF6 Compliance Reminder: '+i.obligation;
+        const row=(label,val,bg)=>'<tr'+(bg?' style="background:#f8fafc;"':'')+'><td style="padding:8px;font-weight:600;color:#64748b;width:140px;">'+label+'</td><td style="padding:8px;">'+val+'</td></tr>';
+        const messageHtml='<div style="font-family:system-ui,sans-serif,Arial;font-size:14px;color:#1a202c;max-width:600px;margin:0 auto;">'
+            +'<div style="background:#0f172a;color:#fff;padding:16px 24px;border-radius:8px 8px 0 0;"><strong style="font-size:18px;">NF6 Capital - Compliance Reminder</strong></div>'
+            +'<div style="padding:24px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;">'
+            +'<p>Hi Brandon,</p>'
+            +'<p>This is a reminder that the following compliance item is coming due:</p>'
+            +'<table style="width:100%;border-collapse:collapse;margin:16px 0;">'
+            +row('Item',i.obligation,false)
+            +row('Entity',i.entity,true)
+            +row('Due Date','<span style="color:#dc2626;font-weight:600;">'+(i.nextDue||'N/A')+' ('+dueStr+')</span>',false)
+            +row('Assigned To',i.person,true)
+            +row('Category',i.category,false)
+            +row('Location',i.location||'N/A',true)
+            +row('Frequency',i.frequency,false)
+            +row('Status',i.status,true)
+            +'</table>'
+            +'<p>Please take action before the due date to stay compliant.</p>'
+            +'<p style="margin-top:16px;"><a href="https://compliance-dashboard-k4pa.onrender.com/compliance-dashboard.html" style="background:#2563eb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;display:inline-block;">View Dashboard</a></p>'
+            +'<p style="color:#94a3b8;font-size:12px;margin-top:24px;">This is an automated reminder from the NF6 Capital Compliance Dashboard.</p>'
+            +'</div></div>';
+        emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
+            subject_line:subjectLine,
+            message_html:messageHtml
+        }).then(()=>{sent++;sendNext(idx+1);}).catch(()=>{failed++;sendNext(idx+1);});
+    };
+    sendNext(0);
 }
 
 // ═══════════════════════════════════════

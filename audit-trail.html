@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit Trail - NF6 Capital Compliance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1a202c;
+      --text-secondary: #64748b;
+      --accent: #2563eb;
+      --accent-light: #eff6ff;
+      --green: #16a34a;
+      --green-bg: #f0fdf4;
+      --yellow: #ca8a04;
+      --yellow-bg: #fefce8;
+      --red: #dc2626;
+      --red-bg: #fef2f2;
+      --orange: #ea580c;
+      --orange-bg: #fff7ed;
+      --purple: #7c3aed;
+      --purple-bg: #f5f3ff;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    nav {
+      background: #0f172a;
+      color: #fff;
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    nav .brand {
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+
+    nav .brand span {
+      color: #60a5fa;
+    }
+
+    nav .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    nav .nav-links a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    nav .nav-links a:hover,
+    nav .nav-links a.active {
+      color: #fff;
+    }
+
+    .today-badge {
+      background: #1e3a5f;
+      color: #93c5fd;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .auth-overlay.hidden {
+      display: none;
+    }
+
+    .auth-box {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 3rem 2.5rem;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .auth-title {
+      font-size: 1.75rem;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .auth-title span {
+      color: #60a5fa;
+    }
+
+    .auth-sub {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin: 0.5rem 0 1.5rem;
+    }
+
+    .google-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.7rem 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .google-btn:hover {
+      background: #f1f5f9;
+    }
+
+    .auth-error {
+      color: #ef4444;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    .auth-domain {
+      color: #64748b;
+      font-size: 0.8rem;
+      margin-top: 1rem;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .filters-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .filters-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .filter-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .filter-input,
+    .filter-select {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--text);
+      background: #fff;
+      transition: border-color 0.2s;
+    }
+
+    .filter-input:focus,
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    .filter-input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .filters-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 1.2rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg);
+      border-color: #cbd5e1;
+    }
+
+    .table-container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      padding: 1rem;
+      text-align: left;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: var(--bg);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .badge-created {
+      background: var(--purple-bg);
+      color: var(--purple);
+    }
+
+    .badge-updated {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .badge-completed {
+      background: var(--green-bg);
+      color: var(--green);
+    }
+
+    .badge-deleted {
+      background: var(--red-bg);
+      color: var(--red);
+    }
+
+    .badge-escalated {
+      background: var(--orange-bg);
+      color: var(--orange);
+    }
+
+    .timestamp {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 3rem;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .empty-state-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state-text {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-secondary);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .filters-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        font-size: 0.85rem;
+      }
+
+      th, td {
+        padding: 0.75rem 0.5rem;
+      }
+
+      .page-title {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-box">
+      <h1 class="auth-title">NF6 <span>Capital</span></h1>
+      <p class="auth-sub">Audit Trail &mdash; Internal Use Only</p>
+      <button class="google-btn" onclick="signInWithGoogle()">
+        <svg viewBox="0 0 24 24" width="20" height="20">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Sign in with Google
+      </button>
+      <div class="auth-error" id="authError"></div>
+      <p class="auth-domain">Restricted to @nf6capital.com accounts</p>
+    </div>
+  </div>
+
+  <nav>
+    <div class="brand">NF6 <span>Capital</span></div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="compliance-dashboard.html">Dashboard</a>
+      <a href="compliance-calendar.html">Calendar</a>
+      <a href="audit-trail.html" class="active">Audit Trail</a>
+    </div>
+    <div class="today-badge" id="todayBadge"></div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Audit Trail</h1>
+      <p class="page-subtitle">Complete log of all compliance actions, changes, and email reminders.</p>
+    </div>
+
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-label">Total Actions</div>
+        <div class="stat-value" id="totalActions">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Items Modified</div>
+        <div class="stat-value" id="itemsModified">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Email Reminders</div>
+        <div class="stat-value" id="emailReminders">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Last Activity</div>
+        <div class="stat-value" id="lastActivity" style="font-size: 1.1rem;">—</div>
+      </div>
+    </div>
+
+    <div class="filters-section">
+      <div class="filters-title">Filters</div>
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label class="filter-label">Search</label>
+          <input type="text" class="filter-input" id="searchInput" placeholder="Obligation or details...">
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Action Type</label>
+          <select class="filter-select" id="actionFilter">
+            <option value="">All Actions</option>
+            <option value="created">Created</option>
+            <option value="updated">Updated</option>
+            <option value="completed">Completed</option>
+            <option value="deleted">Deleted</option>
+            <option value="escalated">Escalated</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Date Range</label>
+          <select class="filter-select" id="dateFilter">
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="7days">Last 7 Days</option>
+            <option value="30days">Last 30 Days</option>
+          </select>
+        </div>
+      </div>
+      <div class="filters-actions">
+        <button class="btn btn-secondary" onclick="resetFilters()">Reset Filters</button>
+        <button class="btn btn-primary" onclick="exportToCSV()">Export to CSV</button>
+      </div>
+    </div>
+
+    <div id="auditTableContainer">
+      <div class="loading">
+        <span class="spinner"></span>Loading audit trail...
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAbvvj4qCzfZPdRxU6BtbRSfXDXPitNwkQ",
+      authDomain: "nf6-compliance.firebaseapp.com",
+      projectId: "nf6-compliance",
+      storageBucket: "nf6-compliance.firebasestorage.app",
+      messagingSenderId: "758076256010",
+      appId: "1:758076256010:web:5799632950c369244c54f3"
+    };
+
+    const ALLOWED_DOMAIN = 'nf6capital.com';
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    let currentUser = null;
+    let allAuditEntries = [];
+    let filteredEntries = [];
+
+    function setTodayBadge() {
+      const today = new Date();
+      const options = { month: 'short', day: 'numeric', year: 'numeric' };
+      const formattedDate = today.toLocaleDateString('en-US', options);
+      document.getElementById('todayBadge').textContent = formattedDate;
+    }
+
+    async function signInWithGoogle() {
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        const result = await auth.signInWithPopup(provider);
+
+        const userEmail = result.user.email;
+        const domain = userEmail.split('@')[1];
+
+        if (domain !== ALLOWED_DOMAIN) {
+          await auth.signOut();
+          showAuthError('Only @nf6capital.com accounts are allowed');
+          return;
+        }
+
+        currentUser = result.user;
+        document.getElementById('authOverlay').classList.add('hidden');
+        loadAuditTrail();
+      } catch (error) {
+        console.error('Auth error:', error);
+        showAuthError('Sign in failed. Please try again.');
+      }
+    }
+
+    function showAuthError(message) {
+      const errorDiv = document.getElementById('authError');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      setTimeout(() => {
+        errorDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    function loadAuditTrail() {
+      allAuditEntries = [];
+
+      const globalLog = localStorage.getItem('nf6_audit_log');
+      if (globalLog) {
+        try {
+          const parsed = JSON.parse(globalLog);
+          if (Array.isArray(parsed)) {
+            allAuditEntries = allAuditEntries.concat(parsed);
+          }
+        } catch (e) {
+          console.error('Error parsing global audit log:', e);
+        }
+      }
+
+      const complianceData = localStorage.getItem('nf6_compliance_data');
+      if (complianceData) {
+        try {
+          const items = JSON.parse(complianceData);
+          if (Array.isArray(items)) {
+            items.forEach(item => {
+              if (item.auditLog && Array.isArray(item.auditLog)) {
+                item.auditLog.forEach(entry => {
+                  allAuditEntries.push({
+                    ...entry,
+                    obligation: item.name || 'Unknown'
+                  });
+                });
+              }
+            });
+          }
+        } catch (e) {
+          console.error('Error parsing compliance data:', e);
+        }
+      }
+
+      allAuditEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      filteredEntries = [...allAuditEntries];
+
+      updateStats();
+      renderAuditTable();
+    }
+
+    function updateStats() {
+      const totalActions = allAuditEntries.length;
+      const uniqueItems = new Set(allAuditEntries.map(e => e.obligation)).size;
+      const emailReminders = allAuditEntries.filter(e =>
+        e.details && e.details.toLowerCase().includes('email')
+      ).length;
+      const lastActivity = allAuditEntries.length > 0
+        ? formatTimestamp(allAuditEntries[0].timestamp)
+        : '—';
+
+      document.getElementById('totalActions').textContent = totalActions;
+      document.getElementById('itemsModified').textContent = uniqueItems;
+      document.getElementById('emailReminders').textContent = emailReminders;
+      document.getElementById('lastActivity').textContent = lastActivity;
+    }
+
+    function formatTimestamp(timestamp) {
+      if (!timestamp) return '—';
+
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffDays < 7) return `${diffDays}d ago`;
+
+      const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+      return date.toLocaleDateString('en-US', options);
+    }
+
+    function formatFullTimestamp(timestamp) {
+      if (!timestamp) return '—';
+      const date = new Date(timestamp);
+      const options = {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      };
+      return date.toLocaleDateString('en-US', options);
+    }
+
+    function applyFilters() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const actionType = document.getElementById('actionFilter').value;
+      const dateRange = document.getElementById('dateFilter').value;
+
+      const now = new Date();
+      let filterDate = null;
+
+      if (dateRange === 'today') {
+        filterDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      } else if (dateRange === '7days') {
+        filterDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      } else if (dateRange === '30days') {
+        filterDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      }
+
+      filteredEntries = allAuditEntries.filter(entry => {
+        const matchesSearch = !searchTerm ||
+          (entry.obligation && entry.obligation.toLowerCase().includes(searchTerm)) ||
+          (entry.details && entry.details.toLowerCase().includes(searchTerm));
+
+        const matchesAction = !actionType || entry.action === actionType;
+
+        const entryDate = new Date(entry.timestamp);
+        const matchesDate = !filterDate || entryDate >= filterDate;
+
+        return matchesSearch && matchesAction && matchesDate;
+      });
+
+      renderAuditTable();
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('actionFilter').value = '';
+      document.getElementById('dateFilter').value = 'all';
+      filteredEntries = [...allAuditEntries];
+      renderAuditTable();
+    }
+
+    function renderAuditTable() {
+      const container = document.getElementById('auditTableContainer');
+
+      if (filteredEntries.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-title">No audit trail entries yet</div>
+            <div class="empty-state-text">Actions taken on the Dashboard will appear here.</div>
+          </div>
+        `;
+        return;
+      }
+
+      let tableHTML = `
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Action</th>
+                <th>Obligation</th>
+                <th>Details</th>
+                <th>User</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      filteredEntries.forEach(entry => {
+        const badgeClass = `badge-${entry.action || 'created'}`;
+        const timestamp = formatFullTimestamp(entry.timestamp);
+        const obligation = entry.obligation || 'N/A';
+        const details = entry.details || '—';
+        const user = entry.user || 'Unknown';
+
+        tableHTML += `
+          <tr>
+            <td><div class="timestamp">${timestamp}</div></td>
+            <td><span class="badge ${badgeClass}">${entry.action}</span></td>
+            <td>${escapeHtml(obligation)}</td>
+            <td>${escapeHtml(details)}</td>
+            <td>${escapeHtml(user)}</td>
+          </tr>
+        `;
+      });
+
+      tableHTML += `
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      container.innerHTML = tableHTML;
+    }
+
+    function escapeHtml(text) {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    function exportToCSV() {
+      if (filteredEntries.length === 0) {
+        alert('No entries to export.');
+        return;
+      }
+
+      const headers = ['Timestamp', 'Action', 'Obligation', 'Details', 'User'];
+      const rows = filteredEntries.map(entry => [
+        formatFullTimestamp(entry.timestamp),
+        entry.action || '—',
+        entry.obligation || '—',
+        entry.details || '—',
+        entry.user || '—'
+      ]);
+
+      const csvContent = [
+        headers.map(h => `"${h}"`).join(','),
+        ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      const now = new Date();
+      const filename = `audit-trail-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}.csv`;
+
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('actionFilter').addEventListener('change', applyFilters);
+    document.getElementById('dateFilter').addEventListener('change', applyFilters);
+
+    function initAuth() {
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          const userEmail = user.email;
+          const domain = userEmail.split('@')[1];
+
+          if (domain === ALLOWED_DOMAIN) {
+            currentUser = user;
+            document.getElementById('authOverlay').classList.add('hidden');
+            setTodayBadge();
+            loadAuditTrail();
+          } else {
+            auth.signOut();
+            document.getElementById('authOverlay').classList.remove('hidden');
+            showAuthError('Only @nf6capital.com accounts are allowed');
+          }
+        } else {
+          document.getElementById('authOverlay').classList.remove('hidden');
+        }
+      });
+    }
+
+    setTodayBadge();
+    initAuth();
+  </script>
+</body>
+</html>
