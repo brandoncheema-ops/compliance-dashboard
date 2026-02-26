@@ -202,6 +202,17 @@
         @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
         .toast.success{background:#065f46}.toast.error{background:#991b1b}
 
+        /* CIRCULAR CLOCKS */
+        .nav-clocks{display:flex;gap:.5rem;align-items:center}
+        .clock-circle{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#1e293b,#0f172a);border:2px solid #334155;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(96,165,250,.12),inset 0 1px 2px rgba(0,0,0,.3);position:relative;overflow:hidden}
+        .clock-circle::before{content:'';position:absolute;top:-1px;left:-1px;right:-1px;bottom:-1px;border-radius:50%;background:conic-gradient(from 0deg,#60a5fa 0%,#3b82f6 25%,#1e40af 50%,#3b82f6 75%,#60a5fa 100%);opacity:.15;z-index:0}
+        .clock-circle .clock-label{font-size:.42rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;z-index:1;line-height:1}
+        .clock-circle .clock-time{font-family:'Courier New',monospace;font-size:.6rem;font-weight:700;color:#60a5fa;z-index:1;line-height:1.2;letter-spacing:.02em}
+
+        /* LAST UPDATED FOOTER */
+        .last-updated-bar{position:fixed;bottom:0;right:0;background:rgba(15,23,42,.85);color:#94a3b8;font-size:.65rem;padding:4px 12px;border-radius:8px 0 0 0;z-index:90;backdrop-filter:blur(8px);font-family:'Inter',sans-serif}
+        .last-updated-bar strong{color:#60a5fa;font-weight:600}
+
         /* RESPONSIVE */
         @media(max-width:1024px){.stats-row{grid-template-columns:repeat(3,1fr)}.entity-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}}
         @media(max-width:768px){
@@ -252,6 +263,16 @@
         <a href="audit-trail.html">Audit Trail</a>
     </div>
     <div class="nav-right">
+        <div class="nav-clocks">
+            <div class="clock-circle">
+                <span class="clock-label">COL</span>
+                <span class="clock-time" id="clockColombia">--:--</span>
+            </div>
+            <div class="clock-circle">
+                <span class="clock-label">PR</span>
+                <span class="clock-time" id="clockPR">--:--</span>
+            </div>
+        </div>
         <div class="today-badge" id="todayBadge"></div>
         <button class="sign-out-btn" id="signOutBtn" onclick="signOutUser()" style="display:none">Sign Out</button>
         <button class="hamburger" onclick="document.getElementById('mm').classList.toggle('open')">&#9776;</button>
@@ -465,6 +486,18 @@ const ALLOWED_DOMAIN = 'nf6capital.com';
 const EMAILJS_PUBLIC_KEY = 'USwgqgHcXPGUVEGN5';
 const EMAILJS_SERVICE_ID = 'service_ih0557y';
 const EMAILJS_TEMPLATE_ID = 'template_zefa3ok';
+// == LIVE CLOCKS ==
+function updateClocks(){
+    const now=new Date();
+    const fmt=(tz)=>now.toLocaleTimeString('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+    const colEl=document.getElementById('clockColombia');
+    const prEl=document.getElementById('clockPR');
+    if(colEl)colEl.textContent=fmt('America/Bogota');
+    if(prEl)prEl.textContent=fmt('America/Puerto_Rico');
+}
+setInterval(updateClocks,1000);
+updateClocks();
+
 const REMINDER_EMAIL = 'brandoncheema@gmail.com';
 const AUTH_ENABLED = true; // Firebase Auth is configured
 const FIRESTORE_ENABLED = false; // Set true after Firestore setup
@@ -752,7 +785,7 @@ function renderTable() {
         const ri=RAW_DATA.indexOf(items.find(it=>it.obligation===i.obligation&&it.entity===i.entity));
         const attachCount=i.attachments?i.attachments.length:0;
         const esc=i._escalated?'<div class="escalation-indicator">\u26A0 Escalated to '+i.backupPerson+'</div>':'';
-        return `<tr>
+        return `<tr style="cursor:pointer" onclick="editItem(${ri})">
             <td>${statusBadge(i)}</td>
             <td class="obligation-text"><div class="main">${i.obligation}</div><div class="entity">${i.type} \u00B7 ${i.description||'\u2014'}</div>${esc}</td>
             <td><span class="badge badge-blue">${i.category}</span></td>
@@ -764,10 +797,10 @@ function renderTable() {
             <td>${i.cost||'\u2014'}</td>
             <td>${attachCount?'<span class="attach-count" onclick="showItemDetail('+ri+')">'+attachCount+' file'+(attachCount>1?'s':'')+'</span>':'\u2014'}</td>
             <td>${reminderBadge(i)}</td>
-            <td><div class="row-actions">
-                <button class="row-btn" onclick="editItem(${ri})" title="Edit">\u270F</button>
-                <button class="row-btn complete-btn" onclick="markComplete(${ri})" title="Mark Complete">\u2713</button>
-                <button class="row-btn delete-btn" onclick="deleteItem(${ri})" title="Delete">\u2715</button>
+            <td><div class="row-actions" onclick="event.stopPropagation()">
+                <button class="row-btn" onclick="event.stopPropagation();editItem(${ri})" title="Edit">\u270F</button>
+                <button class="row-btn complete-btn" onclick="event.stopPropagation();markComplete(${ri})" title="Mark Complete">\u2713</button>
+                <button class="row-btn delete-btn" onclick="event.stopPropagation();deleteItem(${ri})" title="Delete">\u2715</button>
             </div></td>
         </tr>`;
     }).join('');
@@ -1108,5 +1141,21 @@ document.querySelectorAll('th[data-sort]').forEach(th=>{th.addEventListener('cli
 initAuth();
 refreshAll();
 </script>
+
+<div class="last-updated-bar" id="lastUpdated">Last updated: <strong>--</strong></div>
+<script>
+function updateLastUpdated(){
+    const el=document.getElementById('lastUpdated');
+    if(!el)return;
+    const now=new Date();
+    el.innerHTML='Last updated: <strong>'+now.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})+'</strong>';
+}
+updateLastUpdated();
+// Update whenever data changes
+const _origSave=typeof saveItem==='function'?saveItem:null;
+if(_origSave){window._saveItemOrig=_origSave;}
+setInterval(updateLastUpdated,60000);
+</script>
+
 </body>
 </html>
