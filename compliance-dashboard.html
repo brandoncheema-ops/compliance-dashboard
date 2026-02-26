@@ -464,7 +464,7 @@ const FIREBASE_CONFIG = {
 const ALLOWED_DOMAIN = 'nf6capital.com';
 const EMAILJS_PUBLIC_KEY = 'USwgqgHcXPGUVEGN5';
 const EMAILJS_SERVICE_ID = 'service_ih0557y';
-const EMAILJS_TEMPLATE_ID = 'template_q1uyl21';
+const EMAILJS_TEMPLATE_ID = 'template_zefa3ok';
 const REMINDER_EMAIL = 'brandoncheema@gmail.com';
 const AUTH_ENABLED = true; // Firebase Auth is configured
 const FIRESTORE_ENABLED = false; // Set true after Firestore setup
@@ -1036,12 +1036,10 @@ uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag-over
 // EMAIL
 // ═══════════════════════════════════════
 function sendEmailReminders(){
-    const upcoming=items.filter(i=>i._days>=0&&i._days<=14).sort((a,b)=>a._days-b._days);
-    const escalated=items.filter(i=>i._escalated);
-    if(!upcoming.length&&!escalated.length){showToast('No items need reminders.','success');return;}
+    const allItems=items.filter(i=>i.nextDue).sort((a,b)=>a._days-b._days);
+    if(!allItems.length){showToast('No items need reminders.','success');return;}
     if(EMAILJS_PUBLIC_KEY==='YOUR_EMAILJS_PUBLIC_KEY'){showToast('EmailJS not configured. See setup guide.','error');return;}
     emailjs.init(EMAILJS_PUBLIC_KEY);
-    const allItems=[...upcoming,...escalated.filter(e=>!upcoming.includes(e))];
     let sent=0, failed=0;
     const sendNext=(idx)=>{
         if(idx>=allItems.length){
@@ -1051,31 +1049,16 @@ function sendEmailReminders(){
         }
         const i=allItems[idx];
         const dueStr=i._days<0?Math.abs(i._days)+' days OVERDUE':i._days===0?'Due TODAY':i._days===1?'Due TOMORROW':'Due in '+i._days+' days';
-        const dueDateDisplay=(i.nextDue||'N/A').replace(/\//g,'-');
-        const subjectLine='NF6 Compliance Reminder: '+i.obligation;
-        const row=(label,val,bg)=>'<tr'+(bg?' style="background:#f8fafc;"':'')+'><td style="padding:8px;font-weight:600;color:#64748b;width:140px;">'+label+'</td><td style="padding:8px;">'+val+'</td></tr>';
-        const messageHtml='<div style="font-family:system-ui,sans-serif,Arial;font-size:14px;color:#1a202c;max-width:600px;margin:0 auto;">'
-            +'<div style="background:#0f172a;color:#fff;padding:16px 24px;border-radius:8px 8px 0 0;"><strong style="font-size:18px;">NF6 Capital - Compliance Reminder</strong></div>'
-            +'<div style="padding:24px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;">'
-            +'<p>Hi Brandon,</p>'
-            +'<p>This is a reminder that the following compliance item is coming due:</p>'
-            +'<table style="width:100%;border-collapse:collapse;margin:16px 0;">'
-            +row('Item',i.obligation,false)
-            +row('Entity',i.entity,true)
-            +row('Due Date','<span style="color:#dc2626;font-weight:600;">'+(i.nextDue||'N/A')+' ('+dueStr+')</span>',false)
-            +row('Assigned To',i.person,true)
-            +row('Category',i.category,false)
-            +row('Location',i.location||'N/A',true)
-            +row('Frequency',i.frequency,false)
-            +row('Status',i.status,true)
-            +'</table>'
-            +'<p>Please take action before the due date to stay compliant.</p>'
-            +'<p style="margin-top:16px;"><a href="https://compliance-dashboard-k4pa.onrender.com/compliance-dashboard.html" style="background:#2563eb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;display:inline-block;">View Dashboard</a></p>'
-            +'<p style="color:#94a3b8;font-size:12px;margin-top:24px;">This is an automated reminder from the NF6 Capital Compliance Dashboard.</p>'
-            +'</div></div>';
+        const dueDateFmt=(i.nextDue||'N/A').replace(/\//g,'-');
+        const subjectLine='NF6 Compliance Reminder: '+i.obligation+' due '+dueDateFmt+' ('+dueStr+')';
         emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
             subject_line:subjectLine,
-            message_html:messageHtml
+            to_name:'Brandon',
+            item_name:i.obligation,
+            entity:i.entity,
+            due_date:(i.nextDue||'N/A')+' ('+dueStr+')',
+            person:i.person,
+            category:i.category
         }).then(()=>{sent++;sendNext(idx+1);}).catch(()=>{failed++;sendNext(idx+1);});
     };
     sendNext(0);
