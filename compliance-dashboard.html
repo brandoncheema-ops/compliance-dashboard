@@ -1043,7 +1043,7 @@ function sendEmailReminders(){
     let sent=0, failed=0;
     const sendNext=(idx)=>{
         if(idx>=allItems.length){
-            addAuditEntry('updated','Email Reminders','Sent '+sent+' reminder email(s)');
+            addAuditEntry('email','Email Summary','Sent '+sent+' of '+allItems.length+' reminder(s) to '+REMINDER_EMAIL+(failed?' | '+failed+' failed':''));
             showToast('Sent '+sent+' reminder(s) to '+REMINDER_EMAIL+(failed?' ('+failed+' failed)':''),'success');
             return;
         }
@@ -1059,7 +1059,15 @@ function sendEmailReminders(){
             due_date:(i.nextDue||'N/A')+' ('+dueStr+')',
             person:i.person,
             category:i.category
-        }).then(()=>{sent++;sendNext(idx+1);}).catch(()=>{failed++;sendNext(idx+1);});
+        }).then(()=>{
+            sent++;
+            addAuditEntry('email',i.obligation,'Sent to '+REMINDER_EMAIL+' | Entity: '+i.entity+' | Due: '+(i.nextDue||'N/A')+' ('+dueStr+') | Assigned: '+i.person+' | Category: '+i.category);
+            sendNext(idx+1);
+        }).catch((e)=>{
+            failed++;
+            addAuditEntry('email',i.obligation,'FAILED to send to '+REMINDER_EMAIL+' | Error: '+(e&&e.text?e.text:'Unknown'));
+            sendNext(idx+1);
+        });
     };
     sendNext(0);
 }

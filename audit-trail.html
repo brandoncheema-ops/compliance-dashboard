@@ -386,6 +386,11 @@
       color: var(--orange);
     }
 
+    .badge-email {
+      background: #ede9fe;
+      color: #7c3aed;
+    }
+
     .timestamp {
       color: var(--text-secondary);
       font-size: 0.85rem;
@@ -528,6 +533,7 @@
             <option value="completed">Completed</option>
             <option value="deleted">Deleted</option>
             <option value="escalated">Escalated</option>
+            <option value="email">Email Sent</option>
           </select>
         </div>
         <div class="filter-group">
@@ -661,7 +667,7 @@
       const totalActions = allAuditEntries.length;
       const uniqueItems = new Set(allAuditEntries.map(e => e.obligation)).size;
       const emailReminders = allAuditEntries.filter(e =>
-        e.details && e.details.toLowerCase().includes('email')
+        e.action === 'email' || (e.details && e.details.toLowerCase().includes('email'))
       ).length;
       const lastActivity = allAuditEntries.length > 0
         ? formatTimestamp(allAuditEntries[0].timestamp)
