@@ -128,7 +128,7 @@
     <!-- UPLOAD ZONE -->
     <div class="upload-section">
         <div class="upload-zone" id="dropZone" onclick="document.getElementById('csvInput').click()">
-            <div class="icon">\u{1F4C1}</div>
+            <div class="icon">&#x1F4C1;</div>
             <h2>Drop your CSV file here</h2>
             <p>or click to browse &mdash; exported from Google Sheets</p>
             <div class="formats">Supports .csv and .tsv files</div>
@@ -138,25 +138,25 @@
 
     <!-- COLUMN MAPPING -->
     <div class="mapping-section">
-        <h3>\u{1F504} Column Mapping (auto-detected)</h3>
+        <h3>&#x1F504; Column Mapping (auto-detected)</h3>
         <p style="font-size:.75rem;color:var(--text2);margin-bottom:.5rem">Your Google Sheets columns are mapped to the dashboard fields. Headers are matched by name automatically.</p>
         <div class="mapping-grid">
-            <div class="mapping-row"><span class="csv-col">Status</span><span class="arrow">\u2192</span><span class="db-col">status</span></div>
-            <div class="mapping-row"><span class="csv-col">Category</span><span class="arrow">\u2192</span><span class="db-col">category</span></div>
-            <div class="mapping-row"><span class="csv-col">Entity</span><span class="arrow">\u2192</span><span class="db-col">entity</span></div>
-            <div class="mapping-row"><span class="csv-col">Obligation</span><span class="arrow">\u2192</span><span class="db-col">obligation</span></div>
-            <div class="mapping-row"><span class="csv-col">Person</span><span class="arrow">\u2192</span><span class="db-col">person</span></div>
-            <div class="mapping-row"><span class="csv-col">Frequency</span><span class="arrow">\u2192</span><span class="db-col">frequency</span></div>
-            <div class="mapping-row"><span class="csv-col">Next Due</span><span class="arrow">\u2192</span><span class="db-col">nextDue</span></div>
-            <div class="mapping-row"><span class="csv-col">Cost / Amount</span><span class="arrow">\u2192</span><span class="db-col">cost</span></div>
-            <div class="mapping-row"><span class="csv-col">Location</span><span class="arrow">\u2192</span><span class="db-col">location</span></div>
-            <div class="mapping-row"><span class="csv-col">Type</span><span class="arrow">\u2192</span><span class="db-col">type</span></div>
+            <div class="mapping-row"><span class="csv-col">Status</span><span class="arrow">&#x2192;</span><span class="db-col">status</span></div>
+            <div class="mapping-row"><span class="csv-col">Category</span><span class="arrow">&#x2192;</span><span class="db-col">category</span></div>
+            <div class="mapping-row"><span class="csv-col">Entity</span><span class="arrow">&#x2192;</span><span class="db-col">entity</span></div>
+            <div class="mapping-row"><span class="csv-col">Obligation</span><span class="arrow">&#x2192;</span><span class="db-col">obligation</span></div>
+            <div class="mapping-row"><span class="csv-col">Person</span><span class="arrow">&#x2192;</span><span class="db-col">person</span></div>
+            <div class="mapping-row"><span class="csv-col">Frequency</span><span class="arrow">&#x2192;</span><span class="db-col">frequency</span></div>
+            <div class="mapping-row"><span class="csv-col">Next Due</span><span class="arrow">&#x2192;</span><span class="db-col">nextDue</span></div>
+            <div class="mapping-row"><span class="csv-col">Cost / Amount</span><span class="arrow">&#x2192;</span><span class="db-col">cost</span></div>
+            <div class="mapping-row"><span class="csv-col">Location</span><span class="arrow">&#x2192;</span><span class="db-col">location</span></div>
+            <div class="mapping-row"><span class="csv-col">Type</span><span class="arrow">&#x2192;</span><span class="db-col">type</span></div>
         </div>
     </div>
 
     <!-- PREVIEW -->
     <div id="previewSection" style="display:none">
-        <div class="section-title">\u{1F50D} Data Preview</div>
+        <div class="section-title">&#x1F50D; Data Preview</div>
         <div class="preview-card">
             <div class="preview-header">
                 <h3>Parsed rows</h3>
@@ -167,20 +167,20 @@
             </div>
         </div>
         <div class="action-bar">
-            <button class="btn primary" id="confirmBtn" onclick="confirmUpload()">\u2705 Apply to Dashboard &amp; Calendar</button>
-            <button class="btn" onclick="exportCurrentCSV()">\u{1F4E5} Export Current Data</button>
-            <button class="btn danger" onclick="clearPreview()">\u2716 Cancel</button>
+            <button class="btn primary" id="confirmBtn" onclick="confirmUpload()">&#x2705; Apply to Dashboard &amp; Calendar</button>
+            <button class="btn" onclick="exportCurrentCSV()">&#x1F4E5; Export Current Data</button>
+            <button class="btn danger" onclick="clearPreview()">&#x2716; Cancel</button>
         </div>
     </div>
 
     <!-- ALWAYS-VISIBLE ACTIONS -->
     <div class="action-bar" id="defaultActions">
-        <button class="btn" onclick="exportCurrentCSV()">\u{1F4E5} Export Current Data as CSV</button>
-        <button class="btn danger" onclick="resetToDefaults()">\u{1F504} Reset to Default Data</button>
+        <button class="btn" onclick="exportCurrentCSV()">&#x1F4E5; Export Current Data as CSV</button>
+        <button class="btn danger" onclick="resetToDefaults()">&#x1F504; Reset to Default Data</button>
     </div>
 
     <!-- UPLOAD LOG -->
-    <div class="section-title">\u{1F4CB} Upload History</div>
+    <div class="section-title">&#x1F4CB; Upload History</div>
     <div class="log-card" id="logCard">
         <div class="empty-log" id="emptyLog">No uploads yet. Drop a CSV to get started.</div>
     </div>
@@ -368,7 +368,7 @@ function renderLog(logs) {
         const d = new Date(l.time);
         const timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
         card.insertAdjacentHTML('beforeend',
-            '<div class="log-entry"><div class="log-dot '+l.type+'"></div><div class="log-body"><strong>'+l.title+'</strong><div class="meta">'+l.detail+' \u2022 '+timeStr+'</div></div></div>'
+            '<div class="log-entry"><div class="log-dot '+l.type+'"></div><div class="log-body"><strong>'+l.title+'</strong><div class="meta">'+l.detail+' \u00B7 '+timeStr+'</div></div></div>'
         );
     });
 }
