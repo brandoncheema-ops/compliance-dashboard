@@ -425,7 +425,7 @@
         }
 
         /* File Input */
-        #csvFile, #sheetsUrl {
+        #csvFileTax, #sheetsUrlTax, #csvFileAnnual, #sheetsUrlAnnual {
             display: none;
         }
 
@@ -887,6 +887,43 @@
             margin-top: 3rem;
         }
 
+        /* TAB STYLES */
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .tab-btn {
+            padding: 1rem 2rem;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text2);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-btn:hover {
+            color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         /* Mobile Responsive */
         @media (max-width: 768px) {
             nav {
@@ -967,6 +1004,11 @@
                 left: 1rem;
                 max-width: none;
             }
+
+            .tab-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
         }
 
         /* Loading State */
@@ -1035,181 +1077,300 @@
             <p>Track tax filings, deadlines, and compliance status</p>
         </div>
 
-        <!-- Upload Section -->
-        <div class="upload-section" id="uploadSection">
-            <h3>Load Tax Data</h3>
-            <p>Choose a CSV file or enter a Google Sheets URL to get started</p>
-            <div class="upload-buttons">
-                <button class="btn btn-primary" onclick="document.getElementById('csvFile').click()">
-                    📁 Choose CSV File
-                </button>
-                <button class="btn btn-secondary" onclick="promptSheetsUrl()">
-                    🔗 Google Sheets URL
-                </button>
-                <button class="btn btn-success" onclick="exportToCSV()">
-                    📊 Export CSV
-                </button>
-            </div>
-            <input type="file" id="csvFile" accept=".csv" onchange="handleFileUpload(event)">
+        <!-- Tab Bar -->
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('tax')">Tax Tracking</button>
+            <button class="tab-btn" onclick="switchTab('annual')">Annual Reports</button>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Total Items</div>
-                <div class="stat-value" id="statTotal">0</div>
-                <div class="stat-change" id="statTotalChange"></div>
+        <!-- TAB 1: TAX TRACKING -->
+        <div class="tab-content active" id="taxContent">
+            <!-- Upload Section -->
+            <div class="upload-section" id="uploadSectionTax" ondrop="handleDropTax(event)" ondragover="handleDragOverTax(event)" ondragleave="handleDragLeaveTax(event)">
+                <h3>📊 Upload Tax Data or Sync from Google Sheets</h3>
+                <p>Drag and drop a CSV file, or choose from the options below</p>
+                <div class="upload-buttons">
+                    <button class="btn btn-primary" onclick="document.getElementById('csvFileTax').click()">📁 Choose CSV File</button>
+                    <input type="file" id="csvFileTax" accept=".csv" onchange="handleFileSelectTax(event)">
+                    <button class="btn btn-secondary" onclick="showSheetsDialogTax()">📊 Google Sheets URL</button>
+                    <button class="btn btn-secondary" onclick="exportCSVTax()">💾 Export CSV</button>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Due by March</div>
-                <div class="stat-value" id="statMarch">0</div>
-                <div class="stat-change" id="statMarchChange"></div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid" id="statsGridTax" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-label">Total Items</div>
+                    <div class="stat-value" id="statTotalItemsTax">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Due by March</div>
+                    <div class="stat-value" id="statDueMarchTax">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Due by April</div>
+                    <div class="stat-value" id="statDueAprilTax">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Filed</div>
+                    <div class="stat-value" id="statFiledTax">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Not Started</div>
+                    <div class="stat-value" id="statNotStartedTax">0</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Due by April</div>
-                <div class="stat-value" id="statApril">0</div>
-                <div class="stat-change" id="statAprilChange"></div>
+
+            <!-- Charts Grid -->
+            <div class="charts-grid" id="chartsGridTax" style="display: none;">
+                <div class="chart-card">
+                    <h3>Filing Status</h3>
+                    <div class="chart-container">
+                        <canvas id="filingStatusChartTax"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Review Status</h3>
+                    <div class="chart-container">
+                        <canvas id="reviewStatusChartTax"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Items by Due Date</h3>
+                    <div class="chart-container">
+                        <canvas id="dueDateChartTax"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Draft Status</h3>
+                    <div class="chart-container">
+                        <canvas id="draftStatusChartTax"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Filed</div>
-                <div class="stat-value" id="statFiled">0</div>
-                <div class="stat-change" id="statFiledChange"></div>
+
+            <!-- Data Table Section -->
+            <div class="table-section" id="tableSectionTax" style="display: none;">
+                <div class="table-header">
+                    <h3>Tax Items</h3>
+                    <div class="search-bar">
+                        <input type="text" id="searchInputTax" placeholder="Search tax items..." onkeyup="applyFiltersTax()">
+                    </div>
+                </div>
+                <div class="filter-row" id="filterRowTax">
+                    <label>Filters:</label>
+                    <select id="filterDueDateTax" onchange="applyFiltersTax()">
+                        <option value="">All Due Dates</option>
+                    </select>
+                    <select id="filterFilingStatusTax" onchange="applyFiltersTax()">
+                        <option value="">All Filing Status</option>
+                    </select>
+                    <select id="filterReviewStatusTax" onchange="applyFiltersTax()">
+                        <option value="">All Review Status</option>
+                    </select>
+                    <select id="filterPersonTax" onchange="applyFiltersTax()">
+                        <option value="">All Persons</option>
+                    </select>
+                    <button class="clear-filters" onclick="clearFiltersTax()">Clear Filters</button>
+                </div>
+                <div class="table-wrapper">
+                    <table id="dataTableTax">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTableTax('Item')">Item</th>
+                                <th class="sortable" onclick="sortTableTax('Due date')">Due Date</th>
+                                <th>Status Update</th>
+                                <th class="sortable" onclick="sortTableTax('Person to prepare')">Person to Prepare</th>
+                                <th class="sortable" onclick="sortTableTax('State report')">State Report</th>
+                                <th class="sortable" onclick="sortTableTax('Review status with PR')">Review Status</th>
+                                <th class="sortable" onclick="sortTableTax('Filing status')">Filing Status</th>
+                                <th>Confirmation Numbers</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBodyTax">
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Not Started</div>
-                <div class="stat-value" id="statNotStarted">0</div>
-                <div class="stat-change" id="statNotStartedChange"></div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyStateTax">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="30" r="20" fill="currentColor"/>
+                    <path d="M 20 60 Q 20 70 30 75 L 70 75 Q 80 70 80 60" fill="currentColor"/>
+                </svg>
+                <h3>No Tax Data Yet</h3>
+                <p>Upload a CSV file or sync from Google Sheets to get started with your tax tracking</p>
             </div>
         </div>
 
-        <!-- Charts Grid -->
-        <div class="charts-grid">
-            <div class="chart-card">
-                <h3>Filing Status</h3>
-                <div class="chart-container">
-                    <canvas id="filingStatusChart"></canvas>
+        <!-- TAB 2: ANNUAL REPORTS -->
+        <div class="tab-content" id="annualContent">
+            <!-- Upload Section -->
+            <div class="upload-section" id="uploadSectionAnnual" ondrop="handleDropAnnual(event)" ondragover="handleDragOverAnnual(event)" ondragleave="handleDragLeaveAnnual(event)">
+                <h3>📊 Upload Annual Reports or Sync from Google Sheets</h3>
+                <p>Drag and drop a CSV file, or choose from the options below</p>
+                <div class="upload-buttons">
+                    <button class="btn btn-primary" onclick="document.getElementById('csvFileAnnual').click()">📁 Choose CSV File</button>
+                    <input type="file" id="csvFileAnnual" accept=".csv" onchange="handleFileSelectAnnual(event)">
+                    <button class="btn btn-secondary" onclick="showSheetsDialogAnnual()">📊 Google Sheets URL</button>
+                    <button class="btn btn-secondary" onclick="exportCSVAnnual()">💾 Export CSV</button>
                 </div>
             </div>
-            <div class="chart-card">
-                <h3>Review Status</h3>
-                <div class="chart-container">
-                    <canvas id="reviewStatusChart"></canvas>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid" id="statsGridAnnual" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-label">Total Entities</div>
+                    <div class="stat-value" id="statTotalEntitiesAnnual">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Paid/Complete</div>
+                    <div class="stat-value" id="statPaidAnnual">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Not Started</div>
+                    <div class="stat-value" id="statNotStartedAnnual">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">N/A Entities</div>
+                    <div class="stat-value" id="statNAAnnual">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Tax Due</div>
+                    <div class="stat-value" id="statTotalTaxAnnual">$0</div>
                 </div>
             </div>
-            <div class="chart-card">
-                <h3>Items by Due Date</h3>
-                <div class="chart-container">
-                    <canvas id="dueDateChart"></canvas>
+
+            <!-- Charts Grid -->
+            <div class="charts-grid" id="chartsGridAnnual" style="display: none;">
+                <div class="chart-card">
+                    <h3>Filing Status</h3>
+                    <div class="chart-container">
+                        <canvas id="filingStatusChartAnnual"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Entities by State</h3>
+                    <div class="chart-container">
+                        <canvas id="stateChartAnnual"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Entity Types</h3>
+                    <div class="chart-container">
+                        <canvas id="entityTypeChartAnnual"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Historical Filing Compliance</h3>
+                    <div class="chart-container">
+                        <canvas id="complianceChartAnnual"></canvas>
+                    </div>
                 </div>
             </div>
-            <div class="chart-card">
-                <h3>Draft Status Overview</h3>
-                <div class="chart-container">
-                    <canvas id="draftStatusChart"></canvas>
+
+            <!-- Data Table Section -->
+            <div class="table-section" id="tableSectionAnnual" style="display: none;">
+                <div class="table-header">
+                    <h3>Annual Entities</h3>
+                    <div class="search-bar">
+                        <input type="text" id="searchInputAnnual" placeholder="Search entities..." onkeyup="applyFiltersAnnual()">
+                    </div>
+                </div>
+                <div class="filter-row" id="filterRowAnnual">
+                    <label>Filters:</label>
+                    <select id="filterStatusAnnual" onchange="applyFiltersAnnual()">
+                        <option value="">All Statuses</option>
+                    </select>
+                    <select id="filterStateAnnual" onchange="applyFiltersAnnual()">
+                        <option value="">All States</option>
+                    </select>
+                    <select id="filterEntityTypeAnnual" onchange="applyFiltersAnnual()">
+                        <option value="">All Entity Types</option>
+                    </select>
+                    <select id="filterPersonResponsibleAnnual" onchange="applyFiltersAnnual()">
+                        <option value="">All Persons</option>
+                    </select>
+                    <button class="clear-filters" onclick="clearFiltersAnnual()">Clear Filters</button>
+                </div>
+                <div class="table-wrapper">
+                    <table id="dataTableAnnual">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTableAnnual('Entity Name')">Entity Name</th>
+                                <th class="sortable" onclick="sortTableAnnual('Current Status')">Current Status</th>
+                                <th class="sortable" onclick="sortTableAnnual('State of formation')">State</th>
+                                <th class="sortable" onclick="sortTableAnnual('Due Date')">Due Date</th>
+                                <th>Tax Amount Due</th>
+                                <th class="sortable" onclick="sortTableAnnual('Last Filed date')">Last Filed</th>
+                                <th class="sortable" onclick="sortTableAnnual('Entity Type')">Entity Type</th>
+                                <th class="sortable" onclick="sortTableAnnual('EIN (Federal ID)')">EIN</th>
+                                <th class="sortable" onclick="sortTableAnnual('Person Responsible for filing')">Person Responsible</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBodyAnnual">
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
 
-        <!-- Data Table Section -->
-        <div class="table-section">
-            <div class="table-header">
-                <h3>Tax Filing Portfolio</h3>
-            </div>
-
-            <!-- Filters -->
-            <div class="filter-row">
-                <label for="filterDueDate">Due Date:</label>
-                <select id="filterDueDate" onchange="applyFilters()">
-                    <option value="">All Dates</option>
-                </select>
-
-                <label for="filterFilingStatus">Filing Status:</label>
-                <select id="filterFilingStatus" onchange="applyFilters()">
-                    <option value="">All Status</option>
-                </select>
-
-                <label for="filterReviewStatus">Review Status:</label>
-                <select id="filterReviewStatus" onchange="applyFilters()">
-                    <option value="">All Status</option>
-                </select>
-
-                <label for="filterPreparedBy">Prepared By:</label>
-                <select id="filterPreparedBy" onchange="applyFilters()">
-                    <option value="">All People</option>
-                </select>
-
-                <button class="clear-filters" onclick="clearFilters()">Clear Filters</button>
-            </div>
-
-            <!-- Data Table -->
-            <div class="table-wrapper">
-                <table id="dataTable">
-                    <thead>
-                        <tr>
-                            <th class="sortable" onclick="sortTable('Item')">Item</th>
-                            <th class="sortable" onclick="sortTable('Due date')">Due Date</th>
-                            <th class="sortable" onclick="sortTable('Status update')">Status Update</th>
-                            <th class="sortable" onclick="sortTable('Person to prepare')">Person to Prepare</th>
-                            <th class="sortable" onclick="sortTable('State report')">State Report</th>
-                            <th class="sortable" onclick="sortTable('Review status with PR')">Review Status</th>
-                            <th class="sortable" onclick="sortTable('Filing status')">Filing Status</th>
-                            <th class="sortable" onclick="sortTable('Confirmation numbers')">Confirmation #</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr>
-                            <td colspan="8" style="text-align:center;padding:3rem;color:var(--text2);">
-                                <h3>No data loaded</h3>
-                                <p>Upload a CSV file or enter a Google Sheets URL to see tax filing data</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyStateAnnual">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="30" r="20" fill="currentColor"/>
+                    <path d="M 20 60 Q 20 70 30 75 L 70 75 Q 80 70 80 60" fill="currentColor"/>
+                </svg>
+                <h3>No Annual Report Data Yet</h3>
+                <p>Upload a CSV file or sync from Google Sheets to get started with your annual reports</p>
             </div>
         </div>
     </div>
 
     <!-- Detail Modal -->
-    <div class="modal" id="detailModal">
-        <div class="modal-content">
+    <div class="modal" id="detailModal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h2 id="modalTitle">Item Details</h2>
-                <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+                <h2 id="modalTitle"></h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body" id="modalBody">
-                <!-- Details will be populated here -->
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeDetailModal()">Close</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2025 NF6 Capital. All rights reserved. | Tax & Annual Reports Dashboard</p>
+        <p>NF6 Capital Tax & Annual Reports | Last updated: <span id="lastUpdated">Never</span></p>
     </footer>
 
     <script>
-        // ============================================================================
-        // GLOBAL STATE & CONFIG
-        // ============================================================================
-
         const FIREBASE_CONFIG = {
             apiKey: "AIzaSyAbvvj4qCzfZPdRxU6BtbRSfXDXPitNwkQ",
             authDomain: "nf6-compliance.firebaseapp.com",
             projectId: "nf6-compliance"
         };
         const ALLOWED_DOMAIN = 'nf6capital.com';
+        const STORAGE_KEY_TAX = 'nf6_tax_data';
+        const SHEETS_KEY_TAX = 'nf6_sheets_url_tax';
+        const STORAGE_KEY_ANNUAL = 'nf6_annual_data';
+        const SHEETS_KEY_ANNUAL = 'nf6_sheets_url_annual';
 
-        let allData = [];
-        let filteredData = [];
-        let currentSort = { column: null, direction: 'asc' };
-        let charts = {};
-
-        // ============================================================================
-        // UTILITY: Normalize Keys
-        // ============================================================================
+        let taxData = [];
+        let annualData = [];
+        let filteredDataTax = [];
+        let filteredDataAnnual = [];
+        let sortColumnTax = 'Item';
+        let sortDirectionTax = 'asc';
+        let sortColumnAnnual = 'Entity Name';
+        let sortDirectionAnnual = 'asc';
+        let chartsTax = {};
+        let chartsAnnual = {};
+        let currentUser = null;
+        let currentLang = 'EN';
 
         function normalizeKeys(data) {
             return data.map(row => {
@@ -1219,41 +1380,41 @@
             });
         }
 
-        // ============================================================================
-        // FIREBASE INITIALIZATION
-        // ============================================================================
-
         try {
             firebase.initializeApp(FIREBASE_CONFIG);
-        } catch (e) {
-            console.warn('Firebase already initialized');
+        } catch (error) {
+            console.log('Firebase already initialized');
         }
 
-        firebase.auth().onAuthStateChanged(user => {
-            const authOverlay = document.getElementById('authOverlay');
-            if (user) {
-                authOverlay.classList.add('hidden');
-                loadStoredData();
-                initializePage();
-            } else {
-                authOverlay.classList.remove('hidden');
-                initializeGoogleSignIn();
-            }
-        });
+        const auth = firebase.auth();
 
-        function initializeGoogleSignIn() {
+        function initAuth() {
+            auth.onAuthStateChanged((user) => {
+                if (user && user.email && user.email.endsWith('@' + ALLOWED_DOMAIN)) {
+                    currentUser = user;
+                    document.getElementById('authOverlay').classList.add('hidden');
+                    initApp();
+                } else if (user) {
+                    signOut();
+                    showToast('Error: Please sign in with an ' + ALLOWED_DOMAIN + ' account', 'error');
+                } else {
+                    document.getElementById('authOverlay').classList.remove('hidden');
+                    showGoogleSignIn();
+                }
+            });
+        }
+
+        function showGoogleSignIn() {
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.setCustomParameters({ hd: ALLOWED_DOMAIN });
 
             const signInBtn = document.createElement('button');
             signInBtn.className = 'btn btn-primary';
-            signInBtn.textContent = 'Sign in with Google';
+            signInBtn.textContent = 'Sign In with Google';
             signInBtn.onclick = () => {
-                firebase.auth().signInWithPopup(provider)
-                    .catch(error => {
-                        console.error('Auth error:', error);
-                        showToast('Sign in failed. Please try again.', 'error');
-                    });
+                auth.signInWithPopup(provider).catch(error => {
+                    showToast('Authentication failed: ' + error.message, 'error');
+                });
             };
 
             const container = document.getElementById('firebaseui-auth-container');
@@ -1262,82 +1423,49 @@
         }
 
         function signOut() {
-            firebase.auth().signOut().catch(err => console.error(err));
-        }
-
-        // ============================================================================
-        // NAVIGATION & UI
-        // ============================================================================
-
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            menu.classList.toggle('open');
-        }
-
-        function toggleTheme() {
-            const html = document.documentElement;
-            const isDark = html.getAttribute('data-theme') === 'dark';
-            html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            localStorage.setItem('theme', isDark ? 'light' : 'dark');
-        }
-
-        function toggleLang() {
-            const label = document.getElementById('langLabel');
-            const current = label.textContent.trim();
-            label.textContent = current === 'ES' ? 'EN' : 'ES';
-            localStorage.setItem('lang', current === 'ES' ? 'EN' : 'ES');
-        }
-
-        function initializePage() {
-            // Load theme
-            const theme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', theme);
-
-            // Load language
-            const lang = localStorage.getItem('lang') || 'ES';
-            document.getElementById('langLabel').textContent = lang;
-
-            // Initialize clocks and today badge
-            updateClocks();
-            updateTodayBadge();
-            setInterval(updateClocks, 1000);
-        }
-
-        function updateClocks() {
-            const now = new Date();
-            const formatter = new Intl.DateTimeFormat('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                timeZone: 'America/Bogota',
-                hour12: false
+            auth.signOut().then(() => {
+                currentUser = null;
+                document.getElementById('authOverlay').classList.remove('hidden');
             });
-            const colTime = formatter.format(now);
-
-            const formatterPR = new Intl.DateTimeFormat('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                timeZone: 'America/Puerto_Rico',
-                hour12: false
-            });
-            const prTime = formatterPR.format(now);
-
-            document.getElementById('clockCOL').textContent = colTime;
-            document.getElementById('clockPR').textContent = prTime;
         }
 
-        function updateTodayBadge() {
-            const today = new Date();
-            const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            document.getElementById('todayBadge').textContent = dateStr;
+        function initApp() {
+            loadDataTax();
+            loadDataAnnual();
+            initClocks();
+            initTheme();
+            initLanguage();
+            loadSheetsUrlIfExistsTax();
+            loadSheetsUrlIfExistsAnnual();
         }
 
-        // ============================================================================
-        // DATA LOADING
-        // ============================================================================
+        function loadDataTax() {
+            const stored = localStorage.getItem(STORAGE_KEY_TAX);
+            if (stored) {
+                try {
+                    taxData = normalizeKeys(JSON.parse(stored));
+                    renderDashboardTax();
+                } catch (error) {
+                    console.error('Error loading tax data:', error);
+                    showToast('Error loading saved tax data', 'error');
+                }
+            }
+        }
 
-        function handleFileUpload(event) {
+        function loadDataAnnual() {
+            const stored = localStorage.getItem(STORAGE_KEY_ANNUAL);
+            if (stored) {
+                try {
+                    annualData = normalizeKeys(JSON.parse(stored));
+                    renderDashboardAnnual();
+                } catch (error) {
+                    console.error('Error loading annual data:', error);
+                    showToast('Error loading saved annual data', 'error');
+                }
+            }
+        }
+
+        function handleFileSelectTax(event) {
             const file = event.target.files[0];
             if (!file) return;
 
@@ -1346,41 +1474,151 @@
                 skipEmptyLines: true,
                 complete: (results) => {
                     if (results.data && results.data.length > 0) {
-                        allData = normalizeKeys(results.data);
-                        localStorage.setItem('nf6_tax_data', JSON.stringify(allData));
-                        filteredData = [...allData];
-                        updatePageData();
-                        showToast('Data loaded successfully!', 'success');
+                        taxData = normalizeKeys(results.data);
+                        saveDataTax();
+                        renderDashboardTax();
+                        showToast(`Loaded ${taxData.length} tax items successfully`, 'success');
+                    } else {
+                        showToast('CSV file is empty', 'error');
                     }
                 },
                 error: (error) => {
                     showToast('Error parsing CSV: ' + error.message, 'error');
                 }
             });
+
+            event.target.value = '';
         }
 
-        function promptSheetsUrl() {
-            const url = prompt('Enter Google Sheets CSV export URL:');
-            if (!url) return;
+        function handleDropTax(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById('uploadSectionTax').classList.remove('dragover');
 
-            localStorage.setItem('nf6_sheets_url_tax', url);
+            const files = event.dataTransfer.files;
+            if (files.length > 0 && (files[0].type === 'text/csv' || files[0].name.endsWith('.csv'))) {
+                const file = files[0];
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: (results) => {
+                        if (results.data && results.data.length > 0) {
+                            taxData = normalizeKeys(results.data);
+                            saveDataTax();
+                            renderDashboardTax();
+                            showToast(`Loaded ${taxData.length} tax items successfully`, 'success');
+                        }
+                    },
+                    error: (error) => {
+                        showToast('Error parsing CSV: ' + error.message, 'error');
+                    }
+                });
+            } else {
+                showToast('Please drop a CSV file', 'error');
+            }
+        }
+
+        function handleDragOverTax(event) {
+            event.preventDefault();
+            document.getElementById('uploadSectionTax').classList.add('dragover');
+        }
+
+        function handleDragLeaveTax(event) {
+            if (event.target.id === 'uploadSectionTax') {
+                document.getElementById('uploadSectionTax').classList.remove('dragover');
+            }
+        }
+
+        function handleFileSelectAnnual(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: (results) => {
+                    if (results.data && results.data.length > 0) {
+                        annualData = normalizeKeys(results.data);
+                        saveDataAnnual();
+                        renderDashboardAnnual();
+                        showToast(`Loaded ${annualData.length} annual entities successfully`, 'success');
+                    } else {
+                        showToast('CSV file is empty', 'error');
+                    }
+                },
+                error: (error) => {
+                    showToast('Error parsing CSV: ' + error.message, 'error');
+                }
+            });
+
+            event.target.value = '';
+        }
+
+        function handleDropAnnual(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById('uploadSectionAnnual').classList.remove('dragover');
+
+            const files = event.dataTransfer.files;
+            if (files.length > 0 && (files[0].type === 'text/csv' || files[0].name.endsWith('.csv'))) {
+                const file = files[0];
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: (results) => {
+                        if (results.data && results.data.length > 0) {
+                            annualData = normalizeKeys(results.data);
+                            saveDataAnnual();
+                            renderDashboardAnnual();
+                            showToast(`Loaded ${annualData.length} annual entities successfully`, 'success');
+                        }
+                    },
+                    error: (error) => {
+                        showToast('Error parsing CSV: ' + error.message, 'error');
+                    }
+                });
+            } else {
+                showToast('Please drop a CSV file', 'error');
+            }
+        }
+
+        function handleDragOverAnnual(event) {
+            event.preventDefault();
+            document.getElementById('uploadSectionAnnual').classList.add('dragover');
+        }
+
+        function handleDragLeaveAnnual(event) {
+            if (event.target.id === 'uploadSectionAnnual') {
+                document.getElementById('uploadSectionAnnual').classList.remove('dragover');
+            }
+        }
+
+        function showSheetsDialogTax() {
+            const url = prompt('Enter Google Sheets CSV export URL (https://docs.google.com/spreadsheets/d/...export?format=csv)');
+            if (url) {
+                localStorage.setItem(SHEETS_KEY_TAX, url);
+                loadFromSheetsTax(url);
+            }
+        }
+
+        function loadFromSheetsTax(url) {
             fetch(url)
                 .then(response => response.text())
-                .then(csvText => {
-                    Papa.parse(csvText, {
+                .then(csv => {
+                    Papa.parse(csv, {
                         header: true,
                         skipEmptyLines: true,
                         complete: (results) => {
                             if (results.data && results.data.length > 0) {
-                                allData = normalizeKeys(results.data);
-                                localStorage.setItem('nf6_tax_data', JSON.stringify(allData));
-                                filteredData = [...allData];
-                                updatePageData();
-                                showToast('Data loaded from Google Sheets!', 'success');
+                                taxData = normalizeKeys(results.data);
+                                saveDataTax();
+                                renderDashboardTax();
+                                showToast(`Synced ${taxData.length} tax items from Google Sheets`, 'success');
+                                updateLastUpdated();
                             }
                         },
                         error: (error) => {
-                            showToast('Error loading from Google Sheets: ' + error.message, 'error');
+                            showToast('Error parsing Google Sheets: ' + error.message, 'error');
                         }
                     });
                 })
@@ -1389,383 +1627,978 @@
                 });
         }
 
-        function loadStoredData() {
-            const stored = localStorage.getItem('nf6_tax_data');
-            if (stored) {
-                try {
-                    allData = JSON.parse(stored);
-                    filteredData = [...allData];
-                } catch (e) {
-                    console.error('Error loading stored data:', e);
-                }
+        function loadSheetsUrlIfExistsTax() {
+            const url = localStorage.getItem(SHEETS_KEY_TAX);
+            if (url) {
+                loadFromSheetsTax(url);
             }
         }
 
-        function exportToCSV() {
-            if (allData.length === 0) {
-                showToast('No data to export', 'error');
+        function showSheetsDialogAnnual() {
+            const url = prompt('Enter Google Sheets CSV export URL (https://docs.google.com/spreadsheets/d/...export?format=csv)');
+            if (url) {
+                localStorage.setItem(SHEETS_KEY_ANNUAL, url);
+                loadFromSheetsAnnual(url);
+            }
+        }
+
+        function loadFromSheetsAnnual(url) {
+            fetch(url)
+                .then(response => response.text())
+                .then(csv => {
+                    Papa.parse(csv, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: (results) => {
+                            if (results.data && results.data.length > 0) {
+                                annualData = normalizeKeys(results.data);
+                                saveDataAnnual();
+                                renderDashboardAnnual();
+                                showToast(`Synced ${annualData.length} annual entities from Google Sheets`, 'success');
+                                updateLastUpdated();
+                            }
+                        },
+                        error: (error) => {
+                            showToast('Error parsing Google Sheets: ' + error.message, 'error');
+                        }
+                    });
+                })
+                .catch(error => {
+                    showToast('Error fetching Google Sheets: ' + error.message, 'error');
+                });
+        }
+
+        function loadSheetsUrlIfExistsAnnual() {
+            const url = localStorage.getItem(SHEETS_KEY_ANNUAL);
+            if (url) {
+                loadFromSheetsAnnual(url);
+            }
+        }
+
+        function saveDataTax() {
+            try {
+                localStorage.setItem(STORAGE_KEY_TAX, JSON.stringify(taxData));
+                updateLastUpdated();
+            } catch (error) {
+                console.error('Error saving tax data:', error);
+                showToast('Error saving tax data', 'error');
+            }
+        }
+
+        function saveDataAnnual() {
+            try {
+                localStorage.setItem(STORAGE_KEY_ANNUAL, JSON.stringify(annualData));
+                updateLastUpdated();
+            } catch (error) {
+                console.error('Error saving annual data:', error);
+                showToast('Error saving annual data', 'error');
+            }
+        }
+
+        function updateLastUpdated() {
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = now.toLocaleString();
+        }
+
+        function parseCurrency(value) {
+            if (!value || value === 'N/A' || value === '#VALUE!' || value === '') return 0;
+            if (typeof value === 'string' && value.includes('%')) return 0;
+            if (typeof value === 'string') {
+                value = value.replace(/[$,]/g, '');
+                if (value.includes('(') && value.includes(')')) {
+                    value = '-' + value.replace(/[()]/g, '');
+                }
+                const num = parseFloat(value);
+                return isNaN(num) ? 0 : num;
+            }
+            return typeof value === 'number' ? value : 0;
+        }
+
+        function formatCurrency(value) {
+            const num = parseCurrency(value);
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            }).format(num);
+        }
+
+        function renderDashboardTax() {
+            if (taxData.length === 0) {
+                document.getElementById('emptyStateTax').style.display = 'flex';
+                document.getElementById('statsGridTax').style.display = 'none';
+                document.getElementById('chartsGridTax').style.display = 'none';
+                document.getElementById('tableSectionTax').style.display = 'none';
+                document.getElementById('uploadSectionTax').style.display = 'block';
                 return;
             }
 
-            const csv = Papa.unparse(allData);
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'tax-reports-export.csv';
-            link.click();
-            window.URL.revokeObjectURL(url);
-            showToast('CSV exported successfully!', 'success');
+            document.getElementById('emptyStateTax').style.display = 'none';
+            document.getElementById('statsGridTax').style.display = 'grid';
+            document.getElementById('chartsGridTax').style.display = 'grid';
+            document.getElementById('tableSectionTax').style.display = 'block';
+            document.getElementById('uploadSectionTax').style.display = 'block';
+
+            renderStatsTax();
+            renderChartsTax();
+            populateFiltersTax();
+            renderTableTax();
         }
 
-        // ============================================================================
-        // PAGE UPDATE & STATS
-        // ============================================================================
-
-        function updatePageData() {
-            updateStats();
-            updateCharts();
-            updateFilters();
-            applyFilters();
-        }
-
-        function updateStats() {
-            const total = allData.length;
-            const march = allData.filter(row => {
-                const due = row['Due date'] || '';
-                return due.includes('/3/') || due.includes('3/15');
-            }).length;
-            const april = allData.filter(row => {
-                const due = row['Due date'] || '';
-                return due.includes('/4/') || due.includes('4/15');
-            }).length;
-            const filed = allData.filter(row => {
+        function renderStatsTax() {
+            const totalItems = taxData.length;
+            const dueByMarch = taxData.filter(row => (row['Due date'] || '').includes('3/')).length;
+            const dueByApril = taxData.filter(row => (row['Due date'] || '').includes('4/')).length;
+            const filed = taxData.filter(row => {
                 const status = (row['Filing status'] || '').toLowerCase();
-                const confirmations = row['Confirmation numbers'] || '';
-                return status.includes('filed') || status.includes('complete') || confirmations.trim() !== '';
+                const hasConfirm = row['Confirmation numbers'] && row['Confirmation numbers'].trim() !== '';
+                return status.includes('filed') || status.includes('complete') || hasConfirm;
             }).length;
-            const notStarted = allData.filter(row => {
+            const notStarted = taxData.filter(row => {
                 const status = (row['Filing status'] || '').toLowerCase();
-                return status.includes('not started') || status === '';
+                return status === '' || status.includes('not started');
             }).length;
 
-            document.getElementById('statTotal').textContent = total;
-            document.getElementById('statMarch').textContent = march;
-            document.getElementById('statApril').textContent = april;
-            document.getElementById('statFiled').textContent = filed;
-            document.getElementById('statNotStarted').textContent = notStarted;
+            document.getElementById('statTotalItemsTax').textContent = totalItems;
+            document.getElementById('statDueMarchTax').textContent = dueByMarch;
+            document.getElementById('statDueAprilTax').textContent = dueByApril;
+            document.getElementById('statFiledTax').textContent = filed;
+            document.getElementById('statNotStartedTax').textContent = notStarted;
         }
 
-        // ============================================================================
-        // CHARTS
-        // ============================================================================
+        function renderChartsTax() {
+            destroyChartsTax();
 
-        function updateCharts() {
-            updateFilingStatusChart();
-            updateReviewStatusChart();
-            updateDueDateChart();
-            updateDraftStatusChart();
-        }
-
-        function updateFilingStatusChart() {
-            const statusCounts = {};
-            allData.forEach(row => {
-                const status = (row['Filing status'] || '').trim() || 'Not Started';
-                statusCounts[status] = (statusCounts[status] || 0) + 1;
+            const filingStatusCounts = {};
+            taxData.forEach(row => {
+                let status = (row['Filing status'] || '').trim();
+                if (!status) status = 'Not Started';
+                filingStatusCounts[status] = (filingStatusCounts[status] || 0) + 1;
             });
 
-            const ctx = document.getElementById('filingStatusChart').getContext('2d');
-            if (charts.filingStatus) charts.filingStatus.destroy();
+            const filingStatusColors = {
+                'Not Started': '#6b7280',
+                'filed': '#16a34a',
+                'complete': '#16a34a'
+            };
 
-            charts.filingStatus = new Chart(ctx, {
+            chartsTax.filingStatusChart = new Chart(document.getElementById('filingStatusChartTax'), {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(statusCounts),
+                    labels: Object.keys(filingStatusCounts),
                     datasets: [{
-                        data: Object.values(statusCounts),
-                        backgroundColor: [
-                            '#16a34a', '#fbbf24', '#f87171', '#94a3b8', '#60a5fa'
-                        ],
-                        borderColor: 'var(--card)',
+                        data: Object.values(filingStatusCounts),
+                        backgroundColor: Object.keys(filingStatusCounts).map(status => filingStatusColors[status] || '#2563eb'),
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card'),
                         borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') }
+                        }
+                    }
                 }
             });
-        }
 
-        function updateReviewStatusChart() {
-            const reviewCounts = {};
-            allData.forEach(row => {
-                const status = (row['Review status with PR'] || '').trim() || 'Not Started';
-                reviewCounts[status] = (reviewCounts[status] || 0) + 1;
+            const reviewStatusCounts = {};
+            taxData.forEach(row => {
+                let status = (row['Review status with PR'] || '').trim();
+                if (!status) status = 'Not Started';
+                reviewStatusCounts[status] = (reviewStatusCounts[status] || 0) + 1;
             });
 
-            const ctx = document.getElementById('reviewStatusChart').getContext('2d');
-            if (charts.reviewStatus) charts.reviewStatus.destroy();
-
-            charts.reviewStatus = new Chart(ctx, {
+            chartsTax.reviewStatusChart = new Chart(document.getElementById('reviewStatusChartTax'), {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(reviewCounts),
+                    labels: Object.keys(reviewStatusCounts),
                     datasets: [{
-                        data: Object.values(reviewCounts),
-                        backgroundColor: [
-                            '#16a34a', '#fbbf24', '#f87171', '#94a3b8', '#60a5fa'
-                        ],
-                        borderColor: 'var(--card)',
+                        data: Object.values(reviewStatusCounts),
+                        backgroundColor: Object.keys(reviewStatusCounts).map(status => status === 'Not Started' ? '#6b7280' : '#2563eb'),
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card'),
                         borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') }
+                        }
+                    }
                 }
             });
-        }
 
-        function updateDueDateChart() {
             const dueDateCounts = {};
-            allData.forEach(row => {
-                const date = (row['Due date'] || '').trim() || 'Unknown';
+            taxData.forEach(row => {
+                const date = (row['Due date'] || 'Unknown').trim();
                 dueDateCounts[date] = (dueDateCounts[date] || 0) + 1;
             });
 
-            const ctx = document.getElementById('dueDateChart').getContext('2d');
-            if (charts.dueDate) charts.dueDate.destroy();
+            const sortedDueDates = Object.entries(dueDateCounts)
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .slice(0, 15);
 
-            charts.dueDate = new Chart(ctx, {
+            chartsTax.dueDateChart = new Chart(document.getElementById('dueDateChartTax'), {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(dueDateCounts),
+                    labels: sortedDueDates.map(d => d[0]),
                     datasets: [{
-                        label: 'Count',
-                        data: Object.values(dueDateCounts),
+                        label: 'Items',
+                        data: sortedDueDates.map(d => d[1]),
                         backgroundColor: '#2563eb',
                         borderColor: '#1e40af',
                         borderWidth: 1
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
                     indexAxis: 'y',
-                    plugins: { legend: { display: false } }
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text2') }
+                        },
+                        y: {
+                            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text2') }
+                        }
+                    }
                 }
             });
-        }
 
-        function updateDraftStatusChart() {
-            const draftCounts = {};
-            allData.forEach(row => {
-                const status = (row['Draft status for bal to review'] || '').trim() || 'Not Started';
-                draftCounts[status] = (draftCounts[status] || 0) + 1;
+            const draftStatusCounts = {};
+            taxData.forEach(row => {
+                let status = (row['Draft status for bal to review'] || '').trim();
+                if (!status) status = 'Not Started';
+                draftStatusCounts[status] = (draftStatusCounts[status] || 0) + 1;
             });
 
-            const ctx = document.getElementById('draftStatusChart').getContext('2d');
-            if (charts.draftStatus) charts.draftStatus.destroy();
-
-            charts.draftStatus = new Chart(ctx, {
+            chartsTax.draftStatusChart = new Chart(document.getElementById('draftStatusChartTax'), {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(draftCounts),
+                    labels: Object.keys(draftStatusCounts),
                     datasets: [{
-                        data: Object.values(draftCounts),
-                        backgroundColor: [
-                            '#16a34a', '#fbbf24', '#f87171', '#94a3b8', '#60a5fa'
-                        ],
-                        borderColor: 'var(--card)',
+                        data: Object.values(draftStatusCounts),
+                        backgroundColor: Object.keys(draftStatusCounts).map(status => status === 'Not Started' ? '#6b7280' : '#8b5cf6'),
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card'),
                         borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') }
+                        }
+                    }
                 }
             });
         }
 
-        // ============================================================================
-        // FILTERS
-        // ============================================================================
-
-        function updateFilters() {
-            const dueDates = new Set();
-            const filingStatuses = new Set();
-            const reviewStatuses = new Set();
-            const people = new Set();
-
-            allData.forEach(row => {
-                if (row['Due date']) dueDates.add(row['Due date'].trim());
-                const fs = (row['Filing status'] || '').trim() || 'Not Started';
-                if (fs) filingStatuses.add(fs);
-                const rs = (row['Review status with PR'] || '').trim() || 'Not Started';
-                if (rs) reviewStatuses.add(rs);
-                if (row['Person to prepare']) people.add(row['Person to prepare'].trim());
+        function destroyChartsTax() {
+            Object.values(chartsTax).forEach(chart => {
+                if (chart) chart.destroy();
             });
-
-            populateSelect('filterDueDate', Array.from(dueDates).sort());
-            populateSelect('filterFilingStatus', Array.from(filingStatuses).sort());
-            populateSelect('filterReviewStatus', Array.from(reviewStatuses).sort());
-            populateSelect('filterPreparedBy', Array.from(people).sort());
+            chartsTax = {};
         }
 
-        function populateSelect(elementId, options) {
-            const select = document.getElementById(elementId);
-            const currentValue = select.value;
-            select.innerHTML = '<option value="">All</option>';
-            options.forEach(opt => {
-                const option = document.createElement('option');
-                option.value = opt;
-                option.textContent = opt;
-                select.appendChild(option);
-            });
-            select.value = currentValue;
+        function populateFiltersTax() {
+            const dueDates = [...new Set(taxData.map(r => (r['Due date'] || '').trim()).filter(Boolean))].sort();
+            const filingStatuses = [...new Set(taxData.map(r => (r['Filing status'] || '').trim()).filter(Boolean))].sort();
+            const reviewStatuses = [...new Set(taxData.map(r => (r['Review status with PR'] || '').trim()).filter(Boolean))].sort();
+            const persons = [...new Set(taxData.map(r => (r['Person to prepare'] || '').trim()).filter(Boolean))].sort();
+
+            const dueDateSel = document.getElementById('filterDueDateTax');
+            dueDateSel.innerHTML = '<option value="">All Due Dates</option>';
+            dueDates.forEach(d => dueDateSel.innerHTML += `<option value="${d}">${d}</option>`);
+
+            const filingStatusSel = document.getElementById('filterFilingStatusTax');
+            filingStatusSel.innerHTML = '<option value="">All Filing Status</option>';
+            filingStatuses.forEach(s => filingStatusSel.innerHTML += `<option value="${s}">${s}</option>`);
+
+            const reviewStatusSel = document.getElementById('filterReviewStatusTax');
+            reviewStatusSel.innerHTML = '<option value="">All Review Status</option>';
+            reviewStatuses.forEach(s => reviewStatusSel.innerHTML += `<option value="${s}">${s}</option>`);
+
+            const personSel = document.getElementById('filterPersonTax');
+            personSel.innerHTML = '<option value="">All Persons</option>';
+            persons.forEach(p => personSel.innerHTML += `<option value="${p}">${p}</option>`);
         }
 
-        function applyFilters() {
-            const dueDateFilter = document.getElementById('filterDueDate').value;
-            const filingStatusFilter = document.getElementById('filterFilingStatus').value;
-            const reviewStatusFilter = document.getElementById('filterReviewStatus').value;
-            const preparedByFilter = document.getElementById('filterPreparedBy').value;
+        function applyFiltersTax() {
+            const searchTerm = document.getElementById('searchInputTax').value.toLowerCase();
+            const dueDateFilter = document.getElementById('filterDueDateTax').value;
+            const filingStatusFilter = document.getElementById('filterFilingStatusTax').value;
+            const reviewStatusFilter = document.getElementById('filterReviewStatusTax').value;
+            const personFilter = document.getElementById('filterPersonTax').value;
 
-            filteredData = allData.filter(row => {
-                if (dueDateFilter && row['Due date'] !== dueDateFilter) return false;
-                if (filingStatusFilter && row['Filing status'] !== filingStatusFilter) return false;
-                if (reviewStatusFilter && row['Review status with PR'] !== reviewStatusFilter) return false;
-                if (preparedByFilter && row['Person to prepare'] !== preparedByFilter) return false;
+            filteredDataTax = taxData.filter(row => {
+                if (dueDateFilter && (row['Due date'] || '').trim() !== dueDateFilter) return false;
+                if (filingStatusFilter && (row['Filing status'] || '').trim() !== filingStatusFilter) return false;
+                if (reviewStatusFilter && (row['Review status with PR'] || '').trim() !== reviewStatusFilter) return false;
+                if (personFilter && (row['Person to prepare'] || '').trim() !== personFilter) return false;
+                if (searchTerm) {
+                    return Object.values(row).some(val => String(val).toLowerCase().includes(searchTerm));
+                }
                 return true;
             });
 
-            renderTable();
-        }
+            const tbody = document.getElementById('tableBodyTax');
+            tbody.innerHTML = '';
 
-        function clearFilters() {
-            document.getElementById('filterDueDate').value = '';
-            document.getElementById('filterFilingStatus').value = '';
-            document.getElementById('filterReviewStatus').value = '';
-            document.getElementById('filterPreparedBy').value = '';
-            filteredData = [...allData];
-            renderTable();
-        }
+            filteredDataTax.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
+                const originalIndex = taxData.indexOf(row);
+                tr.onclick = () => showDetailTax(originalIndex);
 
-        // ============================================================================
-        // TABLE RENDERING & SORTING
-        // ============================================================================
+                const statusUpdate = row['Status update'] || '';
+                let statusClass = 'status-written-off';
+                if (statusUpdate.toLowerCase().includes('ready') || statusUpdate.toLowerCase().includes('finalized') || statusUpdate.toLowerCase().includes('complete')) {
+                    statusClass = 'status-active';
+                } else if (statusUpdate.toLowerCase().includes('waiting') || statusUpdate.toLowerCase().includes('pending') || statusUpdate.toLowerCase().includes('draft')) {
+                    statusClass = 'status-sold';
+                }
 
-        function renderTable() {
-            const tbody = document.getElementById('tableBody');
+                tr.innerHTML = `
+                    <td>${row['Item'] || '-'}</td>
+                    <td>${row['Due date'] || '-'}</td>
+                    <td><span class="status-badge ${statusClass}">${statusUpdate || '-'}</span></td>
+                    <td>${row['Person to prepare'] || '-'}</td>
+                    <td>${row['State report'] || '-'}</td>
+                    <td>${row['Review status with PR'] || '-'}</td>
+                    <td>${row['Filing status'] || '-'}</td>
+                    <td>${row['Confirmation numbers'] || '-'}</td>
+                `;
 
-            if (filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--text2);"><h3>No data</h3><p>No items match the current filters</p></td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = filteredData.map((row, idx) => `
-                <tr onclick="openDetailModal(${allData.indexOf(row)})">
-                    <td>${row['Item'] || ''}</td>
-                    <td>${row['Due date'] || ''}</td>
-                    <td>${getStatusBadge(row['Status update'])}</td>
-                    <td>${row['Person to prepare'] || ''}</td>
-                    <td>${row['State report'] || ''}</td>
-                    <td>${getStatusBadge(row['Review status with PR'])}</td>
-                    <td>${getStatusBadge(row['Filing status'])}</td>
-                    <td>${row['Confirmation numbers'] || ''}</td>
-                </tr>
-            `).join('');
-        }
-
-        function getStatusBadge(status) {
-            if (!status) status = 'Not Started';
-            const lower = status.toLowerCase();
-
-            let className = 'status-written-off';
-            if (lower.includes('filed') || lower.includes('complete') || lower.includes('approved')) {
-                className = 'status-active';
-            } else if (lower.includes('waiting') || lower.includes('pending') || lower.includes('draft') || lower.includes('progress') || lower.includes('review')) {
-                className = 'status-sold';
-            } else if (lower.includes('not started')) {
-                className = 'status-written-off';
-            }
-
-            return `<span class="status-badge ${className}">${status}</span>`;
-        }
-
-        function sortTable(column) {
-            const th = event.target;
-            if (currentSort.column === column) {
-                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-            } else {
-                currentSort.column = column;
-                currentSort.direction = 'asc';
-            }
-
-            document.querySelectorAll('th').forEach(t => {
-                t.classList.remove('sorted-asc', 'sorted-desc');
+                tbody.appendChild(tr);
             });
-            th.classList.add(currentSort.direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
+        }
 
-            filteredData.sort((a, b) => {
-                let aVal = a[column] || '';
-                let bVal = b[column] || '';
-                if (currentSort.direction === 'asc') {
-                    return aVal.toString().localeCompare(bVal.toString());
+        function renderTableTax() {
+            applyFiltersTax();
+        }
+
+        function clearFiltersTax() {
+            document.getElementById('searchInputTax').value = '';
+            document.getElementById('filterDueDateTax').value = '';
+            document.getElementById('filterFilingStatusTax').value = '';
+            document.getElementById('filterReviewStatusTax').value = '';
+            document.getElementById('filterPersonTax').value = '';
+            applyFiltersTax();
+        }
+
+        function sortTableTax(column) {
+            if (sortColumnTax === column) {
+                sortDirectionTax = sortDirectionTax === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumnTax = column;
+                sortDirectionTax = 'asc';
+            }
+
+            taxData.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+
+                aVal = String(aVal || '').toLowerCase();
+                bVal = String(bVal || '').toLowerCase();
+
+                if (sortDirectionTax === 'asc') {
+                    return aVal.localeCompare(bVal);
                 } else {
-                    return bVal.toString().localeCompare(aVal.toString());
+                    return bVal.localeCompare(aVal);
                 }
             });
 
-            renderTable();
+            document.querySelectorAll('#tableSectionTax th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+
+            const activeHeader = Array.from(document.querySelectorAll('#tableSectionTax th')).find(th =>
+                th.textContent.includes(column)
+            );
+            if (activeHeader) {
+                activeHeader.classList.add(sortDirectionTax === 'asc' ? 'sorted-asc' : 'sorted-desc');
+            }
+
+            renderTableTax();
         }
 
-        // ============================================================================
-        // MODAL
-        // ============================================================================
-
-        function openDetailModal(index) {
-            const row = allData[index];
-            const modal = document.getElementById('detailModal');
+        function showDetailTax(index) {
+            const row = taxData[index];
             document.getElementById('modalTitle').textContent = row['Item'] || 'Item Details';
 
-            const fields = [
-                'Item', 'Due date', 'Extension file date', 'Have ready for review due date',
-                'Status update', 'Person to prepare', 'State report', 'Review date with Bal',
-                'Draft status for bal to review', 'Date sent to PR Team', 'File date',
-                'Review With Bal', 'Review status with PR', 'Filing status', 'Confirmation numbers', 'Links'
-            ];
+            let detailHtml = '<div class="detail-section"><h3>Tax Item Details</h3><div class="detail-grid">';
+            Object.entries(row).forEach(([key, value]) => {
+                if (key && value) {
+                    detailHtml += `
+                        <div class="detail-item">
+                            <div class="detail-label">${key}</div>
+                            <div class="detail-value">${value}</div>
+                        </div>
+                    `;
+                }
+            });
+            detailHtml += '</div></div>';
 
-            const detailsHtml = fields.map(field => `
-                <div class="detail-item">
-                    <div class="detail-label">${field}</div>
-                    <div class="detail-value">${row[field] || 'N/A'}</div>
-                </div>
-            `).join('');
-
-            document.getElementById('modalBody').innerHTML = `
-                <div class="detail-section">
-                    <h3>Item Information</h3>
-                    <div class="detail-grid">
-                        ${detailsHtml}
-                    </div>
-                </div>
-            `;
-
-            modal.classList.add('open');
+            document.getElementById('modalBody').innerHTML = detailHtml;
+            document.getElementById('detailModal').classList.add('open');
         }
 
-        function closeDetailModal() {
+        function exportCSVTax() {
+            if (taxData.length === 0) {
+                showToast('No data to export', 'error');
+                return;
+            }
+
+            const headers = Object.keys(taxData[0]);
+            const csv = [
+                headers.join(','),
+                ...taxData.map(row =>
+                    headers.map(header => {
+                        let value = row[header] || '';
+                        if (String(value).includes(',') || String(value).includes('"')) {
+                            value = '"' + String(value).replace(/"/g, '""') + '"';
+                        }
+                        return value;
+                    }).join(',')
+                )
+            ].join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tax_export_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            showToast('CSV exported successfully', 'success');
+        }
+
+        function renderDashboardAnnual() {
+            if (annualData.length === 0) {
+                document.getElementById('emptyStateAnnual').style.display = 'flex';
+                document.getElementById('statsGridAnnual').style.display = 'none';
+                document.getElementById('chartsGridAnnual').style.display = 'none';
+                document.getElementById('tableSectionAnnual').style.display = 'none';
+                document.getElementById('uploadSectionAnnual').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('emptyStateAnnual').style.display = 'none';
+            document.getElementById('statsGridAnnual').style.display = 'grid';
+            document.getElementById('chartsGridAnnual').style.display = 'grid';
+            document.getElementById('tableSectionAnnual').style.display = 'block';
+            document.getElementById('uploadSectionAnnual').style.display = 'block';
+
+            renderStatsAnnual();
+            renderChartsAnnual();
+            populateFiltersAnnual();
+            renderTableAnnual();
+        }
+
+        function renderStatsAnnual() {
+            const totalEntities = annualData.filter(row => (row['Entity Name'] || '').trim()).length;
+            const paid = annualData.filter(row => {
+                const status = (row['Current Status'] || '').toLowerCase();
+                return status.includes('paid') || status.includes('complete');
+            }).length;
+            const notStarted = annualData.filter(row => {
+                const status = (row['Current Status'] || '').toLowerCase();
+                return status.includes('not started');
+            }).length;
+            const na = annualData.filter(row => (row['Current Status'] || '').trim() === 'N/A').length;
+            const totalTaxDue = annualData.reduce((sum, row) => sum + parseCurrency(row['Tax Amount Due for 2025']), 0);
+
+            document.getElementById('statTotalEntitiesAnnual').textContent = totalEntities;
+            document.getElementById('statPaidAnnual').textContent = paid;
+            document.getElementById('statNotStartedAnnual').textContent = notStarted;
+            document.getElementById('statNAAnnual').textContent = na;
+            document.getElementById('statTotalTaxAnnual').textContent = formatCurrency(totalTaxDue);
+        }
+
+        function renderChartsAnnual() {
+            destroyChartsAnnual();
+
+            const statusCounts = {};
+            annualData.forEach(row => {
+                let status = (row['Current Status'] || '').trim();
+                if (!status) status = 'Unknown';
+                statusCounts[status] = (statusCounts[status] || 0) + 1;
+            });
+
+            chartsAnnual.filingStatusChart = new Chart(document.getElementById('filingStatusChartAnnual'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        data: Object.values(statusCounts),
+                        backgroundColor: Object.keys(statusCounts).map(status => {
+                            if (status.toLowerCase().includes('paid') || status.toLowerCase().includes('complete')) return '#16a34a';
+                            if (status.toLowerCase().includes('not started')) return '#ea580c';
+                            if (status === 'N/A') return '#9ca3af';
+                            return '#2563eb';
+                        }),
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card'),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') }
+                        }
+                    }
+                }
+            });
+
+            const stateCounts = {};
+            annualData.forEach(row => {
+                const state = (row['State of formation'] || 'Unknown').trim();
+                stateCounts[state] = (stateCounts[state] || 0) + 1;
+            });
+
+            const sortedStates = Object.entries(stateCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 15);
+
+            chartsAnnual.stateChart = new Chart(document.getElementById('stateChartAnnual'), {
+                type: 'bar',
+                data: {
+                    labels: sortedStates.map(s => s[0]),
+                    datasets: [{
+                        label: 'Entities',
+                        data: sortedStates.map(s => s[1]),
+                        backgroundColor: '#3b82f6',
+                        borderColor: '#1e40af',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text2') }
+                        },
+                        y: {
+                            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text2') }
+                        }
+                    }
+                }
+            });
+
+            const entityTypeCounts = {};
+            annualData.forEach(row => {
+                let type = (row['Entity Type'] || 'Unknown').trim();
+                if (!type) type = 'Unknown';
+                entityTypeCounts[type] = (entityTypeCounts[type] || 0) + 1;
+            });
+
+            chartsAnnual.entityTypeChart = new Chart(document.getElementById('entityTypeChartAnnual'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(entityTypeCounts),
+                    datasets: [{
+                        data: Object.values(entityTypeCounts),
+                        backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#6366f1'],
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card'),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') }
+                        }
+                    }
+                }
+            });
+
+            const years = ['2019', '2020', '2021', '2022', '2023', '2025'];
+            const complianceData = [];
+            const nonComplianceData = [];
+
+            years.forEach(year => {
+                const key = `ANNUAL TAX/REPORT ${year}`;
+                let compliant = 0;
+                let nonCompliant = 0;
+                annualData.forEach(row => {
+                    const value = (row[key] || '').toLowerCase();
+                    if (value === 'true' || value === '1' || value === 'yes') {
+                        compliant++;
+                    } else if (value === 'false' || value === '0' || value === 'no' || value === '') {
+                        nonCompliant++;
+                    }
+                });
+                complianceData.push(compliant);
+                nonComplianceData.push(nonCompliant);
+            });
+
+            chartsAnnual.complianceChart = new Chart(document.getElementById('complianceChartAnnual'), {
+                type: 'bar',
+                data: {
+                    labels: years,
+                    datasets: [
+                        {
+                            label: 'Compliant',
+                            data: complianceData,
+                            backgroundColor: '#16a34a',
+                            borderColor: '#15803d',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Non-Compliant',
+                            data: nonComplianceData,
+                            backgroundColor: '#ef4444',
+                            borderColor: '#dc2626',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text2') }
+                        },
+                        y: {
+                            stacked: true,
+                            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text2') }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') }
+                        }
+                    }
+                }
+            });
+        }
+
+        function destroyChartsAnnual() {
+            Object.values(chartsAnnual).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            chartsAnnual = {};
+        }
+
+        function populateFiltersAnnual() {
+            const statuses = [...new Set(annualData.map(r => (r['Current Status'] || '').trim()).filter(Boolean))].sort();
+            const states = [...new Set(annualData.map(r => (r['State of formation'] || '').trim()).filter(Boolean))].sort();
+            const entityTypes = [...new Set(annualData.map(r => (r['Entity Type'] || '').trim()).filter(Boolean))].sort();
+            const persons = [...new Set(annualData.map(r => (r['Person Responsible for filing'] || '').trim()).filter(Boolean))].sort();
+
+            const statusSel = document.getElementById('filterStatusAnnual');
+            statusSel.innerHTML = '<option value="">All Statuses</option>';
+            statuses.forEach(s => statusSel.innerHTML += `<option value="${s}">${s}</option>`);
+
+            const stateSel = document.getElementById('filterStateAnnual');
+            stateSel.innerHTML = '<option value="">All States</option>';
+            states.forEach(s => stateSel.innerHTML += `<option value="${s}">${s}</option>`);
+
+            const entityTypeSel = document.getElementById('filterEntityTypeAnnual');
+            entityTypeSel.innerHTML = '<option value="">All Entity Types</option>';
+            entityTypes.forEach(t => entityTypeSel.innerHTML += `<option value="${t}">${t}</option>`);
+
+            const personSel = document.getElementById('filterPersonResponsibleAnnual');
+            personSel.innerHTML = '<option value="">All Persons</option>';
+            persons.forEach(p => personSel.innerHTML += `<option value="${p}">${p}</option>`);
+        }
+
+        function applyFiltersAnnual() {
+            const searchTerm = document.getElementById('searchInputAnnual').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatusAnnual').value;
+            const stateFilter = document.getElementById('filterStateAnnual').value;
+            const entityTypeFilter = document.getElementById('filterEntityTypeAnnual').value;
+            const personFilter = document.getElementById('filterPersonResponsibleAnnual').value;
+
+            filteredDataAnnual = annualData.filter(row => {
+                if (statusFilter && (row['Current Status'] || '').trim() !== statusFilter) return false;
+                if (stateFilter && (row['State of formation'] || '').trim() !== stateFilter) return false;
+                if (entityTypeFilter && (row['Entity Type'] || '').trim() !== entityTypeFilter) return false;
+                if (personFilter && (row['Person Responsible for filing'] || '').trim() !== personFilter) return false;
+                if (searchTerm) {
+                    return Object.values(row).some(val => String(val).toLowerCase().includes(searchTerm));
+                }
+                return true;
+            });
+
+            const tbody = document.getElementById('tableBodyAnnual');
+            tbody.innerHTML = '';
+
+            filteredDataAnnual.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
+                const originalIndex = annualData.indexOf(row);
+                tr.onclick = () => showDetailAnnual(originalIndex);
+
+                const currentStatus = row['Current Status'] || '';
+                let statusClass = 'status-written-off';
+                if (currentStatus.toLowerCase().includes('paid') || currentStatus.toLowerCase().includes('complete')) {
+                    statusClass = 'status-active';
+                } else if (currentStatus.toLowerCase().includes('not started')) {
+                    statusClass = 'status-sold';
+                }
+
+                tr.innerHTML = `
+                    <td>${row['Entity Name'] || '-'}</td>
+                    <td><span class="status-badge ${statusClass}">${currentStatus || '-'}</span></td>
+                    <td>${row['State of formation'] || '-'}</td>
+                    <td>${row['Due Date'] || '-'}</td>
+                    <td class="currency">${formatCurrency(row['Tax Amount Due for 2025'])}</td>
+                    <td>${row['Last Filed date'] || '-'}</td>
+                    <td>${row['Entity Type'] || '-'}</td>
+                    <td>${row['EIN (Federal ID)'] || '-'}</td>
+                    <td>${row['Person Responsible for filing'] || '-'}</td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderTableAnnual() {
+            applyFiltersAnnual();
+        }
+
+        function clearFiltersAnnual() {
+            document.getElementById('searchInputAnnual').value = '';
+            document.getElementById('filterStatusAnnual').value = '';
+            document.getElementById('filterStateAnnual').value = '';
+            document.getElementById('filterEntityTypeAnnual').value = '';
+            document.getElementById('filterPersonResponsibleAnnual').value = '';
+            applyFiltersAnnual();
+        }
+
+        function sortTableAnnual(column) {
+            if (sortColumnAnnual === column) {
+                sortDirectionAnnual = sortDirectionAnnual === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumnAnnual = column;
+                sortDirectionAnnual = 'asc';
+            }
+
+            annualData.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+
+                const aNum = parseCurrency(aVal);
+                const bNum = parseCurrency(bVal);
+
+                if (aNum !== 0 || bNum !== 0) {
+                    return sortDirectionAnnual === 'asc' ? aNum - bNum : bNum - aNum;
+                }
+
+                aVal = String(aVal || '').toLowerCase();
+                bVal = String(bVal || '').toLowerCase();
+
+                if (sortDirectionAnnual === 'asc') {
+                    return aVal.localeCompare(bVal);
+                } else {
+                    return bVal.localeCompare(aVal);
+                }
+            });
+
+            document.querySelectorAll('#tableSectionAnnual th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+
+            const activeHeader = Array.from(document.querySelectorAll('#tableSectionAnnual th')).find(th =>
+                th.textContent.includes(column)
+            );
+            if (activeHeader) {
+                activeHeader.classList.add(sortDirectionAnnual === 'asc' ? 'sorted-asc' : 'sorted-desc');
+            }
+
+            renderTableAnnual();
+        }
+
+        function showDetailAnnual(index) {
+            const row = annualData[index];
+            document.getElementById('modalTitle').textContent = row['Entity Name'] || 'Entity Details';
+
+            let detailHtml = '<div class="detail-section"><h3>Annual Report Details</h3><div class="detail-grid">';
+            Object.entries(row).forEach(([key, value]) => {
+                if (key && value) {
+                    detailHtml += `
+                        <div class="detail-item">
+                            <div class="detail-label">${key}</div>
+                            <div class="detail-value">${value}</div>
+                        </div>
+                    `;
+                }
+            });
+            detailHtml += '</div></div>';
+
+            document.getElementById('modalBody').innerHTML = detailHtml;
+            document.getElementById('detailModal').classList.add('open');
+        }
+
+        function exportCSVAnnual() {
+            if (annualData.length === 0) {
+                showToast('No data to export', 'error');
+                return;
+            }
+
+            const headers = Object.keys(annualData[0]);
+            const csv = [
+                headers.join(','),
+                ...annualData.map(row =>
+                    headers.map(header => {
+                        let value = row[header] || '';
+                        if (String(value).includes(',') || String(value).includes('"')) {
+                            value = '"' + String(value).replace(/"/g, '""') + '"';
+                        }
+                        return value;
+                    }).join(',')
+                )
+            ].join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `annual_reports_export_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            showToast('CSV exported successfully', 'success');
+        }
+
+        function switchTab(tab) {
+            const taxContent = document.getElementById('taxContent');
+            const annualContent = document.getElementById('annualContent');
+            const tabs = document.querySelectorAll('.tab-btn');
+
+            if (tab === 'tax') {
+                taxContent.classList.add('active');
+                annualContent.classList.remove('active');
+                tabs[0].classList.add('active');
+                tabs[1].classList.remove('active');
+            } else {
+                taxContent.classList.remove('active');
+                annualContent.classList.add('active');
+                tabs[0].classList.remove('active');
+                tabs[1].classList.add('active');
+            }
+        }
+
+        function closeModal(event) {
+            if (event && event.target.id !== 'detailModal') return;
             document.getElementById('detailModal').classList.remove('open');
         }
 
-        // ============================================================================
-        // TOAST
-        // ============================================================================
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-theme') === 'dark';
+
+            if (isDark) {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('nf6_theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('nf6_theme', 'dark');
+            }
+
+            destroyChartsTax();
+            destroyChartsAnnual();
+            if (taxData.length > 0) {
+                renderChartsTax();
+            }
+            if (annualData.length > 0) {
+                renderChartsAnnual();
+            }
+        }
+
+        function initTheme() {
+            const theme = localStorage.getItem('nf6_theme');
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        }
+
+        function toggleLang() {
+            const current = localStorage.getItem('nf6_lang') || 'EN';
+            const next = current === 'EN' ? 'ES' : 'EN';
+            localStorage.setItem('nf6_lang', next);
+            currentLang = next;
+            document.getElementById('langLabel').textContent = next;
+            showToast(`Language changed to ${next}`, 'success');
+        }
+
+        function initLanguage() {
+            const lang = localStorage.getItem('nf6_lang') || 'EN';
+            currentLang = lang;
+            document.getElementById('langLabel').textContent = lang;
+        }
+
+        function initClocks() {
+            updateClocks();
+            updateTodayBadge();
+            setInterval(updateClocks, 1000);
+        }
+
+        function updateClocks() {
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                timeZone: 'America/Bogota'
+            });
+
+            const formatterPR = new Intl.DateTimeFormat('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                timeZone: 'America/Puerto_Rico'
+            });
+
+            document.getElementById('clockCOL').textContent = formatter.format(new Date());
+            document.getElementById('clockPR').textContent = formatterPR.format(new Date());
+        }
+
+        function updateTodayBadge() {
+            const today = new Date().toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+            });
+            document.getElementById('todayBadge').textContent = today;
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobileMenu').classList.toggle('open');
+        }
 
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
@@ -1777,6 +2610,10 @@
                 toast.remove();
             }, 3000);
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initAuth();
+        });
     </script>
 </body>
 </html>
