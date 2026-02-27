@@ -452,6 +452,55 @@
             color: var(--text);
         }
 
+        .filter-row {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+
+        .filter-row label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-row select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .filter-row select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-lt);
+        }
+
+        .filter-row .clear-filters {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--card);
+            color: var(--text2);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-row .clear-filters:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
         .search-bar {
             display: flex;
             gap: 0.5rem;
@@ -1058,10 +1107,26 @@
         <!-- Data Table Section -->
         <div class="table-section" id="tableSection" style="display: none;">
             <div class="table-header">
-                <h3>Asset Portfolio</h3>
+                <h3 data-i18n="assetPortfolio">Asset Portfolio</h3>
                 <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="Search assets..." onkeyup="filterTable()">
+                    <input type="text" id="searchInput" placeholder="Search assets..." data-i18n-placeholder="searchAssets" onkeyup="applyFilters()">
                 </div>
+            </div>
+            <div class="filter-row" id="filterRow">
+                <label data-i18n="filters">Filters:</label>
+                <select id="filterCategory" onchange="applyFilters()">
+                    <option value="">All Categories</option>
+                </select>
+                <select id="filterStatus" onchange="applyFilters()">
+                    <option value="">All Statuses</option>
+                </select>
+                <select id="filterLocation" onchange="applyFilters()">
+                    <option value="">All Locations</option>
+                </select>
+                <select id="filterOwner" onchange="applyFilters()">
+                    <option value="">All Owners</option>
+                </select>
+                <button class="clear-filters" onclick="clearFilters()" data-i18n="clearFilters">Clear Filters</button>
             </div>
             <div class="table-wrapper">
                 <table id="dataTable">
@@ -1465,6 +1530,7 @@
 
             renderStats();
             renderCharts();
+            populateFilters();
             renderTable();
         }
 
@@ -1655,46 +1721,50 @@
         }
 
         function renderTable() {
-            filteredData = [...assetData];
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
+            applyFilters();
+        }
 
-            filteredData.forEach((row, index) => {
-                const tr = document.createElement('tr');
-                tr.style.cursor = 'pointer';
-                tr.onclick = () => showDetail(index);
+        function populateFilters() {
+            const fields = {
+                filterCategory: 'Category',
+                filterStatus: 'Status',
+                filterLocation: 'Location',
+                filterOwner: 'Owner'
+            };
+            const labels = {
+                filterCategory: ['All Categories', 'Todas las Categorías'],
+                filterStatus: ['All Statuses', 'Todos los Estados'],
+                filterLocation: ['All Locations', 'Todas las Ubicaciones'],
+                filterOwner: ['All Owners', 'Todos los Propietarios']
+            };
 
-                const status = row.Status || 'Unknown';
-                const statusClass = {
-                    'Active': 'status-active',
-                    'Sold': 'status-sold',
-                    'Dissolved': 'status-dissolved',
-                    'Written Off': 'status-written-off'
-                }[status] || 'status-written-off';
-
-                tr.innerHTML = `
-                    <td>${row.Asset || '-'}</td>
-                    <td>${row.Location || '-'}</td>
-                    <td>${row.Category || '-'}</td>
-                    <td><span class="status-badge ${statusClass}">${status}</span></td>
-                    <td>${row.Owner || '-'}</td>
-                    <td>${row['% owned'] || '-'}%</td>
-                    <td class="currency">${formatCurrency(row['Initial investment'])}</td>
-                    <td class="currency">${formatCurrency(row['Total Capital Invested'])}</td>
-                    <td class="currency">${formatCurrency(row['Net profit'])}</td>
-                    <td class="percentage ${parsePercentage(row['ROI % on cash distributions']) < 0 ? 'negative' : ''}">${parsePercentage(row['ROI % on cash distributions']).toFixed(2)}%</td>
-                `;
-
-                tbody.appendChild(tr);
+            Object.entries(fields).forEach(([selectId, field]) => {
+                const sel = document.getElementById(selectId);
+                const current = sel.value;
+                const values = [...new Set(assetData.map(r => (r[field] || '').trim()).filter(Boolean))].sort();
+                sel.innerHTML = `<option value="">${labels[selectId][currentLang === 'es' ? 1 : 0]}</option>`;
+                values.forEach(v => {
+                    sel.innerHTML += `<option value="${v}" ${v === current ? 'selected' : ''}>${v}</option>`;
+                });
             });
         }
 
-        function filterTable() {
+        function applyFilters() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const catFilter = document.getElementById('filterCategory').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+            const locFilter = document.getElementById('filterLocation').value;
+            const ownerFilter = document.getElementById('filterOwner').value;
+
             filteredData = assetData.filter(row => {
-                return Object.values(row).some(val =>
-                    String(val).toLowerCase().includes(searchTerm)
-                );
+                if (catFilter && (row.Category || '').trim() !== catFilter) return false;
+                if (statusFilter && (row.Status || '').trim() !== statusFilter) return false;
+                if (locFilter && (row.Location || '').trim() !== locFilter) return false;
+                if (ownerFilter && (row.Owner || '').trim() !== ownerFilter) return false;
+                if (searchTerm) {
+                    return Object.values(row).some(val => String(val).toLowerCase().includes(searchTerm));
+                }
+                return true;
             });
 
             const tbody = document.getElementById('tableBody');
@@ -1729,6 +1799,15 @@
 
                 tbody.appendChild(tr);
             });
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterCategory').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterLocation').value = '';
+            document.getElementById('filterOwner').value = '';
+            applyFilters();
         }
 
         function sortTable(column) {
