@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NF6 Capital — Mail</title>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f5f7fa;
+            --card: #fff;
+            --border: #e2e8f0;
+            --text: #1a202c;
+            --text2: #64748b;
+            --accent: #2563eb;
+            --accent-lt: #eff6ff;
+            --green: #16a34a;
+            --green-bg: #f0fdf4;
+            --yellow: #ca8a04;
+            --yellow-bg: #fefce8;
+            --red: #dc2626;
+            --red-bg: #fef2f2;
+            --orange: #ea580c;
+            --orange-bg: #fff7ed;
+            --purple: #7c3aed;
+            --purple-bg: #f5f3ff;
+            --nav: #0f172a;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+            --text: #e2e8f0;
+            --text2: #94a3b8;
+            --accent: #60a5fa;
+            --accent-lt: #1e3a5f;
+            --green: #4ade80;
+            --green-bg: #064e3b;
+            --yellow: #fbbf24;
+            --yellow-bg: #713f12;
+            --red: #f87171;
+            --red-bg: #7f1d1d;
+            --orange: #fb923c;
+            --orange-bg: #7c2d12;
+            --purple: #a78bfa;
+            --purple-bg: #4c1d95;
+            --nav: #020617;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--nav);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--accent);
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .brand span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            margin-left: 3rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .toggle-btn .icon {
+            font-size: 1rem;
+        }
+
+        .nav-clocks {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .clock-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+        }
+
+        .clock-label {
+            font-weight: bold;
+            font-size: 0.7rem;
+        }
+
+        .clock-time {
+            font-size: 0.6rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .today-badge {
+            background: var(--accent);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .sign-out-btn {
+            background: var(--red);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+        }
+
+        .sign-out-btn:hover {
+            background: #b91c1c;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header p {
+            color: var(--text2);
+            font-size: 1.125rem;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--card);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: var(--bg);
+            border-color: var(--accent);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-label {
+            color: var(--text2);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text);
+        }
+
+        /* Search Bar */
+        .search-container {
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--card);
+            color: var(--text);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-lt);
+        }
+
+        /* Table */
+        .table-wrapper {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            transition: background-color 0.2s;
+        }
+
+        th:hover {
+            background: var(--accent-lt);
+        }
+
+        th.sortable::after {
+            content: ' ⇅';
+            color: var(--text2);
+            font-size: 0.75rem;
+        }
+
+        th.sorted-asc::after {
+            content: ' ↑';
+            color: var(--accent);
+        }
+
+        th.sorted-desc::after {
+            content: ' ↓';
+            color: var(--accent);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:nth-child(odd) {
+            background: var(--bg);
+        }
+
+        tbody tr:hover {
+            background: var(--accent-lt);
+            cursor: pointer;
+        }
+
+        td {
+            padding: 1rem;
+            color: var(--text);
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.125rem;
+            transition: transform 0.2s;
+            color: var(--text2);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.2);
+            color: var(--accent);
+        }
+
+        .action-btn.delete:hover {
+            color: var(--red);
+        }
+
+        /* Empty State */
+        .empty-state {
+            background: var(--card);
+            border: 2px dashed var(--border);
+            border-radius: 0.5rem;
+            padding: 3rem 2rem;
+            text-align: center;
+            color: var(--text2);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--text);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text2);
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="date"],
+        input[type="url"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-lt);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Dropzone */
+        .dropzone {
+            border: 2px dashed var(--border);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg);
+        }
+
+        .dropzone:hover,
+        .dropzone.dragover {
+            border-color: var(--accent);
+            background: var(--accent-lt);
+        }
+
+        .dropzone-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* Preview */
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .preview-table th,
+        .preview-table td {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .preview-table th {
+            background: var(--bg);
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-cancel:hover {
+            background: var(--border);
+        }
+
+        /* Footer */
+        footer {
+            position: fixed;
+            bottom: 1rem;
+            right: 2rem;
+            font-size: 0.75rem;
+            color: var(--text2);
+            text-align: right;
+        }
+
+        /* Auth Overlay */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .auth-container {
+            background: var(--card);
+            padding: 3rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .auth-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .auth-container h2 {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .auth-container p {
+            color: var(--text2);
+            margin-bottom: 2rem;
+        }
+
+        .google-signin-btn {
+            background: white;
+            color: #1f2937;
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            width: 100%;
+            transition: box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .google-signin-btn:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--nav);
+                flex-direction: column;
+                padding: 1rem;
+                gap: 1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .nav-links.open {
+                display: flex;
+            }
+
+            .mobile-menu {
+                display: none;
+            }
+
+            .mobile-menu.open {
+                display: flex;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-right {
+                flex-wrap: wrap;
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            .nav-clocks {
+                order: 3;
+                width: 100%;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.875rem;
+            }
+
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .table-wrapper {
+                border-radius: 0;
+            }
+
+            footer {
+                bottom: auto;
+                top: auto;
+                right: auto;
+                left: 1rem;
+                position: static;
+                margin-top: 2rem;
+            }
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-active {
+            background: var(--green-bg);
+            color: var(--green);
+        }
+
+        .badge-inactive {
+            background: var(--red-bg);
+            color: var(--red);
+        }
+
+        .badge-pending {
+            background: var(--yellow-bg);
+            color: var(--yellow);
+        }
+
+        .badge-archived {
+            background: var(--purple-bg);
+            color: var(--purple);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div style="display:flex;align-items:center;gap:1rem">
+            <button class="hamburger" onclick="document.querySelector('.mobile-menu').classList.toggle('open')">☰</button>
+            <a href="index.html" class="brand">NF6 <span>Capital</span></a>
+            <div class="nav-links">
+                <a href="index.html" data-i18n="home">HomeBase</a>
+                <a href="compliance-dashboard.html" data-i18n="dashboard">Dashboard</a>
+                <a href="compliance-calendar.html" data-i18n="calendar">Calendar</a>
+                <a href="audit-trail.html" data-i18n="audit">Audit Trail</a>
+                <a href="upload.html" data-i18n="upload">Upload</a>
+                <a href="document-finder.html" data-i18n="documents">Documents</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button class="toggle-btn" onclick="toggleLang()"><span class="icon">●</span> <span id="langLabel">ES</span></button>
+            <button class="toggle-btn" onclick="toggleTheme()"><span class="icon">☽</span> <span data-i18n="dark">Dark</span></button>
+            <div class="nav-clocks">
+                <div class="clock-circle"><span class="clock-label">COL</span><span class="clock-time" id="clockCOL">--:--:--</span></div>
+                <div class="clock-circle"><span class="clock-label">PR</span><span class="clock-time" id="clockPR">--:--:--</span></div>
+            </div>
+            <span class="today-badge" id="todayBadge"></span>
+            <button class="sign-out-btn" onclick="signOut()" data-i18n="signOut">Sign Out</button>
+        </div>
+    </nav>
+
+    <!-- Auth Overlay -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-container">
+            <div class="auth-icon">🏦</div>
+            <h2 data-i18n="signIn">Sign In</h2>
+            <p data-i18n="signInMsg">Sign in with your NF6 Capital account to continue</p>
+            <button class="google-signin-btn" onclick="signInWithGoogle()">
+                <span>🔐</span>
+                <span data-i18n="signInGoogle">Sign in with Google</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container" id="mainContainer" style="display:none;">
+        <!-- Header -->
+        <div class="header">
+            <h1><span>📧</span> <span data-i18n="assets">Mail</span></h1>
+            <p data-i18n="assetsSubtitle">Track incoming and outgoing mail, certified letters, notices, and important correspondence.</p>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <button class="btn btn-primary" onclick="openUploadModal()" data-i18n="uploadCSV">📤 Upload CSV</button>
+            <button class="btn" onclick="exportCSV()" data-i18n="exportCSV">📥 Export CSV</button>
+            <button class="btn" onclick="openSheetsModal()" data-i18n="googleSheets">📊 Google Sheets</button>
+            <button class="btn btn-primary" onclick="openAddItemModal()" data-i18n="addItem">➕ Add Item</button>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row" id="statsRow">
+            <div class="stat-card">
+                <div class="stat-label" data-i18n="totalItems">Total Items</div>
+                <div class="stat-value" id="statTotalItems">0</div>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search all columns..." data-i18n-placeholder="search">
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrapper">
+            <table id="dataTable">
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display:none;">
+            <div class="empty-state-icon">📁</div>
+            <h3 data-i18n="noData">No data yet</h3>
+            <p data-i18n="noDataMsg">Upload a CSV or sync from Google Sheets to get started.</p>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-i18n="uploadCSV">Upload CSV</h2>
+                <button class="modal-close" onclick="closeModal('uploadModal')">✕</button>
+            </div>
+            <div class="form-group">
+                <div class="dropzone" id="dropzone" ondrop="handleDrop(event)" ondragover="event.preventDefault(); document.getElementById('dropzone').classList.add('dragover')" ondragleave="document.getElementById('dropzone').classList.remove('dragover')">
+                    <div class="dropzone-icon">📤</div>
+                    <p data-i18n="dragDrop">Drag and drop your CSV file here</p>
+                    <p style="color:var(--text2);font-size:0.875rem;margin-top:0.5rem;" data-i18n="orClick">or click to select</p>
+                    <input type="file" id="fileInput" accept=".csv" onchange="handleFileSelect(event)">
+                </div>
+                <button class="btn" onclick="document.getElementById('fileInput').click()" style="width:100%;margin-top:1rem;" data-i18n="selectFile">📁 Select File</button>
+            </div>
+            <div id="previewContainer" style="display:none;">
+                <label data-i18n="preview">Preview</label>
+                <table class="preview-table" id="previewTable">
+                    <thead id="previewHead"></thead>
+                    <tbody id="previewBody"></tbody>
+                </table>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-cancel" onclick="closeModal('uploadModal')" data-i18n="cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmUpload()" id="confirmUploadBtn" style="display:none;" data-i18n="upload">Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Sheets Modal -->
+    <div class="modal" id="sheetsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-i18n="googleSheets">Google Sheets Sync</h2>
+                <button class="modal-close" onclick="closeModal('sheetsModal')">✕</button>
+            </div>
+            <div class="form-group">
+                <label data-i18n="sheetsURL">Google Sheets URL</label>
+                <input type="url" id="sheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/..." data-i18n-placeholder="sheetsURLPlaceholder">
+            </div>
+            <div class="form-group">
+                <small style="color:var(--text2);" data-i18n="sheetsHelp">Convert the URL to CSV format: add /export?format=csv to the end</small>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-cancel" onclick="closeModal('sheetsModal')" data-i18n="cancel">Cancel</button>
+                <button class="btn" onclick="saveSheetURL()" data-i18n="save">💾 Save URL</button>
+                <button class="btn btn-primary" onclick="syncSheets()" data-i18n="syncNow">🔄 Sync Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-i18n="editItem">Edit Item</h2>
+                <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+            </div>
+            <div id="editFormContainer"></div>
+            <div class="btn-group">
+                <button class="btn btn-cancel" onclick="closeModal('editModal')" data-i18n="cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEdit()" data-i18n="save">💾 Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-i18n="addNewItem">Add New Item</h2>
+                <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+            </div>
+            <div id="addFormContainer"></div>
+            <div class="btn-group">
+                <button class="btn btn-cancel" onclick="closeModal('addModal')" data-i18n="cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="saveNewItem()" data-i18n="add">➕ Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="lastUpdated">Last updated: --:--:--</footer>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            storageKey: 'nf6_mail_data',
+            sheetsKey: 'nf6_sheets_url_mail',
+            themeKey: 'nf6_theme',
+            langKey: 'nf6_lang',
+            auth: {
+                enabled: true,
+                allowedDomain: 'nf6capital.com',
+                config: {
+                    apiKey: "AIzaSyC1sdGSbwmBBXObn6mGRoOR5v1cNnJsolg",
+                    authDomain: "nf6-compliance.firebaseapp.com",
+                    projectId: "nf6-compliance"
+                }
+            }
+        };
+
+        // i18n translations
+        const translations = {
+            en: {
+                home: 'HomeBase',
+                dashboard: 'Dashboard',
+                calendar: 'Calendar',
+                audit: 'Audit Trail',
+                upload: 'Upload',
+                documents: 'Documents',
+                dark: 'Dark',
+                signOut: 'Sign Out',
+                signIn: 'Sign In',
+                signInMsg: 'Sign in with your NF6 Capital account to continue',
+                signInGoogle: 'Sign in with Google',
+                assets: 'Mail',
+                assetsSubtitle: 'Track incoming and outgoing mail, certified letters, notices, and important correspondence.',
+                uploadCSV: '📤 Upload CSV',
+                exportCSV: '📥 Export CSV',
+                googleSheets: '📊 Google Sheets',
+                addItem: '➕ Add Item',
+                totalItems: 'Total Items',
+                search: '🔍 Search all columns...',
+                noData: 'No data yet',
+                noDataMsg: 'Upload a CSV or sync from Google Sheets to get started.',
+                dragDrop: 'Drag and drop your CSV file here',
+                orClick: 'or click to select',
+                selectFile: '📁 Select File',
+                preview: 'Preview',
+                cancel: 'Cancel',
+                upload: 'Upload',
+                sheetsURL: 'Google Sheets URL',
+                sheetsURLPlaceholder: 'https://docs.google.com/spreadsheets/d/...',
+                sheetsHelp: 'Convert the URL to CSV format: add /export?format=csv to the end',
+                save: '💾 Save URL',
+                syncNow: '🔄 Sync Now',
+                editItem: 'Edit Item',
+                addNewItem: 'Add New Item',
+                add: '➕ Add'
+            },
+            es: {
+                home: 'Inicio',
+                dashboard: 'Panel',
+                calendar: 'Calendario',
+                audit: 'Auditoría',
+                upload: 'Cargar',
+                documents: 'Documentos',
+                dark: 'Oscuro',
+                signOut: 'Cerrar Sesión',
+                signIn: 'Iniciar Sesión',
+                signInMsg: 'Inicia sesión con tu cuenta de NF6 Capital para continuar',
+                signInGoogle: 'Inicia sesión con Google',
+                assets: 'Correo',
+                assetsSubtitle: 'Rastree correo entrante y saliente, cartas certificadas, avisos y correspondencia importante.',
+                uploadCSV: '📤 Cargar CSV',
+                exportCSV: '📥 Descargar CSV',
+                googleSheets: '📊 Google Sheets',
+                addItem: '➕ Agregar Elemento',
+                totalItems: 'Elementos Totales',
+                search: '🔍 Buscar en todas las columnas...',
+                noData: 'Sin datos',
+                noDataMsg: 'Carga un CSV o sincroniza desde Google Sheets para comenzar.',
+                dragDrop: 'Arrastra y suelta tu archivo CSV aquí',
+                orClick: 'o haz clic para seleccionar',
+                selectFile: '📁 Seleccionar Archivo',
+                preview: 'Vista Previa',
+                cancel: 'Cancelar',
+                upload: 'Cargar',
+                sheetsURL: 'URL de Google Sheets',
+                sheetsURLPlaceholder: 'https://docs.google.com/spreadsheets/d/...',
+                sheetsHelp: 'Convierte la URL a formato CSV: añade /export?format=csv al final',
+                save: '💾 Guardar URL',
+                syncNow: '🔄 Sincronizar Ahora',
+                editItem: 'Editar Elemento',
+                addNewItem: 'Agregar Nuevo Elemento',
+                add: '➕ Agregar'
+            }
+        };
+
+        let currentLanguage = localStorage.getItem(CONFIG.langKey) || 'en';
+        let currentData = [];
+        let allData = [];
+        let sortConfig = { column: null, ascending: true };
+        let editingIndex = -1;
+        let currentColumns = [];
+        let tempUploadData = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            initClocks();
+            updateTodayBadge();
+            initAuth();
+            updateUI();
+        });
+
+        // Auth
+        function initAuth() {
+            firebase.initializeApp(CONFIG.auth.config);
+            const auth = firebase.auth();
+
+            auth.onAuthStateChanged(user => {
+                if (!user) {
+                    document.getElementById('authOverlay').style.display = 'flex';
+                    document.getElementById('mainContainer').style.display = 'none';
+                    return;
+                }
+
+                // Check domain
+                if (!user.email.endsWith(`@${CONFIG.auth.allowedDomain}`)) {
+                    alert(`Only @${CONFIG.auth.allowedDomain} accounts are allowed.`);
+                    auth.signOut();
+                    return;
+                }
+
+                document.getElementById('authOverlay').style.display = 'none';
+                document.getElementById('mainContainer').style.display = 'block';
+                loadData();
+                autoSyncSheets();
+            });
+        }
+
+        function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider).catch(err => {
+                console.error('Auth error:', err);
+                alert('Sign in failed');
+            });
+        }
+
+        function signOut() {
+            firebase.auth().signOut();
+        }
+
+        // Data Management
+        function loadData() {
+            const stored = localStorage.getItem(CONFIG.storageKey);
+            allData = stored ? JSON.parse(stored) : [];
+            currentData = [...allData];
+            detectColumns();
+            renderTable();
+            updateStats();
+        }
+
+        function saveData() {
+            localStorage.setItem(CONFIG.storageKey, JSON.stringify(allData));
+            currentData = [...allData];
+            renderTable();
+            updateStats();
+            updateLastUpdated();
+        }
+
+        function detectColumns() {
+            if (allData.length === 0) {
+                currentColumns = [];
+                return;
+            }
+            currentColumns = Object.keys(allData[0]);
+        }
+
+        // CSV Upload
+        function openUploadModal() {
+            document.getElementById('uploadModal').classList.add('active');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('dropzone').classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        }
+
+        function handleFile(file) {
+            Papa.parse(file, {
+                header: true,
+                complete: (results) => {
+                    tempUploadData = results.data.filter(row => Object.values(row).some(v => v));
+                    showPreview(tempUploadData);
+                },
+                error: (err) => {
+                    alert('Error parsing CSV: ' + err.message);
+                }
+            });
+        }
+
+        function showPreview(data) {
+            if (data.length === 0) {
+                alert('No valid data in file');
+                return;
+            }
+
+            const previewContainer = document.getElementById('previewContainer');
+            const previewHead = document.getElementById('previewHead');
+            const previewBody = document.getElementById('previewBody');
+
+            const cols = Object.keys(data[0]);
+            previewHead.innerHTML = cols.map(c => `<th>${c}</th>`).join('');
+            previewBody.innerHTML = data.slice(0, 5).map(row =>
+                `<tr>${cols.map(c => `<td>${row[c] || ''}</td>`).join('')}</tr>`
+            ).join('');
+
+            previewContainer.style.display = 'block';
+            document.getElementById('confirmUploadBtn').style.display = 'block';
+        }
+
+        function confirmUpload() {
+            allData = tempUploadData;
+            saveData();
+            closeModal('uploadModal');
+            tempUploadData = [];
+            document.getElementById('previewContainer').style.display = 'none';
+            document.getElementById('confirmUploadBtn').style.display = 'none';
+        }
+
+        // Google Sheets
+        function openSheetsModal() {
+            const saved = localStorage.getItem(CONFIG.sheetsKey);
+            if (saved) {
+                document.getElementById('sheetsUrl').value = saved;
+            }
+            document.getElementById('sheetsModal').classList.add('active');
+        }
+
+        function saveSheetURL() {
+            const url = document.getElementById('sheetsUrl').value;
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+            localStorage.setItem(CONFIG.sheetsKey, url);
+            alert('URL saved!');
+        }
+
+        async function syncSheets() {
+            const url = localStorage.getItem(CONFIG.sheetsKey);
+            if (!url) {
+                alert('No Google Sheets URL saved');
+                return;
+            }
+
+            const csvUrl = url.includes('/export?format=csv') ? url : url.replace(/\/$/, '') + '/export?format=csv';
+
+            try {
+                const response = await fetch(csvUrl);
+                const csv = await response.text();
+                Papa.parse(csv, {
+                    header: true,
+                    complete: (results) => {
+                        allData = results.data.filter(row => Object.values(row).some(v => v));
+                        saveData();
+                        closeModal('sheetsModal');
+                        alert('Synced from Google Sheets!');
+                    }
+                });
+            } catch (err) {
+                alert('Error syncing: ' + err.message);
+            }
+        }
+
+        async function autoSyncSheets() {
+            const url = localStorage.getItem(CONFIG.sheetsKey);
+            if (url) {
+                try {
+                    await syncSheets();
+                } catch (err) {
+                    console.error('Auto-sync failed:', err);
+                }
+            }
+        }
+
+        // Table Rendering
+        function renderTable() {
+            const head = document.getElementById('tableHead');
+            const body = document.getElementById('tableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            if (currentData.length === 0) {
+                head.innerHTML = '';
+                body.innerHTML = '';
+                emptyState.style.display = 'block';
+                document.querySelector('.table-wrapper').style.display = 'none';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            document.querySelector('.table-wrapper').style.display = 'block';
+
+            const cols = currentColumns;
+            head.innerHTML = cols.map(col => `
+                <th class="sortable" onclick="sortTable('${col}')">${col}</th>
+            `).join('') + '<th>Actions</th>';
+
+            body.innerHTML = currentData.map((row, idx) => `
+                <tr onclick="openEditModal(${idx})">
+                    ${cols.map(col => {
+                        let val = row[col] || '';
+                        if (col.toLowerCase().includes('status')) {
+                            const status = val.toLowerCase();
+                            let badgeClass = 'badge-pending';
+                            if (status === 'active' || status === 'activo') badgeClass = 'badge-active';
+                            else if (status === 'inactive' || status === 'inactivo') badgeClass = 'badge-inactive';
+                            else if (status === 'archived' || status === 'archivado') badgeClass = 'badge-archived';
+                            return `<td><span class="badge ${badgeClass}">${val}</span></td>`;
+                        }
+                        return `<td>${val}</td>`;
+                    }).join('')}
+                    <td class="actions-cell">
+                        <button class="action-btn" onclick="event.stopPropagation(); openEditModal(${idx})">✏</button>
+                        <button class="action-btn delete" onclick="event.stopPropagation(); deleteRow(${idx})">✕</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function sortTable(column) {
+            if (sortConfig.column === column) {
+                sortConfig.ascending = !sortConfig.ascending;
+            } else {
+                sortConfig.column = column;
+                sortConfig.ascending = true;
+            }
+
+            currentData.sort((a, b) => {
+                let valA = a[column] || '';
+                let valB = b[column] || '';
+
+                if (!isNaN(valA) && !isNaN(valB)) {
+                    valA = parseFloat(valA);
+                    valB = parseFloat(valB);
+                }
+
+                if (valA < valB) return sortConfig.ascending ? -1 : 1;
+                if (valA > valB) return sortConfig.ascending ? 1 : -1;
+                return 0;
+            });
+
+            renderTable();
+        }
+
+        function filterTable() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            currentData = allData.filter(row =>
+                Object.values(row).some(v => String(v).toLowerCase().includes(query))
+            );
+            renderTable();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', filterTable);
+            }
+        });
+
+        // Edit/Add
+        function openEditModal(idx) {
+            editingIndex = idx;
+            const row = allData[idx];
+            const form = document.getElementById('editFormContainer');
+            form.innerHTML = currentColumns.map(col => `
+                <div class="form-group">
+                    <label>${col}</label>
+                    <input type="text" value="${row[col] || ''}" data-col="${col}">
+                </div>
+            `).join('');
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function saveEdit() {
+            const inputs = document.querySelectorAll('#editFormContainer input');
+            inputs.forEach(input => {
+                allData[editingIndex][input.dataset.col] = input.value;
+            });
+            saveData();
+            closeModal('editModal');
+        }
+
+        function openAddItemModal() {
+            if (currentColumns.length === 0) {
+                alert('Please upload data first to determine columns');
+                return;
+            }
+            const form = document.getElementById('addFormContainer');
+            form.innerHTML = currentColumns.map(col => `
+                <div class="form-group">
+                    <label>${col}</label>
+                    <input type="text" data-col="${col}">
+                </div>
+            `).join('');
+            document.getElementById('addModal').classList.add('active');
+        }
+
+        function saveNewItem() {
+            const newRow = {};
+            document.querySelectorAll('#addFormContainer input').forEach(input => {
+                newRow[input.dataset.col] = input.value;
+            });
+            allData.push(newRow);
+            saveData();
+            closeModal('addModal');
+        }
+
+        function deleteRow(idx) {
+            if (confirm('Delete this item?')) {
+                allData.splice(idx, 1);
+                saveData();
+            }
+        }
+
+        // Export
+        function exportCSV() {
+            if (allData.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const cols = currentColumns;
+            const csv = [cols.join(',')];
+            allData.forEach(row => {
+                csv.push(cols.map(col => {
+                    let val = row[col] || '';
+                    if (typeof val === 'string' && val.includes(',')) {
+                        val = `"${val}"`;
+                    }
+                    return val;
+                }).join(','));
+            });
+
+            const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mail.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Stats
+        function updateStats() {
+            let html = `
+                <div class="stat-card">
+                    <div class="stat-label" data-i18n="totalItems">Total Items</div>
+                    <div class="stat-value">${allData.length}</div>
+                </div>
+            `;
+
+            // Status stats
+            const statusCol = currentColumns.find(c => c.toLowerCase().includes('status'));
+            if (statusCol) {
+                const statusCounts = {};
+                allData.forEach(row => {
+                    const status = row[statusCol] || 'Unknown';
+                    statusCounts[status] = (statusCounts[status] || 0) + 1;
+                });
+
+                Object.entries(statusCounts).forEach(([status, count]) => {
+                    html += `
+                        <div class="stat-card">
+                            <div class="stat-label">${status}</div>
+                            <div class="stat-value">${count}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('statsRow').innerHTML = html;
+            updateUI();
+        }
+
+        // Modal
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // Theme
+        function initTheme() {
+            const saved = localStorage.getItem(CONFIG.themeKey);
+            if (saved === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.removeItem(CONFIG.themeKey);
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem(CONFIG.themeKey, 'dark');
+            }
+        }
+
+        // Language
+        function toggleLang() {
+            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
+            localStorage.setItem(CONFIG.langKey, currentLanguage);
+            document.getElementById('langLabel').textContent = currentLanguage.toUpperCase();
+            updateUI();
+        }
+
+        function updateUI() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.textContent = translations[currentLanguage][key] || key;
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                el.placeholder = translations[currentLanguage][key] || key;
+            });
+            document.getElementById('langLabel').textContent = currentLanguage.toUpperCase();
+        }
+
+        // Clocks
+        function initClocks() {
+            setInterval(updateClocks, 1000);
+            updateClocks();
+        }
+
+        function updateClocks() {
+            const now = new Date();
+            const colTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+            const prTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Puerto_Rico' }));
+
+            document.getElementById('clockCOL').textContent = colTime.toLocaleTimeString('en-US', { hour12: false });
+            document.getElementById('clockPR').textContent = prTime.toLocaleTimeString('en-US', { hour12: false });
+        }
+
+        // Badge
+        function updateTodayBadge() {
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            document.getElementById('todayBadge').textContent = dateStr;
+        }
+
+        // Last Updated
+        function updateLastUpdated() {
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = 'Last updated: ' + now.toLocaleTimeString('en-US', { hour12: false });
+        }
+    </script>
+</body>
+</html>
