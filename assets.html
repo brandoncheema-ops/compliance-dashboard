@@ -1178,6 +1178,15 @@
         const SHEETS_KEY = 'nf6_sheets_url_assets';
 
         let assetData = [];
+
+        // Trim trailing spaces from all CSV column names
+        function normalizeKeys(data) {
+            return data.map(row => {
+                const clean = {};
+                Object.keys(row).forEach(k => { clean[k.trim()] = row[k]; });
+                return clean;
+            });
+        }
         let filteredData = [];
         let sortColumn = 'Asset';
         let sortDirection = 'asc';
@@ -1252,7 +1261,7 @@
             const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
                 try {
-                    assetData = JSON.parse(stored);
+                    assetData = normalizeKeys(JSON.parse(stored));
                     renderDashboard();
                 } catch (error) {
                     console.error('Error loading data:', error);
@@ -1273,7 +1282,7 @@
                 skipEmptyLines: true,
                 complete: (results) => {
                     if (results.data && results.data.length > 0) {
-                        assetData = results.data;
+                        assetData = normalizeKeys(results.data);
                         saveData();
                         renderDashboard();
                         showToast(`Loaded ${assetData.length} assets successfully`, 'success');
@@ -1302,7 +1311,7 @@
                     skipEmptyLines: true,
                     complete: (results) => {
                         if (results.data && results.data.length > 0) {
-                            assetData = results.data;
+                            assetData = normalizeKeys(results.data);
                             saveData();
                             renderDashboard();
                             showToast(`Loaded ${assetData.length} assets successfully`, 'success');
@@ -1348,7 +1357,7 @@
                         skipEmptyLines: true,
                         complete: (results) => {
                             if (results.data && results.data.length > 0) {
-                                assetData = results.data;
+                                assetData = normalizeKeys(results.data);
                                 saveData();
                                 renderDashboard();
                                 showToast(`Synced ${assetData.length} assets from Google Sheets`, 'success');
