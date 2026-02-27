@@ -1052,23 +1052,20 @@
 
         // Auth
         function initAuth() {
-            firebase.initializeApp(CONFIG.auth.config);
-            const auth = firebase.auth();
-
-            auth.onAuthStateChanged(user => {
+            try {
+                firebase.initializeApp(CONFIG.auth.config);
+            } catch(e) { console.warn('Firebase init:', e.message); }
+            firebase.auth().onAuthStateChanged(user => {
                 if (!user) {
                     document.getElementById('authOverlay').style.display = 'flex';
                     document.getElementById('mainContainer').style.display = 'none';
                     return;
                 }
-
-                // Check domain
                 if (!user.email.endsWith(`@${CONFIG.auth.allowedDomain}`)) {
-                    alert(`Only @${CONFIG.auth.allowedDomain} accounts are allowed.`);
-                    auth.signOut();
+                    alert('Access restricted to @' + CONFIG.auth.allowedDomain);
+                    firebase.auth().signOut();
                     return;
                 }
-
                 document.getElementById('authOverlay').style.display = 'none';
                 document.getElementById('mainContainer').style.display = 'block';
                 loadData();
@@ -1078,9 +1075,10 @@
 
         function signInWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({hd: CONFIG.auth.allowedDomain});
             firebase.auth().signInWithPopup(provider).catch(err => {
                 console.error('Auth error:', err);
-                alert('Sign in failed');
+                alert(err.message || 'Sign in failed');
             });
         }
 
