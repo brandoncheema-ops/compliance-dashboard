@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NF6 Capital — Cars</title>
+    <title>NF6 Capital - Automobiles</title>
 
+    <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+    <!-- PapaParse for CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <style>
         * {
@@ -100,6 +106,7 @@
 
         .brand span {
             color: var(--accent);
+            font-style: italic;
         }
 
         .nav-links {
@@ -108,10 +115,35 @@
             margin-left: 3rem;
         }
 
-        .nav-right {
+        .nav-links a {
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-controls {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.5rem;
+        }
+
+        .toggle-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
         }
 
         .hamburger {
@@ -123,209 +155,411 @@
             cursor: pointer;
         }
 
-        .toggle-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: background-color 0.2s;
-        }
-
-        .toggle-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .toggle-btn .icon {
-            font-size: 1rem;
-        }
-
         .nav-clocks {
             display: flex;
             gap: 1rem;
         }
 
         .clock-circle {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            font-size: 0.65rem;
+            font-size: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.4rem;
         }
 
         .clock-label {
-            font-weight: bold;
-            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--accent);
         }
 
         .clock-time {
-            font-size: 0.6rem;
-            font-family: 'Courier New', monospace;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.7rem;
+            margin-top: 0.25rem;
         }
 
         .today-badge {
             background: var(--accent);
             color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.75rem;
-            font-weight: bold;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.4rem;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
 
         .sign-out-btn {
-            background: var(--red);
-            color: white;
-            border: none;
+            background: transparent;
+            border: 1px solid var(--red);
+            color: var(--red);
             padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
+            border-radius: 0.4rem;
             cursor: pointer;
-            font-size: 0.875rem;
-            transition: background-color 0.2s;
+            font-size: 0.9rem;
+            transition: all 0.3s;
         }
 
         .sign-out-btn:hover {
-            background: #b91c1c;
+            background: var(--red);
+            color: white;
         }
 
         /* Main Container */
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 2rem;
         }
 
-        .header {
+        .page-header {
             margin-bottom: 2rem;
         }
 
-        .header h1 {
-            font-size: 2.5rem;
+        .page-header h1 {
+            font-size: 2rem;
             margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
         }
 
-        .header p {
+        .page-header p {
             color: var(--text2);
-            font-size: 1.125rem;
+            font-size: 1rem;
         }
 
-        /* Action Bar */
-        .action-bar {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            background: var(--card);
-            color: var(--text);
-            cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s;
+        /* Auth Overlay */
+        .auth-overlay {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn:hover {
+            justify-content: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: var(--bg);
-            border-color: var(--accent);
+            z-index: 1000;
         }
 
-        .btn-primary {
+        .auth-overlay.hidden {
+            display: none;
+        }
+
+        .auth-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 3rem;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-card h2 {
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .auth-card p {
+            color: var(--text2);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .auth-card button {
+            width: 100%;
+            padding: 0.75rem;
             background: var(--accent);
             color: white;
-            border-color: var(--accent);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.3s;
         }
 
-        .btn-primary:hover {
-            background: #1d4ed8;
+        .auth-card button:hover {
+            opacity: 0.9;
         }
 
-        /* Stats Row */
-        .stats-row {
+        /* Stats Cards */
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .stat-card {
             background: var(--card);
             border: 1px solid var(--border);
+            border-radius: 0.75rem;
             padding: 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .stat-label {
+            font-size: 0.85rem;
             color: var(--text2);
-            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             margin-bottom: 0.5rem;
+            font-weight: 600;
         }
 
         .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
+            font-size: 1.75rem;
+            font-weight: 700;
             color: var(--text);
         }
 
-        /* Search Bar */
-        .search-container {
+        .stat-change {
+            font-size: 0.8rem;
+            color: var(--text2);
+            margin-top: 0.5rem;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
-        .search-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
+        .chart-card {
             background: var(--card);
-            color: var(--text);
-            font-size: 1rem;
-            transition: border-color 0.2s;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            position: relative;
         }
 
-        .search-input:focus {
+        .chart-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: var(--card);
+            border: 2px dashed var(--border);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            transition: all 0.3s;
+        }
+
+        .upload-section.dragover {
+            border-color: var(--accent);
+            background: var(--accent-lt);
+        }
+
+        .upload-section h3 {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .upload-section p {
+            color: var(--text2);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .upload-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent);
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--card);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-lt);
+        }
+
+        .btn-success {
+            background: var(--green);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: var(--green);
+            opacity: 0.9;
+        }
+
+        .btn-danger {
+            background: var(--red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: var(--red);
+            opacity: 0.9;
+        }
+
+        /* File Input */
+        #csvFile {
+            display: none;
+        }
+
+        /* Data Table */
+        .table-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .table-header h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+
+        .filter-row label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-row select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .filter-row select:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 3px var(--accent-lt);
         }
 
-        /* Table */
-        .table-wrapper {
-            background: var(--card);
+        .filter-row .clear-filters {
+            padding: 0.5rem 1rem;
             border: 1px solid var(--border);
             border-radius: 0.5rem;
+            background: var(--card);
+            color: var(--text2);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-row .clear-filters:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text2);
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-lt);
+        }
+
+        .table-wrapper {
             overflow-x: auto;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.9rem;
         }
 
         thead {
             background: var(--bg);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         th {
@@ -333,9 +567,8 @@
             text-align: left;
             font-weight: 600;
             color: var(--text);
-            cursor: pointer;
             user-select: none;
-            white-space: nowrap;
+            cursor: pointer;
             transition: background-color 0.2s;
         }
 
@@ -345,32 +578,32 @@
 
         th.sortable::after {
             content: ' ⇅';
-            color: var(--text2);
-            font-size: 0.75rem;
+            opacity: 0.5;
+            font-size: 0.8rem;
         }
 
         th.sorted-asc::after {
             content: ' ↑';
-            color: var(--accent);
+            opacity: 1;
         }
 
         th.sorted-desc::after {
             content: ' ↓';
-            color: var(--accent);
+            opacity: 1;
         }
 
         tbody tr {
             border-bottom: 1px solid var(--border);
             transition: background-color 0.2s;
+            cursor: pointer;
         }
 
-        tbody tr:nth-child(odd) {
+        tbody tr:nth-child(even) {
             background: var(--bg);
         }
 
         tbody tr:hover {
             background: var(--accent-lt);
-            cursor: pointer;
         }
 
         td {
@@ -378,403 +611,379 @@
             color: var(--text);
         }
 
-        .actions-cell {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.4rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.125rem;
-            transition: transform 0.2s;
-            color: var(--text2);
+        .status-active {
+            background: var(--green-bg);
+            color: var(--green);
         }
 
-        .action-btn:hover {
-            transform: scale(1.2);
-            color: var(--accent);
-        }
-
-        .action-btn.delete:hover {
+        .status-sold {
+            background: var(--red-bg);
             color: var(--red);
+        }
+
+        .status-pending {
+            background: var(--yellow-bg);
+            color: var(--yellow);
+        }
+
+        .currency {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
 
         /* Empty State */
         .empty-state {
-            background: var(--card);
-            border: 2px dashed var(--border);
-            border-radius: 0.5rem;
-            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
             text-align: center;
             color: var(--text2);
         }
 
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
         .empty-state h3 {
-            color: var(--text);
+            font-size: 1.25rem;
             margin-bottom: 0.5rem;
+            color: var(--text);
         }
 
-        /* Modal */
+        .empty-state p {
+            max-width: 400px;
+            line-height: 1.6;
+        }
+
+        /* Detail Modal */
         .modal {
             display: none;
             position: fixed;
-            top: 0;
+            z-index: 200;
             left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
+            animation: fadeIn 0.3s;
+            overflow-y: auto;
         }
 
-        .modal.active {
+        .modal.open {
             display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal-content {
             background: var(--card);
-            border-radius: 0.75rem;
-            padding: 2rem;
-            max-width: 600px;
+            border-radius: 1rem;
             width: 90%;
+            max-width: 900px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .modal-header {
+            background: var(--accent);
+            color: white;
+            padding: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 201;
         }
 
         .modal-header h2 {
-            font-size: 1.5rem;
-            color: var(--text);
+            margin: 0;
+            font-size: 1.75rem;
         }
 
         .modal-close {
             background: none;
             border: none;
+            color: white;
             font-size: 1.5rem;
             cursor: pointer;
-            color: var(--text2);
-            transition: color 0.2s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            transition: background 0.2s;
         }
 
         .modal-close:hover {
-            color: var(--text);
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        /* Form */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--text);
-        }
-
-        input[type="text"],
-        input[type="number"],
-        input[type="email"],
-        input[type="date"],
-        input[type="url"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            background: var(--bg);
-            color: var(--text);
-            font-size: 1rem;
-            font-family: inherit;
-            transition: border-color 0.2s;
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-lt);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        /* Dropzone */
-        .dropzone {
-            border: 2px dashed var(--border);
-            border-radius: 0.5rem;
+        .modal-body {
             padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
+        }
+
+        .detail-section {
+            margin-bottom: 2rem;
+        }
+
+        .detail-section h3 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text2);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .detail-item {
             background: var(--bg);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 3px solid var(--accent);
         }
 
-        .dropzone:hover,
-        .dropzone.dragover {
-            border-color: var(--accent);
-            background: var(--accent-lt);
-        }
-
-        .dropzone-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        /* Preview */
-        .preview-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-            font-size: 0.875rem;
-        }
-
-        .preview-table th,
-        .preview-table td {
-            padding: 0.5rem;
-            border: 1px solid var(--border);
-            text-align: left;
-        }
-
-        .preview-table th {
-            background: var(--bg);
+        .detail-label {
+            font-size: 0.8rem;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
             font-weight: 600;
         }
 
-        /* Buttons */
-        .btn-group {
+        .detail-value {
+            font-size: 1rem;
+            color: var(--text);
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .detail-value.currency {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+        }
+
+        .modal-footer {
             display: flex;
             gap: 1rem;
-            margin-top: 2rem;
-            justify-content: flex-end;
-        }
-
-        .btn-cancel {
+            padding: 2rem;
+            border-top: 1px solid var(--border);
             background: var(--bg);
-            color: var(--text);
-            border: 1px solid var(--border);
+            position: sticky;
+            bottom: 0;
+            z-index: 201;
         }
 
-        .btn-cancel:hover {
-            background: var(--border);
+        .modal-footer button {
+            flex: 1;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--text);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 300;
+            animation: slideInRight 0.3s;
+            max-width: 400px;
+        }
+
+        .toast.success {
+            background: var(--green);
+        }
+
+        .toast.error {
+            background: var(--red);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         /* Footer */
         footer {
-            position: fixed;
-            bottom: 1rem;
-            right: 2rem;
-            font-size: 0.75rem;
-            color: var(--text2);
-            text-align: right;
-        }
-
-        /* Auth Overlay */
-        .auth-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .auth-container {
             background: var(--card);
-            padding: 3rem;
-            border-radius: 0.75rem;
+            border-top: 1px solid var(--border);
+            padding: 1.5rem 2rem;
             text-align: center;
-            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
-            max-width: 400px;
-            width: 90%;
-        }
-
-        .auth-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .auth-container h2 {
-            margin-bottom: 1rem;
-            color: var(--text);
-        }
-
-        .auth-container p {
             color: var(--text2);
-            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            margin-top: 3rem;
         }
 
-        .google-signin-btn {
-            background: white;
-            color: #1f2937;
-            border: 1px solid var(--border);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-weight: 500;
-            width: 100%;
-            transition: box-shadow 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-        }
-
-        .google-signin-btn:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Mobile */
+        /* Mobile Responsive */
         @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
             .hamburger {
                 display: block;
             }
 
             .nav-links {
                 display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: var(--nav);
                 flex-direction: column;
-                padding: 1rem;
                 gap: 1rem;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                width: 100%;
+                margin-left: 0;
             }
 
             .nav-links.open {
                 display: flex;
             }
 
-            .mobile-menu {
-                display: none;
-            }
-
-            .mobile-menu.open {
-                display: flex;
-            }
-
-            nav {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .nav-right {
-                flex-wrap: wrap;
+            .nav-controls {
+                width: 100%;
                 justify-content: space-between;
-                width: 100%;
+                flex-wrap: wrap;
             }
 
-            .nav-clocks {
-                order: 3;
-                width: 100%;
-            }
-
-            .container {
-                padding: 1rem;
-            }
-
-            .header h1 {
-                font-size: 1.75rem;
-            }
-
-            .stats-row {
+            .stats-grid {
                 grid-template-columns: 1fr;
             }
 
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-header {
+                flex-direction: column;
+            }
+
+            .search-bar {
+                min-width: 100%;
+            }
+
             table {
-                font-size: 0.875rem;
+                font-size: 0.8rem;
             }
 
             th, td {
                 padding: 0.75rem 0.5rem;
             }
 
-            .table-wrapper {
-                border-radius: 0;
+            .modal-content {
+                width: 95%;
             }
 
-            footer {
-                bottom: auto;
-                top: auto;
-                right: auto;
+            .modal-header {
+                padding: 1.5rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.25rem;
+            }
+
+            .modal-body {
+                padding: 1.5rem;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toast {
+                bottom: 1rem;
+                right: 1rem;
                 left: 1rem;
-                position: static;
-                margin-top: 2rem;
+                max-width: none;
             }
         }
 
-        /* Status badges */
-        .badge {
+        /* Loading State */
+        .loading {
             display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            white-space: nowrap;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse 1.5s infinite;
         }
 
-        .badge-active {
-            background: var(--green-bg);
-            color: var(--green);
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
         }
 
-        .badge-inactive {
-            background: var(--red-bg);
-            color: var(--red);
-        }
-
-        .badge-pending {
-            background: var(--yellow-bg);
-            color: var(--yellow);
-        }
-
-        .badge-archived {
-            background: var(--purple-bg);
-            color: var(--purple);
+        .lang-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            margin-right: 0.25rem;
         }
     </style>
 </head>
 <body>
+    <!-- Auth Overlay -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-card">
+            <h2>NF6 Capital</h2>
+            <p id="authMsg">Sign in with your nf6capital.com account to continue</p>
+            <button onclick="signInWithGoogle()">Sign In with Google</button>
+        </div>
+    </div>
+
     <!-- Navigation -->
     <nav>
-        <div style="display:flex;align-items:center;gap:1rem">
-            <button class="hamburger" onclick="document.querySelector('.mobile-menu').classList.toggle('open')">☰</button>
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;width:100%">
+            <button class="hamburger" onclick="toggleMobileMenu()">☰</button>
             <a href="index.html" class="brand">NF6 <span>Capital</span></a>
-            <div class="nav-links">
-                <a href="index.html" data-i18n="home">HomeBase</a>
+            <div class="nav-links" id="mobileMenu">
+                <a href="index.html" data-i18n="homebase">HomeBase</a>
                 <a href="compliance-dashboard.html" data-i18n="dashboard">Dashboard</a>
                 <a href="compliance-calendar.html" data-i18n="calendar">Calendar</a>
                 <a href="audit-trail.html" data-i18n="audit">Audit Trail</a>
@@ -782,303 +991,306 @@
                 <a href="document-finder.html" data-i18n="documents">Documents</a>
             </div>
         </div>
-        <div class="nav-right">
-            <button class="toggle-btn" onclick="toggleLang()"><span class="icon">●</span> <span id="langLabel">ES</span></button>
-            <button class="toggle-btn" onclick="toggleTheme()"><span class="icon">☽</span> <span data-i18n="dark">Dark</span></button>
+        <div class="nav-controls">
+            <button class="toggle-btn" onclick="toggleLanguage()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+            <button class="toggle-btn" onclick="toggleTheme()">☽ <span id="themeLabel" data-i18n="dark">Dark</span></button>
             <div class="nav-clocks">
-                <div class="clock-circle"><span class="clock-label">COL</span><span class="clock-time" id="clockCOL">--:--:--</span></div>
-                <div class="clock-circle"><span class="clock-label">PR</span><span class="clock-time" id="clockPR">--:--:--</span></div>
+                <div class="clock-circle">
+                    <span class="clock-label">COL</span>
+                    <span class="clock-time" id="clockCOL">--:--:--</span>
+                </div>
+                <div class="clock-circle">
+                    <span class="clock-label">PR</span>
+                    <span class="clock-time" id="clockPR">--:--:--</span>
+                </div>
             </div>
             <span class="today-badge" id="todayBadge"></span>
-            <button class="sign-out-btn" onclick="signOut()" data-i18n="signOut">Sign Out</button>
+            <button class="sign-out-btn" onclick="signOut()" id="signOutBtn">Sign Out</button>
         </div>
     </nav>
 
-    <!-- Auth Overlay -->
-    <div class="auth-overlay" id="authOverlay">
-        <div class="auth-container">
-            <div class="auth-icon">🏦</div>
-            <h2 data-i18n="signIn">Sign In</h2>
-            <p data-i18n="signInMsg">Sign in with your NF6 Capital account to continue</p>
-            <button class="google-signin-btn" onclick="signInWithGoogle()">
-                <span>🔐</span>
-                <span data-i18n="signInGoogle">Sign in with Google</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Main Container -->
-    <div class="container" id="mainContainer" style="display:none;">
-        <!-- Header -->
-        <div class="header">
-            <h1><span>🏦</span> <span data-i18n="cars">Cars</span></h1>
-            <p data-i18n="carsSubtitle">Manage vehicle registrations, insurance, maintenance logs, and lease or loan details.</p>
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 data-i18n="pageTitle">Automobiles</h1>
+            <p data-i18n="pageSubtitle">Track vehicle details, insurance, registration, and maintenance across all entities.</p>
         </div>
 
-        <!-- Action Bar -->
-        <div class="action-bar">
-            <button class="btn btn-primary" onclick="openUploadModal()" data-i18n="uploadCSV">📤 Upload CSV</button>
-            <button class="btn" onclick="exportCSV()" data-i18n="exportCSV">📥 Export CSV</button>
-            <button class="btn" onclick="openSheetsModal()" data-i18n="googleSheets">📊 Google Sheets</button>
-            <button class="btn btn-primary" onclick="openAddItemModal()" data-i18n="addItem">➕ Add Item</button>
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadSection" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+            <h3 data-i18n="uploadData">Upload Vehicle Data</h3>
+            <p data-i18n="uploadHint">Drag and drop a CSV file or choose one from your computer</p>
+            <div class="upload-buttons">
+                <button class="btn btn-primary" onclick="document.getElementById('csvFile').click()" data-i18n="chooseFile">📁 Choose CSV File</button>
+                <button class="btn btn-secondary" onclick="showSheetsDialog()" data-i18n="googleSheets">📊 Google Sheets URL</button>
+                <button class="btn btn-secondary" onclick="exportCSV()" data-i18n="exportCsv">💾 Export CSV</button>
+            </div>
+            <input type="file" id="csvFile" accept=".csv" onchange="handleFileSelect(event)">
         </div>
 
-        <!-- Stats Row -->
-        <div class="stats-row" id="statsRow">
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="statsGrid" style="display: none;">
             <div class="stat-card">
-                <div class="stat-label" data-i18n="totalItems">Total Items</div>
-                <div class="stat-value" id="statTotalItems">0</div>
+                <div class="stat-label" data-i18n="totalVehicles">Total Vehicles</div>
+                <div class="stat-value" id="statTotalVehicles">0</div>
+                <div class="stat-change"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label" data-i18n="activeVehicles">Active Vehicles</div>
+                <div class="stat-value" id="statActiveVehicles">0</div>
+                <div class="stat-change"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label" data-i18n="totalInsuredValue">Total Insured Value</div>
+                <div class="stat-value" id="statTotalValue">$0</div>
+                <div class="stat-change"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label" data-i18n="expiringSoon">Expiring Soon (30d)</div>
+                <div class="stat-value" id="statExpiringSoon">0</div>
+                <div class="stat-change"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label" data-i18n="soldVehicles">Sold Vehicles</div>
+                <div class="stat-value" id="statSoldVehicles">0</div>
+                <div class="stat-change"></div>
             </div>
         </div>
 
-        <!-- Search Bar -->
-        <div class="search-container">
-            <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search all columns..." data-i18n-placeholder="search">
-        </div>
-
-        <!-- Table -->
-        <div class="table-wrapper">
-            <table id="dataTable">
-                <thead id="tableHead"></thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-
-        <!-- Empty State -->
-        <div class="empty-state" id="emptyState" style="display:none;">
-            <div class="empty-state-icon">📁</div>
-            <h3 data-i18n="noData">No data yet</h3>
-            <p data-i18n="noDataMsg">Upload a CSV or sync from Google Sheets to get started.</p>
-        </div>
-    </div>
-
-    <!-- Upload Modal -->
-    <div class="modal" id="uploadModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 data-i18n="uploadCSV">Upload CSV</h2>
-                <button class="modal-close" onclick="closeModal('uploadModal')">✕</button>
-            </div>
-            <div class="form-group">
-                <div class="dropzone" id="dropzone" ondrop="handleDrop(event)" ondragover="event.preventDefault(); document.getElementById('dropzone').classList.add('dragover')" ondragleave="document.getElementById('dropzone').classList.remove('dragover')">
-                    <div class="dropzone-icon">📤</div>
-                    <p data-i18n="dragDrop">Drag and drop your CSV file here</p>
-                    <p style="color:var(--text2);font-size:0.875rem;margin-top:0.5rem;" data-i18n="orClick">or click to select</p>
-                    <input type="file" id="fileInput" accept=".csv" onchange="handleFileSelect(event)">
+        <!-- Charts Grid -->
+        <div class="charts-grid" id="chartsGrid" style="display: none;">
+            <div class="chart-card">
+                <h3 data-i18n="vehiclesByStatus">Vehicles by Status</h3>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
                 </div>
-                <button class="btn" onclick="document.getElementById('fileInput').click()" style="width:100%;margin-top:1rem;" data-i18n="selectFile">📁 Select File</button>
             </div>
-            <div id="previewContainer" style="display:none;">
-                <label data-i18n="preview">Preview</label>
-                <table class="preview-table" id="previewTable">
-                    <thead id="previewHead"></thead>
-                    <tbody id="previewBody"></tbody>
+            <div class="chart-card">
+                <h3 data-i18n="vehiclesByOwner">Vehicles by Owner</h3>
+                <div class="chart-container">
+                    <canvas id="ownerChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3 data-i18n="insuranceCoverage">Insurance Coverage Types</h3>
+                <div class="chart-container">
+                    <canvas id="coverageChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3 data-i18n="purchasePriceChart">Purchase Price by Vehicle</h3>
+                <div class="chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table Section -->
+        <div class="table-section" id="tableSection" style="display: none;">
+            <div class="table-header">
+                <h3 data-i18n="vehicleTable">Vehicle Data</h3>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search vehicles..." data-i18n-placeholder="search" onkeyup="filterTable()">
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filter-row">
+                <label data-i18n="filterBy">Filter By:</label>
+                <select id="statusFilter" onchange="filterTable()" data-i18n-placeholder="allStatus">
+                    <option value="">All Status</option>
+                </select>
+                <select id="ownerFilter" onchange="filterTable()" data-i18n-placeholder="allOwners">
+                    <option value="">All Owners</option>
+                </select>
+                <select id="insuranceFilter" onchange="filterTable()" data-i18n-placeholder="allProviders">
+                    <option value="">All Insurance Providers</option>
+                </select>
+                <select id="coverageFilter" onchange="filterTable()" data-i18n-placeholder="allCoverage">
+                    <option value="">All Coverage Types</option>
+                </select>
+                <button class="clear-filters" onclick="clearFilters()" data-i18n="clearFilters">Clear Filters</button>
+            </div>
+
+            <!-- Table -->
+            <div class="table-wrapper">
+                <table id="dataTable">
+                    <thead>
+                        <tr id="tableHead"></tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
                 </table>
             </div>
-            <div class="btn-group">
-                <button class="btn btn-cancel" onclick="closeModal('uploadModal')" data-i18n="cancel">Cancel</button>
-                <button class="btn btn-primary" onclick="confirmUpload()" id="confirmUploadBtn" style="display:none;" data-i18n="upload">Upload</button>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <h3 data-i18n="noData">No Data</h3>
+                <p data-i18n="uploadCSVFirst">Upload a CSV file to get started.</p>
             </div>
         </div>
     </div>
 
-    <!-- Google Sheets Modal -->
-    <div class="modal" id="sheetsModal">
+    <!-- Detail Modal -->
+    <div class="modal" id="detailModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 data-i18n="googleSheets">Google Sheets Sync</h2>
-                <button class="modal-close" onclick="closeModal('sheetsModal')">✕</button>
+                <h2 id="modalVehicleName">Vehicle Details</h2>
+                <button class="modal-close" onclick="closeModal()">✕</button>
             </div>
-            <div class="form-group">
-                <label data-i18n="sheetsURL">Google Sheets URL</label>
-                <input type="url" id="sheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/..." data-i18n-placeholder="sheetsURLPlaceholder">
-            </div>
-            <div class="form-group">
-                <small style="color:var(--text2);" data-i18n="sheetsHelp">Convert the URL to CSV format: add /export?format=csv to the end</small>
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-cancel" onclick="closeModal('sheetsModal')" data-i18n="cancel">Cancel</button>
-                <button class="btn" onclick="saveSheetURL()" data-i18n="save">💾 Save URL</button>
-                <button class="btn btn-primary" onclick="syncSheets()" data-i18n="syncNow">🔄 Sync Now</button>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()" data-i18n="close">Close</button>
             </div>
         </div>
     </div>
 
-    <!-- Edit Modal -->
-    <div class="modal" id="editModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 data-i18n="editItem">Edit Item</h2>
-                <button class="modal-close" onclick="closeModal('editModal')">✕</button>
-            </div>
-            <div id="editFormContainer"></div>
-            <div class="btn-group">
-                <button class="btn btn-cancel" onclick="closeModal('editModal')" data-i18n="cancel">Cancel</button>
-                <button class="btn btn-primary" onclick="saveEdit()" data-i18n="save">💾 Save</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Item Modal -->
-    <div class="modal" id="addModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 data-i18n="addNewItem">Add New Item</h2>
-                <button class="modal-close" onclick="closeModal('addModal')">✕</button>
-            </div>
-            <div id="addFormContainer"></div>
-            <div class="btn-group">
-                <button class="btn btn-cancel" onclick="closeModal('addModal')" data-i18n="cancel">Cancel</button>
-                <button class="btn btn-primary" onclick="saveNewItem()" data-i18n="add">➕ Add</button>
-            </div>
-        </div>
-    </div>
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
 
     <!-- Footer -->
-    <footer id="lastUpdated">Last updated: --:--:--</footer>
+    <footer>
+        <p>&copy; 2025 NF6 Capital. All rights reserved.</p>
+    </footer>
 
     <script>
-        // Configuration
-        const CONFIG = {
-            storageKey: 'nf6_cars_data',
-            sheetsKey: 'nf6_sheets_url_cars',
-            themeKey: 'nf6_theme',
-            langKey: 'nf6_lang',
-            auth: {
-                enabled: true,
-                allowedDomain: 'nf6capital.com',
-                config: {
-                    apiKey: "AIzaSyAbvvj4qCzfZPdRxU6BtbRSfXDXPitNwkQ",
-                    authDomain: "nf6-compliance.firebaseapp.com",
-                    projectId: "nf6-compliance"
-                }
-            }
+        // Firebase Config
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyAbvvj4qCzfZPdRxU6BtbRSfXDXPitNwkQ",
+            authDomain: "nf6-compliance.firebaseapp.com",
+            projectId: "nf6-compliance",
+            storageBucket: "nf6-compliance.appspot.com",
+            messagingSenderId: "606372",
+            appId: "1:606372:web:abc123"
         };
 
-        // i18n translations
+        const ALLOWED_DOMAIN = 'nf6capital.com';
+
+        // Translations
         const translations = {
             en: {
-                home: 'HomeBase',
-                dashboard: 'Dashboard',
-                calendar: 'Calendar',
-                audit: 'Audit Trail',
-                upload: 'Upload',
-                documents: 'Documents',
-                dark: 'Dark',
-                signOut: 'Sign Out',
-                signIn: 'Sign In',
-                signInMsg: 'Sign in with your NF6 Capital account to continue',
-                signInGoogle: 'Sign in with Google',
-                cars: 'Cars',
-                carsSubtitle: 'Manage vehicle registrations, insurance, maintenance logs, and lease or loan details.',
-                uploadCSV: '📤 Upload CSV',
-                exportCSV: '📥 Export CSV',
-                googleSheets: '📊 Google Sheets',
-                addItem: '➕ Add Item',
-                totalItems: 'Total Items',
-                search: '🔍 Search all columns...',
-                noData: 'No data yet',
-                noDataMsg: 'Upload a CSV or sync from Google Sheets to get started.',
-                dragDrop: 'Drag and drop your CSV file here',
-                orClick: 'or click to select',
-                selectFile: '📁 Select File',
-                preview: 'Preview',
-                cancel: 'Cancel',
-                upload: 'Upload',
-                sheetsURL: 'Google Sheets URL',
-                sheetsURLPlaceholder: 'https://docs.google.com/spreadsheets/d/...',
-                sheetsHelp: 'Convert the URL to CSV format: add /export?format=csv to the end',
-                save: '💾 Save URL',
-                syncNow: '🔄 Sync Now',
-                editItem: 'Edit Item',
-                addNewItem: 'Add New Item',
-                add: '➕ Add'
+                pageTitle: "Automobiles",
+                pageSubtitle: "Track vehicle details, insurance, registration, and maintenance across all entities.",
+                uploadData: "Upload Vehicle Data",
+                uploadHint: "Drag and drop a CSV file or choose one from your computer",
+                chooseFile: "📁 Choose CSV File",
+                googleSheets: "📊 Google Sheets URL",
+                exportCsv: "💾 Export CSV",
+                totalVehicles: "Total Vehicles",
+                activeVehicles: "Active Vehicles",
+                totalInsuredValue: "Total Insured Value",
+                expiringSoon: "Expiring Soon (30d)",
+                soldVehicles: "Sold Vehicles",
+                vehiclesByStatus: "Vehicles by Status",
+                vehiclesByOwner: "Vehicles by Owner",
+                insuranceCoverage: "Insurance Coverage Types",
+                purchasePriceChart: "Purchase Price by Vehicle",
+                vehicleTable: "Vehicle Data",
+                search: "Search vehicles...",
+                filterBy: "Filter By:",
+                allStatus: "All Status",
+                allOwners: "All Owners",
+                allProviders: "All Insurance Providers",
+                allCoverage: "All Coverage Types",
+                clearFilters: "Clear Filters",
+                noData: "No Data",
+                uploadCSVFirst: "Upload a CSV file to get started.",
+                close: "Close",
+                dark: "Dark",
+                homebase: "HomeBase",
+                dashboard: "Dashboard",
+                calendar: "Calendar",
+                audit: "Audit Trail",
+                upload: "Upload",
+                documents: "Documents"
             },
             es: {
-                home: 'Inicio',
-                dashboard: 'Panel',
-                calendar: 'Calendario',
-                audit: 'Auditoría',
-                upload: 'Cargar',
-                documents: 'Documentos',
-                dark: 'Oscuro',
-                signOut: 'Cerrar Sesión',
-                signIn: 'Iniciar Sesión',
-                signInMsg: 'Inicia sesión con tu cuenta de NF6 Capital para continuar',
-                signInGoogle: 'Inicia sesión con Google',
-                cars: 'Autos',
-                carsSubtitle: 'Administre registros de vehículos, seguros, registros de mantenimiento y detalles de arrendamiento o préstamo.',
-                uploadCSV: '📤 Cargar CSV',
-                exportCSV: '📥 Descargar CSV',
-                googleSheets: '📊 Google Sheets',
-                addItem: '➕ Agregar Elemento',
-                totalItems: 'Elementos Totales',
-                search: '🔍 Buscar en todas las columnas...',
-                noData: 'Sin datos',
-                noDataMsg: 'Carga un CSV o sincroniza desde Google Sheets para comenzar.',
-                dragDrop: 'Arrastra y suelta tu archivo CSV aquí',
-                orClick: 'o haz clic para seleccionar',
-                selectFile: '📁 Seleccionar Archivo',
-                preview: 'Vista Previa',
-                cancel: 'Cancelar',
-                upload: 'Cargar',
-                sheetsURL: 'URL de Google Sheets',
-                sheetsURLPlaceholder: 'https://docs.google.com/spreadsheets/d/...',
-                sheetsHelp: 'Convierte la URL a formato CSV: añade /export?format=csv al final',
-                save: '💾 Guardar URL',
-                syncNow: '🔄 Sincronizar Ahora',
-                editItem: 'Editar Elemento',
-                addNewItem: 'Agregar Nuevo Elemento',
-                add: '➕ Agregar'
+                pageTitle: "Automóviles",
+                pageSubtitle: "Rastrear detalles del vehículo, seguros, registración y mantenimiento en todas las entidades.",
+                uploadData: "Cargar Datos de Vehículos",
+                uploadHint: "Arrastra y suelta un archivo CSV o elige uno de tu computadora",
+                chooseFile: "📁 Elegir Archivo CSV",
+                googleSheets: "📊 URL de Google Sheets",
+                exportCsv: "💾 Exportar CSV",
+                totalVehicles: "Total de Vehículos",
+                activeVehicles: "Vehículos Activos",
+                totalInsuredValue: "Valor Total Asegurado",
+                expiringSoon: "Expirando Pronto (30d)",
+                soldVehicles: "Vehículos Vendidos",
+                vehiclesByStatus: "Vehículos por Estado",
+                vehiclesByOwner: "Vehículos por Propietario",
+                insuranceCoverage: "Tipos de Cobertura de Seguros",
+                purchasePriceChart: "Precio de Compra por Vehículo",
+                vehicleTable: "Datos de Vehículos",
+                search: "Buscar vehículos...",
+                filterBy: "Filtrar por:",
+                allStatus: "Todos los Estados",
+                allOwners: "Todos los Propietarios",
+                allProviders: "Todos los Proveedores de Seguros",
+                allCoverage: "Todos los Tipos de Cobertura",
+                clearFilters: "Limpiar Filtros",
+                noData: "Sin Datos",
+                uploadCSVFirst: "Carga un archivo CSV para comenzar.",
+                close: "Cerrar",
+                dark: "Oscuro",
+                homebase: "Inicio",
+                dashboard: "Panel",
+                calendar: "Calendario",
+                audit: "Registro de Auditoría",
+                upload: "Cargar",
+                documents: "Documentos"
             }
         };
 
-        let currentLanguage = localStorage.getItem(CONFIG.langKey) || 'en';
-        let currentData = [];
-        let allData = [];
-        let sortConfig = { column: null, ascending: true };
-        let editingIndex = -1;
-        let currentColumns = [];
-        let tempUploadData = [];
+        let currentLanguage = localStorage.getItem('nf6_language') || 'en';
+        let currentTheme = localStorage.getItem('nf6_theme') || 'light';
+        let carsData = [];
+        let filteredData = [];
+        let charts = {};
+        let currentUser = null;
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            initTheme();
-            initClocks();
-            updateTodayBadge();
-            initAuth();
-            updateUI();
-        });
-
-        // Auth
-        function initAuth() {
-            try {
-                firebase.initializeApp(CONFIG.auth.config);
-            } catch(e) { console.warn('Firebase init:', e.message); }
-            firebase.auth().onAuthStateChanged(user => {
-                if (!user) {
-                    document.getElementById('authOverlay').style.display = 'flex';
-                    document.getElementById('mainContainer').style.display = 'none';
-                    return;
-                }
-                if (!user.email.endsWith(`@${CONFIG.auth.allowedDomain}`)) {
-                    alert('Access restricted to @' + CONFIG.auth.allowedDomain);
-                    firebase.auth().signOut();
-                    return;
-                }
-                document.getElementById('authOverlay').style.display = 'none';
-                document.getElementById('mainContainer').style.display = 'block';
-                loadData();
-                autoSyncSheets();
-            });
+        // Initialize Firebase
+        try {
+            firebase.initializeApp(FIREBASE_CONFIG);
+        } catch (e) {
+            console.log('Firebase already initialized');
         }
 
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', () => {
+            applyTheme();
+            updateLanguage();
+            initClocks();
+            setInterval(updateClocks, 1000);
+            setInterval(updateDate, 1000);
+            updateDate();
+            loadStoredData();
+            checkAuth();
+        });
+
+        // Auth Functions
         function signInWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({hd: CONFIG.auth.allowedDomain});
-            firebase.auth().signInWithPopup(provider).catch(err => {
-                console.error('Auth error:', err);
-                alert(err.message || 'Sign in failed');
+            provider.setCustomParameters({ hd: ALLOWED_DOMAIN });
+            firebase.auth().signInWithPopup(provider)
+                .catch(e => console.error('Auth error:', e));
+        }
+
+        function checkAuth() {
+            firebase.auth().onAuthStateChanged(user => {
+                if (user) {
+                    const domain = user.email.split('@')[1];
+                    if (domain !== ALLOWED_DOMAIN) {
+                        firebase.auth().signOut();
+                        return;
+                    }
+                    currentUser = user;
+                    document.getElementById('authOverlay').classList.add('hidden');
+                    document.getElementById('signOutBtn').style.display = 'block';
+                } else {
+                    document.getElementById('authOverlay').classList.remove('hidden');
+                    document.getElementById('signOutBtn').style.display = 'none';
+                }
             });
         }
 
@@ -1086,383 +1298,34 @@
             firebase.auth().signOut();
         }
 
-        // Data Management
-        function loadData() {
-            const stored = localStorage.getItem(CONFIG.storageKey);
-            allData = stored ? JSON.parse(stored) : [];
-            currentData = [...allData];
-            detectColumns();
-            renderTable();
-            updateStats();
-        }
-
-        function saveData() {
-            localStorage.setItem(CONFIG.storageKey, JSON.stringify(allData));
-            currentData = [...allData];
-            renderTable();
-            updateStats();
-            updateLastUpdated();
-        }
-
-        function detectColumns() {
-            if (allData.length === 0) {
-                currentColumns = [];
-                return;
-            }
-            currentColumns = Object.keys(allData[0]);
-        }
-
-        // CSV Upload
-        function openUploadModal() {
-            document.getElementById('uploadModal').classList.add('active');
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            document.getElementById('dropzone').classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
-            }
-        }
-
-        function handleFileSelect(e) {
-            const files = e.target.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
-            }
-        }
-
-        function handleFile(file) {
-            Papa.parse(file, {
-                header: true,
-                complete: (results) => {
-                    tempUploadData = results.data.filter(row => Object.values(row).some(v => v));
-                    showPreview(tempUploadData);
-                },
-                error: (err) => {
-                    alert('Error parsing CSV: ' + err.message);
-                }
-            });
-        }
-
-        function showPreview(data) {
-            if (data.length === 0) {
-                alert('No valid data in file');
-                return;
-            }
-
-            const previewContainer = document.getElementById('previewContainer');
-            const previewHead = document.getElementById('previewHead');
-            const previewBody = document.getElementById('previewBody');
-
-            const cols = Object.keys(data[0]);
-            previewHead.innerHTML = cols.map(c => `<th>${c}</th>`).join('');
-            previewBody.innerHTML = data.slice(0, 5).map(row =>
-                `<tr>${cols.map(c => `<td>${row[c] || ''}</td>`).join('')}</tr>`
-            ).join('');
-
-            previewContainer.style.display = 'block';
-            document.getElementById('confirmUploadBtn').style.display = 'block';
-        }
-
-        function confirmUpload() {
-            allData = tempUploadData;
-            saveData();
-            closeModal('uploadModal');
-            tempUploadData = [];
-            document.getElementById('previewContainer').style.display = 'none';
-            document.getElementById('confirmUploadBtn').style.display = 'none';
-        }
-
-        // Google Sheets
-        function openSheetsModal() {
-            const saved = localStorage.getItem(CONFIG.sheetsKey);
-            if (saved) {
-                document.getElementById('sheetsUrl').value = saved;
-            }
-            document.getElementById('sheetsModal').classList.add('active');
-        }
-
-        function saveSheetURL() {
-            const url = document.getElementById('sheetsUrl').value;
-            if (!url) {
-                alert('Please enter a URL');
-                return;
-            }
-            localStorage.setItem(CONFIG.sheetsKey, url);
-            alert('URL saved!');
-        }
-
-        async function syncSheets() {
-            const url = localStorage.getItem(CONFIG.sheetsKey);
-            if (!url) {
-                alert('No Google Sheets URL saved');
-                return;
-            }
-
-            const csvUrl = url.includes('/export?format=csv') ? url : url.replace(/\/$/, '') + '/export?format=csv';
-
-            try {
-                const response = await fetch(csvUrl);
-                const csv = await response.text();
-                Papa.parse(csv, {
-                    header: true,
-                    complete: (results) => {
-                        allData = results.data.filter(row => Object.values(row).some(v => v));
-                        saveData();
-                        closeModal('sheetsModal');
-                        alert('Synced from Google Sheets!');
-                    }
-                });
-            } catch (err) {
-                alert('Error syncing: ' + err.message);
-            }
-        }
-
-        async function autoSyncSheets() {
-            const url = localStorage.getItem(CONFIG.sheetsKey);
-            if (url) {
-                try {
-                    await syncSheets();
-                } catch (err) {
-                    console.error('Auto-sync failed:', err);
-                }
-            }
-        }
-
-        // Table Rendering
-        function renderTable() {
-            const head = document.getElementById('tableHead');
-            const body = document.getElementById('tableBody');
-            const emptyState = document.getElementById('emptyState');
-
-            if (currentData.length === 0) {
-                head.innerHTML = '';
-                body.innerHTML = '';
-                emptyState.style.display = 'block';
-                document.querySelector('.table-wrapper').style.display = 'none';
-                return;
-            }
-
-            emptyState.style.display = 'none';
-            document.querySelector('.table-wrapper').style.display = 'block';
-
-            const cols = currentColumns;
-            head.innerHTML = cols.map(col => `
-                <th class="sortable" onclick="sortTable('${col}')">${col}</th>
-            `).join('') + '<th>Actions</th>';
-
-            body.innerHTML = currentData.map((row, idx) => `
-                <tr onclick="openEditModal(${idx})">
-                    ${cols.map(col => {
-                        let val = row[col] || '';
-                        if (col.toLowerCase().includes('status')) {
-                            const status = val.toLowerCase();
-                            let badgeClass = 'badge-pending';
-                            if (status === 'active' || status === 'activo') badgeClass = 'badge-active';
-                            else if (status === 'inactive' || status === 'inactivo') badgeClass = 'badge-inactive';
-                            else if (status === 'archived' || status === 'archivado') badgeClass = 'badge-archived';
-                            return `<td><span class="badge ${badgeClass}">${val}</span></td>`;
-                        }
-                        return `<td>${val}</td>`;
-                    }).join('')}
-                    <td class="actions-cell">
-                        <button class="action-btn" onclick="event.stopPropagation(); openEditModal(${idx})">✏</button>
-                        <button class="action-btn delete" onclick="event.stopPropagation(); deleteRow(${idx})">✕</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function sortTable(column) {
-            if (sortConfig.column === column) {
-                sortConfig.ascending = !sortConfig.ascending;
-            } else {
-                sortConfig.column = column;
-                sortConfig.ascending = true;
-            }
-
-            currentData.sort((a, b) => {
-                let valA = a[column] || '';
-                let valB = b[column] || '';
-
-                if (!isNaN(valA) && !isNaN(valB)) {
-                    valA = parseFloat(valA);
-                    valB = parseFloat(valB);
-                }
-
-                if (valA < valB) return sortConfig.ascending ? -1 : 1;
-                if (valA > valB) return sortConfig.ascending ? 1 : -1;
-                return 0;
-            });
-
-            renderTable();
-        }
-
-        function filterTable() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            currentData = allData.filter(row =>
-                Object.values(row).some(v => String(v).toLowerCase().includes(query))
-            );
-            renderTable();
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.addEventListener('input', filterTable);
-            }
-        });
-
-        // Edit/Add
-        function openEditModal(idx) {
-            editingIndex = idx;
-            const row = allData[idx];
-            const form = document.getElementById('editFormContainer');
-            form.innerHTML = currentColumns.map(col => `
-                <div class="form-group">
-                    <label>${col}</label>
-                    <input type="text" value="${row[col] || ''}" data-col="${col}">
-                </div>
-            `).join('');
-            document.getElementById('editModal').classList.add('active');
-        }
-
-        function saveEdit() {
-            const inputs = document.querySelectorAll('#editFormContainer input');
-            inputs.forEach(input => {
-                allData[editingIndex][input.dataset.col] = input.value;
-            });
-            saveData();
-            closeModal('editModal');
-        }
-
-        function openAddItemModal() {
-            if (currentColumns.length === 0) {
-                alert('Please upload data first to determine columns');
-                return;
-            }
-            const form = document.getElementById('addFormContainer');
-            form.innerHTML = currentColumns.map(col => `
-                <div class="form-group">
-                    <label>${col}</label>
-                    <input type="text" data-col="${col}">
-                </div>
-            `).join('');
-            document.getElementById('addModal').classList.add('active');
-        }
-
-        function saveNewItem() {
-            const newRow = {};
-            document.querySelectorAll('#addFormContainer input').forEach(input => {
-                newRow[input.dataset.col] = input.value;
-            });
-            allData.push(newRow);
-            saveData();
-            closeModal('addModal');
-        }
-
-        function deleteRow(idx) {
-            if (confirm('Delete this item?')) {
-                allData.splice(idx, 1);
-                saveData();
-            }
-        }
-
-        // Export
-        function exportCSV() {
-            if (allData.length === 0) {
-                alert('No data to export');
-                return;
-            }
-
-            const cols = currentColumns;
-            const csv = [cols.join(',')];
-            allData.forEach(row => {
-                csv.push(cols.map(col => {
-                    let val = row[col] || '';
-                    if (typeof val === 'string' && val.includes(',')) {
-                        val = `"${val}"`;
-                    }
-                    return val;
-                }).join(','));
-            });
-
-            const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'cars.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Stats
-        function updateStats() {
-            let html = `
-                <div class="stat-card">
-                    <div class="stat-label" data-i18n="totalItems">Total Items</div>
-                    <div class="stat-value">${allData.length}</div>
-                </div>
-            `;
-
-            // Status stats
-            const statusCol = currentColumns.find(c => c.toLowerCase().includes('status'));
-            if (statusCol) {
-                const statusCounts = {};
-                allData.forEach(row => {
-                    const status = row[statusCol] || 'Unknown';
-                    statusCounts[status] = (statusCounts[status] || 0) + 1;
-                });
-
-                Object.entries(statusCounts).forEach(([status, count]) => {
-                    html += `
-                        <div class="stat-card">
-                            <div class="stat-label">${status}</div>
-                            <div class="stat-value">${count}</div>
-                        </div>
-                    `;
-                });
-            }
-
-            document.getElementById('statsRow').innerHTML = html;
-            updateUI();
-        }
-
-        // Modal
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-        }
-
-        // Theme
-        function initTheme() {
-            const saved = localStorage.getItem(CONFIG.themeKey);
-            if (saved === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
-        }
-
+        // Theme Functions
         function toggleTheme() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-theme') === 'dark';
             if (isDark) {
-                document.documentElement.removeAttribute('data-theme');
-                localStorage.removeItem(CONFIG.themeKey);
+                html.removeAttribute('data-theme');
+                localStorage.setItem('nf6_theme', 'light');
             } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem(CONFIG.themeKey, 'dark');
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('nf6_theme', 'dark');
             }
         }
 
-        // Language
-        function toggleLang() {
-            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
-            localStorage.setItem(CONFIG.langKey, currentLanguage);
-            document.getElementById('langLabel').textContent = currentLanguage.toUpperCase();
-            updateUI();
+        function applyTheme() {
+            const theme = localStorage.getItem('nf6_theme') || 'light';
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
         }
 
-        function updateUI() {
+        // Language Functions
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
+            localStorage.setItem('nf6_language', currentLanguage);
+            updateLanguage();
+        }
+
+        function updateLanguage() {
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 el.textContent = translations[currentLanguage][key] || key;
@@ -1474,32 +1337,553 @@
             document.getElementById('langLabel').textContent = currentLanguage.toUpperCase();
         }
 
-        // Clocks
-        function initClocks() {
-            setInterval(updateClocks, 1000);
-            updateClocks();
-        }
-
+        // Clock Functions
         function updateClocks() {
             const now = new Date();
             const colTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
             const prTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Puerto_Rico' }));
 
-            document.getElementById('clockCOL').textContent = colTime.toLocaleTimeString('en-US', { hour12: false });
-            document.getElementById('clockPR').textContent = prTime.toLocaleTimeString('en-US', { hour12: false });
+            const formatTime = (date) => {
+                return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            };
+
+            document.getElementById('clockCOL').textContent = formatTime(colTime);
+            document.getElementById('clockPR').textContent = formatTime(prTime);
         }
 
-        // Badge
-        function updateTodayBadge() {
-            const today = new Date();
-            const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            document.getElementById('todayBadge').textContent = dateStr;
-        }
-
-        // Last Updated
-        function updateLastUpdated() {
+        function updateDate() {
             const now = new Date();
-            document.getElementById('lastUpdated').textContent = 'Last updated: ' + now.toLocaleTimeString('en-US', { hour12: false });
+            const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+            document.getElementById('todayBadge').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Mobile Menu
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('open');
+        }
+
+        // CSV Functions
+        function parseCurrency(val) {
+            if (!val) return 0;
+            const negative = val.startsWith('(') || val.startsWith('-');
+            const num = parseFloat(val.replace(/[^0-9.]/g, ''));
+            return isNaN(num) ? 0 : (negative ? -num : num);
+        }
+
+        function formatCurrency(value) {
+            if (typeof value === 'string') {
+                value = parseCurrency(value);
+            }
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2
+            }).format(value);
+        }
+
+        function normalizeKeys(data) {
+            return data.map(row => {
+                const clean = {};
+                Object.keys(row).forEach(k => {
+                    clean[k.trim()] = row[k];
+                });
+                return clean;
+            });
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            Papa.parse(file, {
+                header: false,
+                skipEmptyLines: true,
+                complete: (results) => {
+                    processCSVData(results.data);
+                    showToast('CSV uploaded successfully', 'success');
+                },
+                error: (err) => showToast('Error parsing CSV: ' + err.message, 'error')
+            });
+        }
+
+        function processCSVData(rows) {
+            // Find the row with "Status" as first column (this is the header row)
+            let headerRowIndex = 0;
+            for (let i = 0; i < Math.min(rows.length, 10); i++) {
+                if (rows[i][0] && rows[i][0].toLowerCase().trim() === 'status') {
+                    headerRowIndex = i;
+                    break;
+                }
+            }
+
+            const headers = rows[headerRowIndex];
+            const dataRows = rows.slice(headerRowIndex + 1);
+
+            // Filter out empty rows and summary section
+            carsData = dataRows
+                .filter(row => row[0] && row[0].trim() !== '' && !row[0].toLowerCase().includes('tesla'))
+                .map((row, idx) => {
+                    const obj = {};
+                    headers.forEach((header, colIdx) => {
+                        if (header) {
+                            obj[header.trim()] = row[colIdx] ? row[colIdx].trim() : '';
+                        }
+                    });
+                    return obj;
+                })
+                .filter(row => Object.values(row).some(v => v !== ''));
+
+            carsData = normalizeKeys(carsData);
+
+            localStorage.setItem('nf6_cars_data', JSON.stringify(carsData));
+            filteredData = [...carsData];
+            updateDashboard();
+        }
+
+        function loadStoredData() {
+            const stored = localStorage.getItem('nf6_cars_data');
+            if (stored) {
+                carsData = JSON.parse(stored);
+                filteredData = [...carsData];
+                updateDashboard();
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const section = document.getElementById('uploadSection');
+            section.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('csvFile').files = files;
+                handleFileSelect({ target: { files } });
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('uploadSection').classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            if (e.target.id === 'uploadSection') {
+                document.getElementById('uploadSection').classList.remove('dragover');
+            }
+        }
+
+        // Dashboard Update
+        function updateDashboard() {
+            updateStats();
+            updateCharts();
+            updateTable();
+            populateFilters();
+            document.getElementById('statsGrid').style.display = 'grid';
+            document.getElementById('chartsGrid').style.display = 'grid';
+            document.getElementById('tableSection').style.display = 'block';
+        }
+
+        function updateStats() {
+            const total = carsData.length;
+            const active = carsData.filter(row => {
+                const status = row['Status'] || '';
+                return status.toLowerCase().includes('active');
+            }).length;
+            const sold = carsData.filter(row => {
+                const status = row['Status'] || '';
+                return status.toLowerCase().includes('sold');
+            }).length;
+
+            let totalValue = 0;
+            carsData.forEach(row => {
+                const price = row['Purchase Price'] || '';
+                totalValue += parseCurrency(price);
+            });
+
+            const now = new Date();
+            const expiringSoon = carsData.filter(row => {
+                const expDate = row['Policy End Date'] || row['Tag expiration date'] || '';
+                if (!expDate) return false;
+                try {
+                    const parts = expDate.split('/');
+                    if (parts.length !== 3) return false;
+                    const date = new Date(parseInt(parts[2]), parseInt(parts[0]) - 1, parseInt(parts[1]));
+                    const daysUntil = (date - now) / (1000 * 60 * 60 * 24);
+                    return daysUntil >= 0 && daysUntil <= 30;
+                } catch (e) {
+                    return false;
+                }
+            }).length;
+
+            document.getElementById('statTotalVehicles').textContent = total;
+            document.getElementById('statActiveVehicles').textContent = active;
+            document.getElementById('statTotalValue').textContent = formatCurrency(totalValue);
+            document.getElementById('statExpiringSoon').textContent = expiringSoon;
+            document.getElementById('statSoldVehicles').textContent = sold;
+        }
+
+        function updateCharts() {
+            // Status Chart
+            const statusCounts = {};
+            carsData.forEach(row => {
+                const status = row['Status'] || 'Unknown';
+                statusCounts[status] = (statusCounts[status] || 0) + 1;
+            });
+
+            if (charts.statusChart) charts.statusChart.destroy();
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            charts.statusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        data: Object.values(statusCounts),
+                        backgroundColor: ['#16a34a', '#dc2626', '#ca8a04', '#2563eb', '#7c3aed']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Owner Chart
+            const ownerCounts = {};
+            carsData.forEach(row => {
+                const owner = row['Owner'] || 'Unknown';
+                ownerCounts[owner] = (ownerCounts[owner] || 0) + 1;
+            });
+
+            if (charts.ownerChart) charts.ownerChart.destroy();
+            const ownerCtx = document.getElementById('ownerChart').getContext('2d');
+            charts.ownerChart = new Chart(ownerCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(ownerCounts),
+                    datasets: [{
+                        data: Object.values(ownerCounts),
+                        backgroundColor: ['#2563eb', '#7c3aed', '#0891b2', '#ea580c', '#f59e0b']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Coverage Chart
+            const coverageCounts = {};
+            carsData.forEach(row => {
+                const coverage = row['Coverage Type'] || 'Unknown';
+                if (coverage) {
+                    coverageCounts[coverage] = (coverageCounts[coverage] || 0) + 1;
+                }
+            });
+
+            if (charts.coverageChart) charts.coverageChart.destroy();
+            const coverageCtx = document.getElementById('coverageChart').getContext('2d');
+            charts.coverageChart = new Chart(coverageCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(coverageCounts),
+                    datasets: [{
+                        data: Object.values(coverageCounts),
+                        backgroundColor: ['#16a34a', '#2563eb', '#7c3aed', '#f59e0b']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Price Chart
+            const priceData = carsData.map(row => ({
+                vehicle: row['Vehicle'] || 'Unknown',
+                price: parseCurrency(row['Purchase Price'] || '0')
+            })).filter(x => x.price > 0);
+
+            if (charts.priceChart) charts.priceChart.destroy();
+            const priceCtx = document.getElementById('priceChart').getContext('2d');
+            charts.priceChart = new Chart(priceCtx, {
+                type: 'bar',
+                data: {
+                    labels: priceData.map(x => x.vehicle),
+                    datasets: [{
+                        label: 'Purchase Price',
+                        data: priceData.map(x => x.price),
+                        backgroundColor: '#2563eb'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function populateFilters() {
+            const statuses = [...new Set(carsData.map(row => row['Status'] || 'Unknown'))];
+            const owners = [...new Set(carsData.map(row => row['Owner'] || 'Unknown'))];
+            const insurers = [...new Set(carsData.map(row => row['Insurance Provider'] || 'Unknown').filter(x => x))];
+            const coverages = [...new Set(carsData.map(row => row['Coverage Type'] || 'Unknown').filter(x => x))];
+
+            const statusSelect = document.getElementById('statusFilter');
+            statuses.forEach(status => {
+                const option = document.createElement('option');
+                option.value = status;
+                option.textContent = status;
+                statusSelect.appendChild(option);
+            });
+
+            const ownerSelect = document.getElementById('ownerFilter');
+            owners.forEach(owner => {
+                const option = document.createElement('option');
+                option.value = owner;
+                option.textContent = owner;
+                ownerSelect.appendChild(option);
+            });
+
+            const insurerSelect = document.getElementById('insuranceFilter');
+            insurers.forEach(insurer => {
+                const option = document.createElement('option');
+                option.value = insurer;
+                option.textContent = insurer;
+                insurerSelect.appendChild(option);
+            });
+
+            const coverageSelect = document.getElementById('coverageFilter');
+            coverages.forEach(coverage => {
+                const option = document.createElement('option');
+                option.value = coverage;
+                option.textContent = coverage;
+                coverageSelect.appendChild(option);
+            });
+        }
+
+        function updateTable() {
+            if (filteredData.length === 0) {
+                document.getElementById('emptyState').style.display = 'flex';
+                document.getElementById('tableBody').innerHTML = '';
+                return;
+            }
+
+            document.getElementById('emptyState').style.display = 'none';
+
+            // Create header
+            const columns = ['Vehicle', 'Year', 'Status', 'Owner', 'Purchase Price', 'Insurance Provider', 'Policy End Date', 'Premium', 'Tag expiration date'];
+            const thead = document.getElementById('tableHead');
+            thead.innerHTML = '';
+            columns.forEach(col => {
+                const th = document.createElement('th');
+                th.className = 'sortable';
+                th.textContent = col;
+                th.onclick = () => sortTable(col);
+                thead.appendChild(th);
+            });
+
+            // Create rows
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            filteredData.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                tr.onclick = () => openModal(row);
+
+                columns.forEach(col => {
+                    const td = document.createElement('td');
+                    let value = row[col] || '-';
+
+                    if (col === 'Status') {
+                        const badge = document.createElement('span');
+                        badge.className = 'status-badge status-' + value.toLowerCase().replace(' ', '-');
+                        badge.textContent = value;
+                        td.appendChild(badge);
+                    } else if (col === 'Purchase Price' || col === 'Premium') {
+                        td.className = 'currency';
+                        td.textContent = value !== '-' ? formatCurrency(value) : '-';
+                    } else {
+                        td.textContent = value;
+                    }
+
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterTable() {
+            const status = document.getElementById('statusFilter').value;
+            const owner = document.getElementById('ownerFilter').value;
+            const insurance = document.getElementById('insuranceFilter').value;
+            const coverage = document.getElementById('coverageFilter').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            filteredData = carsData.filter(row => {
+                const matchStatus = !status || row['Status'] === status;
+                const matchOwner = !owner || row['Owner'] === owner;
+                const matchInsurance = !insurance || row['Insurance Provider'] === insurance;
+                const matchCoverage = !coverage || row['Coverage Type'] === coverage;
+                const matchSearch = !search ||
+                    (row['Vehicle'] && row['Vehicle'].toLowerCase().includes(search)) ||
+                    (row['VIN'] && row['VIN'].toLowerCase().includes(search)) ||
+                    (row['License plate'] && row['License plate'].toLowerCase().includes(search));
+
+                return matchStatus && matchOwner && matchInsurance && matchCoverage && matchSearch;
+            });
+
+            updateTable();
+        }
+
+        function clearFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('ownerFilter').value = '';
+            document.getElementById('insuranceFilter').value = '';
+            document.getElementById('coverageFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            filteredData = [...carsData];
+            updateTable();
+        }
+
+        function sortTable(col) {
+            const isAsc = document.querySelector(`th[data-sort="${col}"]`) ?
+                         document.querySelector(`th[data-sort="${col}"]`).classList.contains('sorted-asc') : true;
+
+            filteredData.sort((a, b) => {
+                let aVal = a[col] || '';
+                let bVal = b[col] || '';
+
+                if (col === 'Purchase Price' || col === 'Premium') {
+                    aVal = parseCurrency(aVal);
+                    bVal = parseCurrency(bVal);
+                    return isAsc ? bVal - aVal : aVal - bVal;
+                }
+
+                aVal = aVal.toString().toLowerCase();
+                bVal = bVal.toString().toLowerCase();
+                return isAsc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+            });
+
+            updateTable();
+        }
+
+        function openModal(row) {
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalVehicleName').textContent = row['Vehicle'] || 'Vehicle Details';
+
+            let html = '';
+
+            // Vehicle Section
+            html += '<div class="detail-section">';
+            html += '<h3>Vehicle Information</h3>';
+            html += '<div class="detail-grid">';
+            ['Vehicle', 'Year', 'Status', 'VIN', 'Miles', 'Owner', 'License plate', 'Purchase Price'].forEach(key => {
+                if (row[key]) {
+                    html += '<div class="detail-item">';
+                    html += '<div class="detail-label">' + key + '</div>';
+                    if (key === 'Purchase Price') {
+                        html += '<div class="detail-value currency">' + formatCurrency(row[key]) + '</div>';
+                    } else {
+                        html += '<div class="detail-value">' + row[key] + '</div>';
+                    }
+                    html += '</div>';
+                }
+            });
+            html += '</div></div>';
+
+            // Insurance Section
+            html += '<div class="detail-section">';
+            html += '<h3>Insurance Information</h3>';
+            html += '<div class="detail-grid">';
+            ['Insurance Provider', 'Policy Number', 'Coverage Type', 'Policy Start Date', 'Policy End Date', 'Premium', 'Renewal date'].forEach(key => {
+                if (row[key]) {
+                    html += '<div class="detail-item">';
+                    html += '<div class="detail-label">' + key + '</div>';
+                    if (key === 'Premium') {
+                        html += '<div class="detail-value currency">' + formatCurrency(row[key]) + '</div>';
+                    } else {
+                        html += '<div class="detail-value">' + row[key] + '</div>';
+                    }
+                    html += '</div>';
+                }
+            });
+            html += '</div></div>';
+
+            // Registration Section
+            html += '<div class="detail-section">';
+            html += '<h3>Registration Information</h3>';
+            html += '<div class="detail-grid">';
+            ['Tag Number', 'Tag expiration date'].forEach(key => {
+                if (row[key]) {
+                    html += '<div class="detail-item">';
+                    html += '<div class="detail-label">' + key + '</div>';
+                    html += '<div class="detail-value">' + row[key] + '</div>';
+                    html += '</div>';
+                }
+            });
+            html += '</div></div>';
+
+            // Links Section
+            html += '<div class="detail-section">';
+            html += '<h3>Links</h3>';
+            html += '<div class="detail-grid">';
+            ['Main folder', 'Insurance', 'Resgistration'].forEach(key => {
+                if (row[key]) {
+                    html += '<div class="detail-item">';
+                    html += '<div class="detail-label">' + key + '</div>';
+                    html += '<div class="detail-value">' + row[key] + '</div>';
+                    html += '</div>';
+                }
+            });
+            html += '</div></div>';
+
+            document.getElementById('modalBody').innerHTML = html;
+            modal.classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('open');
+        }
+
+        function exportCSV() {
+            if (carsData.length === 0) {
+                showToast('No data to export', 'error');
+                return;
+            }
+
+            const headers = Object.keys(carsData[0]);
+            let csv = headers.join(',') + '\n';
+            carsData.forEach(row => {
+                csv += headers.map(h => {
+                    const val = row[h] || '';
+                    return val.includes(',') ? '"' + val + '"' : val;
+                }).join(',') + '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'vehicles_' + new Date().toISOString().slice(0, 10) + '.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            showToast('CSV exported successfully', 'success');
+        }
+
+        function showSheetsDialog() {
+            const url = prompt('Enter Google Sheets URL:');
+            if (url) {
+                localStorage.setItem('nf6_sheets_url_cars', url);
+                showToast('Google Sheets URL saved', 'success');
+            }
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
         }
     </script>
 </body>

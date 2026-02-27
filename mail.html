@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NF6 Capital — Mail</title>
+    <title>Mail Tracker - NF6 Capital</title>
 
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- PapaParse for CSV -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js"></script>
 
     <style>
         * {
@@ -41,386 +47,487 @@
             --bg: #0f172a;
             --card: #1e293b;
             --border: #334155;
-            --text: #e2e8f0;
-            --text2: #94a3b8;
-            --accent: #60a5fa;
-            --accent-lt: #1e3a5f;
-            --green: #4ade80;
-            --green-bg: #064e3b;
-            --yellow: #fbbf24;
-            --yellow-bg: #713f12;
-            --red: #f87171;
-            --red-bg: #7f1d1d;
-            --orange: #fb923c;
-            --orange-bg: #7c2d12;
-            --purple: #a78bfa;
-            --purple-bg: #4c1d95;
-            --nav: #020617;
+            --text: #f1f5f9;
+            --text2: #cbd5e1;
+            --accent: #3b82f6;
+            --accent-lt: #1e3a8a;
+            --green-bg: #022c22;
+            --yellow-bg: #332701;
+            --red-bg: #3f0f0f;
+            --orange-bg: #3d1f00;
+            --purple-bg: #2d1b4e;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             transition: background-color 0.3s, color 0.3s;
         }
 
         /* Navigation */
-        nav {
+        .navbar {
             position: sticky;
             top: 0;
-            z-index: 100;
             background-color: var(--nav);
             color: white;
-            padding: 1rem 2rem;
+            padding: 0.75rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        nav a {
-            color: white;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        nav a:hover {
-            color: var(--accent);
-        }
-
-        .brand {
-            font-size: 1.5rem;
-            font-weight: bold;
+        .navbar-left {
             display: flex;
+            gap: 2rem;
             align-items: center;
-            gap: 0.5rem;
+            flex: 1;
         }
 
-        .brand span {
-            color: var(--accent);
+        .navbar-brand {
+            font-size: 1.25rem;
+            font-weight: 600;
         }
 
         .nav-links {
             display: flex;
-            gap: 2rem;
-            margin-left: 3rem;
+            gap: 1.5rem;
+            list-style: none;
         }
 
-        .nav-right {
+        .nav-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        .navbar-right {
             display: flex;
+            gap: 1.5rem;
             align-items: center;
-            gap: 1rem;
         }
 
-        .hamburger {
-            display: none;
+        .control-btn {
             background: none;
             border: none;
-            color: white;
-            font-size: 1.5rem;
+            color: #cbd5e1;
             cursor: pointer;
-        }
-
-        .toggle-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
+            font-size: 0.9rem;
             padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: background-color 0.2s;
-        }
-
-        .toggle-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .toggle-btn .icon {
-            font-size: 1rem;
-        }
-
-        .nav-clocks {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .clock-circle {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.65rem;
-        }
-
-        .clock-label {
-            font-weight: bold;
-            font-size: 0.7rem;
-        }
-
-        .clock-time {
-            font-size: 0.6rem;
-            font-family: 'Courier New', monospace;
-        }
-
-        .today-badge {
-            background: var(--accent);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-
-        .sign-out-btn {
-            background: var(--red);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: background-color 0.2s;
-        }
-
-        .sign-out-btn:hover {
-            background: #b91c1c;
-        }
-
-        /* Main Container */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .header {
-            margin-bottom: 2rem;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .header p {
-            color: var(--text2);
-            font-size: 1.125rem;
-        }
-
-        /* Action Bar */
-        .action-bar {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            background: var(--card);
-            color: var(--text);
-            cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: 500;
+            border-radius: 4px;
             transition: all 0.2s;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .btn:hover {
-            background: var(--bg);
+        .control-btn:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .clock-display {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            font-family: 'Courier New', monospace;
+        }
+
+        .date-badge {
+            background-color: var(--accent);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text2);
+            font-size: 1rem;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: var(--card);
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .upload-section:hover {
             border-color: var(--accent);
+            background-color: var(--accent-lt);
+        }
+
+        .upload-section.dragover {
+            border-color: var(--accent);
+            background-color: var(--accent-lt);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            margin-bottom: 1rem;
+        }
+
+        .upload-text h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-text p {
+            color: var(--text2);
+            font-size: 0.9rem;
+        }
+
+        .upload-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .btn-primary {
-            background: var(--accent);
+            background-color: var(--accent);
             color: white;
-            border-color: var(--accent);
         }
 
         .btn-primary:hover {
-            background: #1d4ed8;
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
         }
 
-        /* Stats Row */
-        .stats-row {
+        .btn-secondary {
+            background-color: var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+        }
+
+        #csvFile {
+            display: none;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .stat-card {
             background: var(--card);
             border: 1px solid var(--border);
+            border-radius: 8px;
             padding: 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            text-align: center;
         }
 
-        .stat-label {
+        .stat-card h3 {
             color: var(--text2);
-            font-size: 0.875rem;
+            font-size: 0.85rem;
+            font-weight: 500;
             margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--text);
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
         }
 
-        /* Search Bar */
-        .search-container {
+        .stat-card.accent .number {
+            color: var(--green);
+        }
+
+        .stat-card.warning .number {
+            color: var(--orange);
+        }
+
+        .stat-card.danger .number {
+            color: var(--red);
+        }
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
-        .search-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
+        .chart-card {
             background: var(--card);
-            color: var(--text);
-            font-size: 1rem;
-            transition: border-color 0.2s;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
         }
 
-        .search-input:focus {
+        .chart-card h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text2);
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--card);
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 3px var(--accent-lt);
         }
 
-        /* Table */
-        .table-wrapper {
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-clear {
+            background-color: var(--border);
+            color: var(--text);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-clear:hover {
+            background-color: #cbd5e1;
+        }
+
+        /* Data Table */
+        .table-section {
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 0.5rem;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .table-section h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .table-controls {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .table-controls input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        .table-wrapper {
             overflow-x: auto;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.9rem;
         }
 
-        thead {
-            background: var(--bg);
-            border-bottom: 1px solid var(--border);
+        table thead {
+            background-color: var(--accent-lt);
+            border-bottom: 2px solid var(--border);
         }
 
-        th {
+        table th {
             padding: 1rem;
             text-align: left;
             font-weight: 600;
-            color: var(--text);
             cursor: pointer;
             user-select: none;
-            white-space: nowrap;
-            transition: background-color 0.2s;
-        }
-
-        th:hover {
-            background: var(--accent-lt);
-        }
-
-        th.sortable::after {
-            content: ' ⇅';
-            color: var(--text2);
-            font-size: 0.75rem;
-        }
-
-        th.sorted-asc::after {
-            content: ' ↑';
-            color: var(--accent);
-        }
-
-        th.sorted-desc::after {
-            content: ' ↓';
-            color: var(--accent);
-        }
-
-        tbody tr {
-            border-bottom: 1px solid var(--border);
-            transition: background-color 0.2s;
-        }
-
-        tbody tr:nth-child(odd) {
-            background: var(--bg);
-        }
-
-        tbody tr:hover {
-            background: var(--accent-lt);
-            cursor: pointer;
-        }
-
-        td {
-            padding: 1rem;
             color: var(--text);
         }
 
-        .actions-cell {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
+        table th:hover {
+            background-color: var(--border);
         }
 
-        .action-btn {
-            background: none;
-            border: none;
+        table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        table tbody tr {
             cursor: pointer;
-            font-size: 1.125rem;
-            transition: transform 0.2s;
-            color: var(--text2);
+            transition: background-color 0.2s;
         }
 
-        .action-btn:hover {
-            transform: scale(1.2);
-            color: var(--accent);
+        table tbody tr:hover {
+            background-color: var(--accent-lt);
         }
 
-        .action-btn.delete:hover {
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .badge-high {
+            background-color: var(--red-bg);
             color: var(--red);
         }
 
-        /* Empty State */
-        .empty-state {
-            background: var(--card);
-            border: 2px dashed var(--border);
-            border-radius: 0.5rem;
-            padding: 3rem 2rem;
-            text-align: center;
-            color: var(--text2);
+        .badge-medium {
+            background-color: var(--yellow-bg);
+            color: var(--yellow);
         }
 
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
+        .badge-low {
+            background-color: var(--green-bg);
+            color: var(--green);
         }
 
-        .empty-state h3 {
-            color: var(--text);
-            margin-bottom: 0.5rem;
+        .badge-na {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .badge-completed {
+            background-color: var(--green-bg);
+            color: var(--green);
+        }
+
+        .badge-in-progress {
+            background-color: #dbeafe;
+            color: #0284c7;
+        }
+
+        .badge-pending {
+            background-color: var(--yellow-bg);
+            color: var(--yellow);
+        }
+
+        .badge-not-started {
+            background-color: var(--red-bg);
+            color: var(--red);
+        }
+
+        .badge-filed {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .badge-info {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .badge-bill {
+            background-color: var(--purple-bg);
+            color: var(--purple);
         }
 
         /* Modal */
@@ -429,10 +536,10 @@
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
             align-items: center;
             justify-content: center;
         }
@@ -443,1026 +550,461 @@
 
         .modal-content {
             background: var(--card);
-            border-radius: 0.75rem;
+            border-radius: 8px;
             padding: 2rem;
             max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
+            max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1rem;
-        }
-
-        .modal-header h2 {
-            font-size: 1.5rem;
-            color: var(--text);
+            width: 90%;
+            position: relative;
         }
 
         .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
             background: none;
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
             color: var(--text2);
-            transition: color 0.2s;
         }
 
         .modal-close:hover {
             color: var(--text);
         }
 
-        /* Form */
-        .form-group {
+        .modal-header {
             margin-bottom: 1.5rem;
+            padding-right: 2rem;
         }
 
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--text);
-        }
-
-        input[type="text"],
-        input[type="number"],
-        input[type="email"],
-        input[type="date"],
-        input[type="url"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            background: var(--bg);
-            color: var(--text);
-            font-size: 1rem;
-            font-family: inherit;
-            transition: border-color 0.2s;
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-lt);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        /* Dropzone */
-        .dropzone {
-            border: 2px dashed var(--border);
-            border-radius: 0.5rem;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: var(--bg);
-        }
-
-        .dropzone:hover,
-        .dropzone.dragover {
-            border-color: var(--accent);
-            background: var(--accent-lt);
-        }
-
-        .dropzone-icon {
-            font-size: 2rem;
+        .modal-header h2 {
             margin-bottom: 0.5rem;
         }
 
-        #fileInput {
-            display: none;
+        .modal-body {
+            display: grid;
+            gap: 1.5rem;
         }
 
-        /* Preview */
-        .preview-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-            font-size: 0.875rem;
+        .modal-field {
+            display: grid;
+            gap: 0.5rem;
         }
 
-        .preview-table th,
-        .preview-table td {
-            padding: 0.5rem;
-            border: 1px solid var(--border);
-            text-align: left;
-        }
-
-        .preview-table th {
-            background: var(--bg);
+        .modal-field label {
             font-weight: 600;
-        }
-
-        /* Buttons */
-        .btn-group {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            justify-content: flex-end;
-        }
-
-        .btn-cancel {
-            background: var(--bg);
             color: var(--text);
-            border: 1px solid var(--border);
+            font-size: 0.9rem;
         }
 
-        .btn-cancel:hover {
-            background: var(--border);
+        .modal-field-value {
+            color: var(--text);
+            padding: 0.75rem;
+            background-color: var(--bg);
+            border-radius: 4px;
+            word-break: break-word;
         }
 
-        /* Footer */
-        footer {
-            position: fixed;
-            bottom: 1rem;
-            right: 2rem;
-            font-size: 0.75rem;
-            color: var(--text2);
-            text-align: right;
+        .modal-field-value a {
+            color: var(--accent);
+            text-decoration: none;
         }
 
-        /* Auth Overlay */
-        .auth-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
+        .modal-field-value a:hover {
+            text-decoration: underline;
         }
 
-        .auth-container {
-            background: var(--card);
-            padding: 3rem;
-            border-radius: 0.75rem;
+        /* Empty State */
+        .empty-state {
             text-align: center;
-            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
-            max-width: 400px;
-            width: 90%;
+            padding: 3rem 1rem;
+            color: var(--text2);
         }
 
-        .auth-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .auth-container h2 {
-            margin-bottom: 1rem;
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
             color: var(--text);
         }
 
-        .auth-container p {
-            color: var(--text2);
-            margin-bottom: 2rem;
-        }
-
-        .google-signin-btn {
-            background: white;
-            color: #1f2937;
-            border: 1px solid var(--border);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-weight: 500;
-            width: 100%;
-            transition: box-shadow 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-        }
-
-        .google-signin-btn:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Mobile */
+        /* Responsive */
         @media (max-width: 768px) {
-            .hamburger {
-                display: block;
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .navbar-left {
+                gap: 1rem;
+                flex-wrap: wrap;
             }
 
             .nav-links {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: var(--nav);
-                flex-direction: column;
-                padding: 1rem;
-                gap: 1rem;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                gap: 0.5rem;
+                font-size: 0.8rem;
             }
 
-            .nav-links.open {
-                display: flex;
-            }
-
-            .mobile-menu {
-                display: none;
-            }
-
-            .mobile-menu.open {
-                display: flex;
-            }
-
-            nav {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .nav-right {
+            .navbar-right {
+                gap: 0.5rem;
+                font-size: 0.8rem;
                 flex-wrap: wrap;
-                justify-content: space-between;
-                width: 100%;
             }
 
-            .nav-clocks {
-                order: 3;
-                width: 100%;
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
 
-            .container {
-                padding: 1rem;
+            .charts-section {
+                grid-template-columns: 1fr;
             }
 
-            .header h1 {
-                font-size: 1.75rem;
-            }
-
-            .stats-row {
+            .filter-grid {
                 grid-template-columns: 1fr;
             }
 
             table {
-                font-size: 0.875rem;
+                font-size: 0.8rem;
             }
 
-            th, td {
+            table th, table td {
                 padding: 0.75rem 0.5rem;
             }
 
-            .table-wrapper {
-                border-radius: 0;
+            .page-header h1 {
+                font-size: 1.5rem;
             }
-
-            footer {
-                bottom: auto;
-                top: auto;
-                right: auto;
-                left: 1rem;
-                position: static;
-                margin-top: 2rem;
-            }
-        }
-
-        /* Status badges */
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .badge-active {
-            background: var(--green-bg);
-            color: var(--green);
-        }
-
-        .badge-inactive {
-            background: var(--red-bg);
-            color: var(--red);
-        }
-
-        .badge-pending {
-            background: var(--yellow-bg);
-            color: var(--yellow);
-        }
-
-        .badge-archived {
-            background: var(--purple-bg);
-            color: var(--purple);
         }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav>
-        <div style="display:flex;align-items:center;gap:1rem">
-            <button class="hamburger" onclick="document.querySelector('.mobile-menu').classList.toggle('open')">☰</button>
-            <a href="index.html" class="brand">NF6 <span>Capital</span></a>
-            <div class="nav-links">
-                <a href="index.html" data-i18n="home">HomeBase</a>
-                <a href="compliance-dashboard.html" data-i18n="dashboard">Dashboard</a>
-                <a href="compliance-calendar.html" data-i18n="calendar">Calendar</a>
-                <a href="audit-trail.html" data-i18n="audit">Audit Trail</a>
-                <a href="upload.html" data-i18n="upload">Upload</a>
-                <a href="document-finder.html" data-i18n="documents">Documents</a>
-            </div>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <div class="navbar-brand">NF6 Capital</div>
+            <ul class="nav-links">
+                <li><a href="index.html" data-i18n="nav_home">HomeBase</a></li>
+                <li><a href="compliance-dashboard.html" data-i18n="nav_dashboard">Dashboard</a></li>
+                <li><a href="compliance-calendar.html" data-i18n="nav_calendar">Calendar</a></li>
+                <li><a href="audit-trail.html" data-i18n="nav_audit">Audit Trail</a></li>
+                <li><a href="upload.html" data-i18n="nav_upload">Upload</a></li>
+                <li><a href="documents.html" data-i18n="nav_documents">Documents</a></li>
+            </ul>
         </div>
-        <div class="nav-right">
-            <button class="toggle-btn" onclick="toggleLang()"><span class="icon">●</span> <span id="langLabel">ES</span></button>
-            <button class="toggle-btn" onclick="toggleTheme()"><span class="icon">☽</span> <span data-i18n="dark">Dark</span></button>
-            <div class="nav-clocks">
-                <div class="clock-circle"><span class="clock-label">COL</span><span class="clock-time" id="clockCOL">--:--:--</span></div>
-                <div class="clock-circle"><span class="clock-label">PR</span><span class="clock-time" id="clockPR">--:--:--</span></div>
-            </div>
-            <span class="today-badge" id="todayBadge"></span>
-            <button class="sign-out-btn" onclick="signOut()" data-i18n="signOut">Sign Out</button>
+        <div class="navbar-right">
+            <button class="control-btn" id="langToggle" data-i18n="btn_lang">EN/ES</button>
+            <button class="control-btn" id="darkToggle" data-i18n="btn_dark">🌙 Dark</button>
+            <div class="clock-display">COL: <span id="colClock">--:--:--</span></div>
+            <div class="clock-display">PR: <span id="prClock">--:--:--</span></div>
+            <div class="date-badge" id="dateBadge">--/--/--</div>
+            <button class="control-btn" id="signOut" data-i18n="btn_signout">Sign Out</button>
         </div>
     </nav>
 
-    <!-- Auth Overlay -->
-    <div class="auth-overlay" id="authOverlay">
-        <div class="auth-container">
-            <div class="auth-icon">🏦</div>
-            <h2 data-i18n="signIn">Sign In</h2>
-            <p data-i18n="signInMsg">Sign in with your NF6 Capital account to continue</p>
-            <button class="google-signin-btn" onclick="signInWithGoogle()">
-                <span>🔐</span>
-                <span data-i18n="signInGoogle">Sign in with Google</span>
-            </button>
-        </div>
-    </div>
-
     <!-- Main Container -->
-    <div class="container" id="mainContainer" style="display:none;">
-        <!-- Header -->
-        <div class="header">
-            <h1><span>📧</span> <span data-i18n="assets">Mail</span></h1>
-            <p data-i18n="assetsSubtitle">Track incoming and outgoing mail, certified letters, notices, and important correspondence.</p>
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 data-i18n="page_title">Mail Tracker</h1>
+            <p data-i18n="page_subtitle">Track incoming and outgoing mail, certified letters, notices, and important correspondence.</p>
         </div>
 
-        <!-- Action Bar -->
-        <div class="action-bar">
-            <button class="btn btn-primary" onclick="openUploadModal()" data-i18n="uploadCSV">📤 Upload CSV</button>
-            <button class="btn" onclick="exportCSV()" data-i18n="exportCSV">📥 Export CSV</button>
-            <button class="btn" onclick="openSheetsModal()" data-i18n="googleSheets">📊 Google Sheets</button>
-            <button class="btn btn-primary" onclick="openAddItemModal()" data-i18n="addItem">➕ Add Item</button>
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadZone">
+            <div class="upload-icon">📨</div>
+            <div class="upload-text">
+                <h3 data-i18n="upload_title">Upload Mail Tracker CSV</h3>
+                <p data-i18n="upload_desc">Drag and drop your CSV file here, or use the buttons below to upload or connect to Google Sheets</p>
+            </div>
+            <div class="upload-controls">
+                <button class="btn btn-primary" id="chooseFileBtn" data-i18n="btn_choose">Choose CSV File</button>
+                <button class="btn btn-secondary" id="sheetsBtn" data-i18n="btn_sheets">Google Sheets URL</button>
+                <button class="btn btn-secondary" id="exportBtn" data-i18n="btn_export">Export CSV</button>
+            </div>
+            <input type="file" id="csvFile" accept=".csv" />
         </div>
 
-        <!-- Stats Row -->
-        <div class="stats-row" id="statsRow">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label" data-i18n="totalItems">Total Items</div>
-                <div class="stat-value" id="statTotalItems">0</div>
+                <h3 data-i18n="stat_total">Total Mail Items</h3>
+                <div class="number" id="statTotal">0</div>
+            </div>
+            <div class="stat-card danger">
+                <h3 data-i18n="stat_high">High Priority</h3>
+                <div class="number" id="statHigh">0</div>
+            </div>
+            <div class="stat-card warning">
+                <h3 data-i18n="stat_action">Action Required</h3>
+                <div class="number" id="statAction">0</div>
+            </div>
+            <div class="stat-card accent">
+                <h3 data-i18n="stat_completed">Completed</h3>
+                <div class="number" id="statCompleted">0</div>
+            </div>
+            <div class="stat-card">
+                <h3 data-i18n="stat_month">This Month</h3>
+                <div class="number" id="statMonth">0</div>
             </div>
         </div>
 
-        <!-- Search Bar -->
-        <div class="search-container">
-            <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search all columns..." data-i18n-placeholder="search">
-        </div>
-
-        <!-- Table -->
-        <div class="table-wrapper">
-            <table id="dataTable">
-                <thead id="tableHead"></thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-
-        <!-- Empty State -->
-        <div class="empty-state" id="emptyState" style="display:none;">
-            <div class="empty-state-icon">📁</div>
-            <h3 data-i18n="noData">No data yet</h3>
-            <p data-i18n="noDataMsg">Upload a CSV or sync from Google Sheets to get started.</p>
-        </div>
-    </div>
-
-    <!-- Upload Modal -->
-    <div class="modal" id="uploadModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 data-i18n="uploadCSV">Upload CSV</h2>
-                <button class="modal-close" onclick="closeModal('uploadModal')">✕</button>
-            </div>
-            <div class="form-group">
-                <div class="dropzone" id="dropzone" ondrop="handleDrop(event)" ondragover="event.preventDefault(); document.getElementById('dropzone').classList.add('dragover')" ondragleave="document.getElementById('dropzone').classList.remove('dragover')">
-                    <div class="dropzone-icon">📤</div>
-                    <p data-i18n="dragDrop">Drag and drop your CSV file here</p>
-                    <p style="color:var(--text2);font-size:0.875rem;margin-top:0.5rem;" data-i18n="orClick">or click to select</p>
-                    <input type="file" id="fileInput" accept=".csv" onchange="handleFileSelect(event)">
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3 data-i18n="chart_priority">Mail by Priority</h3>
+                <div class="chart-container">
+                    <canvas id="priorityChart"></canvas>
                 </div>
-                <button class="btn" onclick="document.getElementById('fileInput').click()" style="width:100%;margin-top:1rem;" data-i18n="selectFile">📁 Select File</button>
             </div>
-            <div id="previewContainer" style="display:none;">
-                <label data-i18n="preview">Preview</label>
-                <table class="preview-table" id="previewTable">
-                    <thead id="previewHead"></thead>
-                    <tbody id="previewBody"></tbody>
+            <div class="chart-card">
+                <h3 data-i18n="chart_status">Mail by Status</h3>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3 data-i18n="chart_senders">Top 10 Senders</h3>
+                <div class="chart-container">
+                    <canvas id="sendersChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3 data-i18n="chart_month">Mail by Month</h3>
+                <div class="chart-container">
+                    <canvas id="monthChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <h3 data-i18n="filter_title">Filters</h3>
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="filterPriority" data-i18n="filter_priority">Priority</label>
+                    <select id="filterPriority">
+                        <option value="">All</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterStatus" data-i18n="filter_status">Status</label>
+                    <select id="filterStatus">
+                        <option value="">All</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterSender" data-i18n="filter_sender">Sender</label>
+                    <select id="filterSender">
+                        <option value="">All</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterAddressed" data-i18n="filter_addressed">Addressed To</label>
+                    <select id="filterAddressed">
+                        <option value="">All</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn-clear" id="clearFiltersBtn" data-i18n="btn_clear">Clear Filters</button>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="table-section">
+            <h3 data-i18n="table_title">Mail Items</h3>
+            <div class="table-controls">
+                <input type="text" id="searchInput" placeholder="Search mail..." data-i18n-placeholder="search_placeholder">
+            </div>
+            <div class="table-wrapper">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th data-column="Date Received" data-i18n="col_date">Date Received</th>
+                            <th data-column="Sender" data-i18n="col_sender">Sender</th>
+                            <th data-column="Mail Heading" data-i18n="col_heading">Mail Heading</th>
+                            <th data-column="Addressed To" data-i18n="col_addressed">Addressed To</th>
+                            <th data-column="Priority" data-i18n="col_priority">Priority</th>
+                            <th data-column="Status" data-i18n="col_status">Status</th>
+                            <th data-column="Lead" data-i18n="col_lead">Lead</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
                 </table>
             </div>
-            <div class="btn-group">
-                <button class="btn btn-cancel" onclick="closeModal('uploadModal')" data-i18n="cancel">Cancel</button>
-                <button class="btn btn-primary" onclick="confirmUpload()" id="confirmUploadBtn" style="display:none;" data-i18n="upload">Upload</button>
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <h3 data-i18n="empty_title">No mail items found</h3>
+                <p data-i18n="empty_desc">Upload a CSV file to get started</p>
             </div>
         </div>
     </div>
 
-    <!-- Google Sheets Modal -->
-    <div class="modal" id="sheetsModal">
+    <!-- Detail Modal -->
+    <div class="modal" id="detailModal">
         <div class="modal-content">
+            <button class="modal-close" id="modalClose">&times;</button>
             <div class="modal-header">
-                <h2 data-i18n="googleSheets">Google Sheets Sync</h2>
-                <button class="modal-close" onclick="closeModal('sheetsModal')">✕</button>
+                <h2 data-i18n="modal_title">Mail Item Details</h2>
             </div>
-            <div class="form-group">
-                <label data-i18n="sheetsURL">Google Sheets URL</label>
-                <input type="url" id="sheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/..." data-i18n-placeholder="sheetsURLPlaceholder">
-            </div>
-            <div class="form-group">
-                <small style="color:var(--text2);" data-i18n="sheetsHelp">Convert the URL to CSV format: add /export?format=csv to the end</small>
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-cancel" onclick="closeModal('sheetsModal')" data-i18n="cancel">Cancel</button>
-                <button class="btn" onclick="saveSheetURL()" data-i18n="save">💾 Save URL</button>
-                <button class="btn btn-primary" onclick="syncSheets()" data-i18n="syncNow">🔄 Sync Now</button>
+            <div class="modal-body" id="modalBody">
             </div>
         </div>
     </div>
-
-    <!-- Edit Modal -->
-    <div class="modal" id="editModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 data-i18n="editItem">Edit Item</h2>
-                <button class="modal-close" onclick="closeModal('editModal')">✕</button>
-            </div>
-            <div id="editFormContainer"></div>
-            <div class="btn-group">
-                <button class="btn btn-cancel" onclick="closeModal('editModal')" data-i18n="cancel">Cancel</button>
-                <button class="btn btn-primary" onclick="saveEdit()" data-i18n="save">💾 Save</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Item Modal -->
-    <div class="modal" id="addModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 data-i18n="addNewItem">Add New Item</h2>
-                <button class="modal-close" onclick="closeModal('addModal')">✕</button>
-            </div>
-            <div id="addFormContainer"></div>
-            <div class="btn-group">
-                <button class="btn btn-cancel" onclick="closeModal('addModal')" data-i18n="cancel">Cancel</button>
-                <button class="btn btn-primary" onclick="saveNewItem()" data-i18n="add">➕ Add</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer id="lastUpdated">Last updated: --:--:--</footer>
 
     <script>
-        // Configuration
-        const CONFIG = {
-            storageKey: 'nf6_mail_data',
-            sheetsKey: 'nf6_sheets_url_mail',
-            themeKey: 'nf6_theme',
-            langKey: 'nf6_lang',
-            auth: {
-                enabled: true,
-                allowedDomain: 'nf6capital.com',
-                config: {
-                    apiKey: "AIzaSyAbvvj4qCzfZPdRxU6BtbRSfXDXPitNwkQ",
-                    authDomain: "nf6-compliance.firebaseapp.com",
-                    projectId: "nf6-compliance"
-                }
-            }
-        };
-
-        // i18n translations
+        // ===== Translations =====
         const translations = {
             en: {
-                home: 'HomeBase',
-                dashboard: 'Dashboard',
-                calendar: 'Calendar',
-                audit: 'Audit Trail',
-                upload: 'Upload',
-                documents: 'Documents',
-                dark: 'Dark',
-                signOut: 'Sign Out',
-                signIn: 'Sign In',
-                signInMsg: 'Sign in with your NF6 Capital account to continue',
-                signInGoogle: 'Sign in with Google',
-                assets: 'Mail',
-                assetsSubtitle: 'Track incoming and outgoing mail, certified letters, notices, and important correspondence.',
-                uploadCSV: '📤 Upload CSV',
-                exportCSV: '📥 Export CSV',
-                googleSheets: '📊 Google Sheets',
-                addItem: '➕ Add Item',
-                totalItems: 'Total Items',
-                search: '🔍 Search all columns...',
-                noData: 'No data yet',
-                noDataMsg: 'Upload a CSV or sync from Google Sheets to get started.',
-                dragDrop: 'Drag and drop your CSV file here',
-                orClick: 'or click to select',
-                selectFile: '📁 Select File',
-                preview: 'Preview',
-                cancel: 'Cancel',
-                upload: 'Upload',
-                sheetsURL: 'Google Sheets URL',
-                sheetsURLPlaceholder: 'https://docs.google.com/spreadsheets/d/...',
-                sheetsHelp: 'Convert the URL to CSV format: add /export?format=csv to the end',
-                save: '💾 Save URL',
-                syncNow: '🔄 Sync Now',
-                editItem: 'Edit Item',
-                addNewItem: 'Add New Item',
-                add: '➕ Add'
+                nav_home: 'HomeBase',
+                nav_dashboard: 'Dashboard',
+                nav_calendar: 'Calendar',
+                nav_audit: 'Audit Trail',
+                nav_upload: 'Upload',
+                nav_documents: 'Documents',
+                btn_lang: 'EN/ES',
+                btn_dark: '🌙 Dark',
+                btn_signout: 'Sign Out',
+                page_title: 'Mail Tracker',
+                page_subtitle: 'Track incoming and outgoing mail, certified letters, notices, and important correspondence.',
+                upload_title: 'Upload Mail Tracker CSV',
+                upload_desc: 'Drag and drop your CSV file here, or use the buttons below to upload or connect to Google Sheets',
+                btn_choose: 'Choose CSV File',
+                btn_sheets: 'Google Sheets URL',
+                btn_export: 'Export CSV',
+                stat_total: 'Total Mail Items',
+                stat_high: 'High Priority',
+                stat_action: 'Action Required',
+                stat_completed: 'Completed',
+                stat_month: 'This Month',
+                chart_priority: 'Mail by Priority',
+                chart_status: 'Mail by Status',
+                chart_senders: 'Top 10 Senders',
+                chart_month: 'Mail by Month',
+                filter_title: 'Filters',
+                filter_priority: 'Priority',
+                filter_status: 'Status',
+                filter_sender: 'Sender',
+                filter_addressed: 'Addressed To',
+                btn_clear: 'Clear Filters',
+                table_title: 'Mail Items',
+                search_placeholder: 'Search mail...',
+                col_date: 'Date Received',
+                col_sender: 'Sender',
+                col_heading: 'Mail Heading',
+                col_addressed: 'Addressed To',
+                col_priority: 'Priority',
+                col_status: 'Status',
+                col_lead: 'Lead',
+                empty_title: 'No mail items found',
+                empty_desc: 'Upload a CSV file to get started',
+                modal_title: 'Mail Item Details'
             },
             es: {
-                home: 'Inicio',
-                dashboard: 'Panel',
-                calendar: 'Calendario',
-                audit: 'Auditoría',
-                upload: 'Cargar',
-                documents: 'Documentos',
-                dark: 'Oscuro',
-                signOut: 'Cerrar Sesión',
-                signIn: 'Iniciar Sesión',
-                signInMsg: 'Inicia sesión con tu cuenta de NF6 Capital para continuar',
-                signInGoogle: 'Inicia sesión con Google',
-                assets: 'Correo',
-                assetsSubtitle: 'Rastree correo entrante y saliente, cartas certificadas, avisos y correspondencia importante.',
-                uploadCSV: '📤 Cargar CSV',
-                exportCSV: '📥 Descargar CSV',
-                googleSheets: '📊 Google Sheets',
-                addItem: '➕ Agregar Elemento',
-                totalItems: 'Elementos Totales',
-                search: '🔍 Buscar en todas las columnas...',
-                noData: 'Sin datos',
-                noDataMsg: 'Carga un CSV o sincroniza desde Google Sheets para comenzar.',
-                dragDrop: 'Arrastra y suelta tu archivo CSV aquí',
-                orClick: 'o haz clic para seleccionar',
-                selectFile: '📁 Seleccionar Archivo',
-                preview: 'Vista Previa',
-                cancel: 'Cancelar',
-                upload: 'Cargar',
-                sheetsURL: 'URL de Google Sheets',
-                sheetsURLPlaceholder: 'https://docs.google.com/spreadsheets/d/...',
-                sheetsHelp: 'Convierte la URL a formato CSV: añade /export?format=csv al final',
-                save: '💾 Guardar URL',
-                syncNow: '🔄 Sincronizar Ahora',
-                editItem: 'Editar Elemento',
-                addNewItem: 'Agregar Nuevo Elemento',
-                add: '➕ Agregar'
+                nav_home: 'HomeBase',
+                nav_dashboard: 'Panel de Control',
+                nav_calendar: 'Calendario',
+                nav_audit: 'Pista de Auditoría',
+                nav_upload: 'Subir',
+                nav_documents: 'Documentos',
+                btn_lang: 'EN/ES',
+                btn_dark: '🌙 Oscuro',
+                btn_signout: 'Cerrar Sesión',
+                page_title: 'Rastreador de Correo',
+                page_subtitle: 'Rastrear correo entrante y saliente, cartas certificadas, avisos y correspondencia importante.',
+                upload_title: 'Subir CSV del Rastreador de Correo',
+                upload_desc: 'Arrastra y suelta tu archivo CSV aquí, o usa los botones a continuación para subir o conectarte a Google Sheets',
+                btn_choose: 'Elegir Archivo CSV',
+                btn_sheets: 'URL de Google Sheets',
+                btn_export: 'Exportar CSV',
+                stat_total: 'Total de Elementos de Correo',
+                stat_high: 'Prioridad Alta',
+                stat_action: 'Acción Requerida',
+                stat_completed: 'Completado',
+                stat_month: 'Este Mes',
+                chart_priority: 'Correo por Prioridad',
+                chart_status: 'Correo por Estado',
+                chart_senders: 'Top 10 Remitentes',
+                chart_month: 'Correo por Mes',
+                filter_title: 'Filtros',
+                filter_priority: 'Prioridad',
+                filter_status: 'Estado',
+                filter_sender: 'Remitente',
+                filter_addressed: 'Dirigido a',
+                btn_clear: 'Limpiar Filtros',
+                table_title: 'Elementos de Correo',
+                search_placeholder: 'Buscar correo...',
+                col_date: 'Fecha Recibida',
+                col_sender: 'Remitente',
+                col_heading: 'Encabezado de Correo',
+                col_addressed: 'Dirigido a',
+                col_priority: 'Prioridad',
+                col_status: 'Estado',
+                col_lead: 'Asignado',
+                empty_title: 'No se encontraron elementos de correo',
+                empty_desc: 'Sube un archivo CSV para comenzar',
+                modal_title: 'Detalles del Elemento de Correo'
             }
         };
 
-        let currentLanguage = localStorage.getItem(CONFIG.langKey) || 'en';
-        let currentData = [];
-        let allData = [];
-        let sortConfig = { column: null, ascending: true };
-        let editingIndex = -1;
-        let currentColumns = [];
-        let tempUploadData = [];
+        let currentLanguage = localStorage.getItem('language') || 'en';
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        let mailData = JSON.parse(localStorage.getItem('nf6_mail_data')) || [];
+        let filteredData = [];
+        let sortColumn = null;
+        let sortOrder = 'asc';
 
-        // Initialize
+        // ===== Firebase =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbvvj4qCzfZPdRxU6BtbRSfXDXPitNwkQ",
+            authDomain: "nf6-compliance.firebaseapp.com",
+            projectId: "nf6-compliance",
+            storageBucket: "nf6-compliance.appspot.com",
+            messagingSenderId: "606372",
+            appId: "1:606372:web:abc123"
+        };
+        const ALLOWED_DOMAIN = 'nf6capital.com';
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+        } catch (e) {
+            console.log('Firebase already initialized');
+        }
+
+        const auth = firebase.auth();
+
+        // ===== Initialize =====
         document.addEventListener('DOMContentLoaded', () => {
-            initTheme();
-            initClocks();
-            updateTodayBadge();
-            initAuth();
-            updateUI();
-        });
+            applyTheme();
+            applyLanguage();
+            updateClocks();
+            updateDateBadge();
+            setInterval(updateClocks, 1000);
 
-        // Auth
-        function initAuth() {
-            try {
-                firebase.initializeApp(CONFIG.auth.config);
-            } catch(e) { console.warn('Firebase init:', e.message); }
-            firebase.auth().onAuthStateChanged(user => {
-                if (!user) {
-                    document.getElementById('authOverlay').style.display = 'flex';
-                    document.getElementById('mainContainer').style.display = 'none';
-                    return;
-                }
-                if (!user.email.endsWith(`@${CONFIG.auth.allowedDomain}`)) {
-                    alert('Access restricted to @' + CONFIG.auth.allowedDomain);
-                    firebase.auth().signOut();
-                    return;
-                }
-                document.getElementById('authOverlay').style.display = 'none';
-                document.getElementById('mainContainer').style.display = 'block';
-                loadData();
-                autoSyncSheets();
-            });
-        }
-
-        function signInWithGoogle() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({hd: CONFIG.auth.allowedDomain});
-            firebase.auth().signInWithPopup(provider).catch(err => {
-                console.error('Auth error:', err);
-                alert(err.message || 'Sign in failed');
-            });
-        }
-
-        function signOut() {
-            firebase.auth().signOut();
-        }
-
-        // Data Management
-        function loadData() {
-            const stored = localStorage.getItem(CONFIG.storageKey);
-            allData = stored ? JSON.parse(stored) : [];
-            currentData = [...allData];
-            detectColumns();
+            setupEventListeners();
             renderTable();
             updateStats();
-        }
-
-        function saveData() {
-            localStorage.setItem(CONFIG.storageKey, JSON.stringify(allData));
-            currentData = [...allData];
-            renderTable();
-            updateStats();
-            updateLastUpdated();
-        }
-
-        function detectColumns() {
-            if (allData.length === 0) {
-                currentColumns = [];
-                return;
-            }
-            currentColumns = Object.keys(allData[0]);
-        }
-
-        // CSV Upload
-        function openUploadModal() {
-            document.getElementById('uploadModal').classList.add('active');
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            document.getElementById('dropzone').classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
-            }
-        }
-
-        function handleFileSelect(e) {
-            const files = e.target.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
-            }
-        }
-
-        function handleFile(file) {
-            Papa.parse(file, {
-                header: true,
-                complete: (results) => {
-                    tempUploadData = results.data.filter(row => Object.values(row).some(v => v));
-                    showPreview(tempUploadData);
-                },
-                error: (err) => {
-                    alert('Error parsing CSV: ' + err.message);
-                }
-            });
-        }
-
-        function showPreview(data) {
-            if (data.length === 0) {
-                alert('No valid data in file');
-                return;
-            }
-
-            const previewContainer = document.getElementById('previewContainer');
-            const previewHead = document.getElementById('previewHead');
-            const previewBody = document.getElementById('previewBody');
-
-            const cols = Object.keys(data[0]);
-            previewHead.innerHTML = cols.map(c => `<th>${c}</th>`).join('');
-            previewBody.innerHTML = data.slice(0, 5).map(row =>
-                `<tr>${cols.map(c => `<td>${row[c] || ''}</td>`).join('')}</tr>`
-            ).join('');
-
-            previewContainer.style.display = 'block';
-            document.getElementById('confirmUploadBtn').style.display = 'block';
-        }
-
-        function confirmUpload() {
-            allData = tempUploadData;
-            saveData();
-            closeModal('uploadModal');
-            tempUploadData = [];
-            document.getElementById('previewContainer').style.display = 'none';
-            document.getElementById('confirmUploadBtn').style.display = 'none';
-        }
-
-        // Google Sheets
-        function openSheetsModal() {
-            const saved = localStorage.getItem(CONFIG.sheetsKey);
-            if (saved) {
-                document.getElementById('sheetsUrl').value = saved;
-            }
-            document.getElementById('sheetsModal').classList.add('active');
-        }
-
-        function saveSheetURL() {
-            const url = document.getElementById('sheetsUrl').value;
-            if (!url) {
-                alert('Please enter a URL');
-                return;
-            }
-            localStorage.setItem(CONFIG.sheetsKey, url);
-            alert('URL saved!');
-        }
-
-        async function syncSheets() {
-            const url = localStorage.getItem(CONFIG.sheetsKey);
-            if (!url) {
-                alert('No Google Sheets URL saved');
-                return;
-            }
-
-            const csvUrl = url.includes('/export?format=csv') ? url : url.replace(/\/$/, '') + '/export?format=csv';
-
-            try {
-                const response = await fetch(csvUrl);
-                const csv = await response.text();
-                Papa.parse(csv, {
-                    header: true,
-                    complete: (results) => {
-                        allData = results.data.filter(row => Object.values(row).some(v => v));
-                        saveData();
-                        closeModal('sheetsModal');
-                        alert('Synced from Google Sheets!');
-                    }
-                });
-            } catch (err) {
-                alert('Error syncing: ' + err.message);
-            }
-        }
-
-        async function autoSyncSheets() {
-            const url = localStorage.getItem(CONFIG.sheetsKey);
-            if (url) {
-                try {
-                    await syncSheets();
-                } catch (err) {
-                    console.error('Auto-sync failed:', err);
-                }
-            }
-        }
-
-        // Table Rendering
-        function renderTable() {
-            const head = document.getElementById('tableHead');
-            const body = document.getElementById('tableBody');
-            const emptyState = document.getElementById('emptyState');
-
-            if (currentData.length === 0) {
-                head.innerHTML = '';
-                body.innerHTML = '';
-                emptyState.style.display = 'block';
-                document.querySelector('.table-wrapper').style.display = 'none';
-                return;
-            }
-
-            emptyState.style.display = 'none';
-            document.querySelector('.table-wrapper').style.display = 'block';
-
-            const cols = currentColumns;
-            head.innerHTML = cols.map(col => `
-                <th class="sortable" onclick="sortTable('${col}')">${col}</th>
-            `).join('') + '<th>Actions</th>';
-
-            body.innerHTML = currentData.map((row, idx) => `
-                <tr onclick="openEditModal(${idx})">
-                    ${cols.map(col => {
-                        let val = row[col] || '';
-                        if (col.toLowerCase().includes('status')) {
-                            const status = val.toLowerCase();
-                            let badgeClass = 'badge-pending';
-                            if (status === 'active' || status === 'activo') badgeClass = 'badge-active';
-                            else if (status === 'inactive' || status === 'inactivo') badgeClass = 'badge-inactive';
-                            else if (status === 'archived' || status === 'archivado') badgeClass = 'badge-archived';
-                            return `<td><span class="badge ${badgeClass}">${val}</span></td>`;
-                        }
-                        return `<td>${val}</td>`;
-                    }).join('')}
-                    <td class="actions-cell">
-                        <button class="action-btn" onclick="event.stopPropagation(); openEditModal(${idx})">✏</button>
-                        <button class="action-btn delete" onclick="event.stopPropagation(); deleteRow(${idx})">✕</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function sortTable(column) {
-            if (sortConfig.column === column) {
-                sortConfig.ascending = !sortConfig.ascending;
-            } else {
-                sortConfig.column = column;
-                sortConfig.ascending = true;
-            }
-
-            currentData.sort((a, b) => {
-                let valA = a[column] || '';
-                let valB = b[column] || '';
-
-                if (!isNaN(valA) && !isNaN(valB)) {
-                    valA = parseFloat(valA);
-                    valB = parseFloat(valB);
-                }
-
-                if (valA < valB) return sortConfig.ascending ? -1 : 1;
-                if (valA > valB) return sortConfig.ascending ? 1 : -1;
-                return 0;
-            });
-
-            renderTable();
-        }
-
-        function filterTable() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            currentData = allData.filter(row =>
-                Object.values(row).some(v => String(v).toLowerCase().includes(query))
-            );
-            renderTable();
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.addEventListener('input', filterTable);
-            }
+            populateFilters();
+            renderCharts();
         });
 
-        // Edit/Add
-        function openEditModal(idx) {
-            editingIndex = idx;
-            const row = allData[idx];
-            const form = document.getElementById('editFormContainer');
-            form.innerHTML = currentColumns.map(col => `
-                <div class="form-group">
-                    <label>${col}</label>
-                    <input type="text" value="${row[col] || ''}" data-col="${col}">
-                </div>
-            `).join('');
-            document.getElementById('editModal').classList.add('active');
-        }
-
-        function saveEdit() {
-            const inputs = document.querySelectorAll('#editFormContainer input');
-            inputs.forEach(input => {
-                allData[editingIndex][input.dataset.col] = input.value;
-            });
-            saveData();
-            closeModal('editModal');
-        }
-
-        function openAddItemModal() {
-            if (currentColumns.length === 0) {
-                alert('Please upload data first to determine columns');
-                return;
-            }
-            const form = document.getElementById('addFormContainer');
-            form.innerHTML = currentColumns.map(col => `
-                <div class="form-group">
-                    <label>${col}</label>
-                    <input type="text" data-col="${col}">
-                </div>
-            `).join('');
-            document.getElementById('addModal').classList.add('active');
-        }
-
-        function saveNewItem() {
-            const newRow = {};
-            document.querySelectorAll('#addFormContainer input').forEach(input => {
-                newRow[input.dataset.col] = input.value;
-            });
-            allData.push(newRow);
-            saveData();
-            closeModal('addModal');
-        }
-
-        function deleteRow(idx) {
-            if (confirm('Delete this item?')) {
-                allData.splice(idx, 1);
-                saveData();
+        // ===== Theme =====
+        function applyTheme() {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            const darkToggle = document.getElementById('darkToggle');
+            if (darkToggle) {
+                darkToggle.textContent = currentTheme === 'dark' ? '☀️ Light' : '🌙 Dark';
             }
         }
 
-        // Export
-        function exportCSV() {
-            if (allData.length === 0) {
-                alert('No data to export');
-                return;
-            }
+        document.getElementById('darkToggle').addEventListener('click', () => {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('theme', currentTheme);
+            applyTheme();
+        });
 
-            const cols = currentColumns;
-            const csv = [cols.join(',')];
-            allData.forEach(row => {
-                csv.push(cols.map(col => {
-                    let val = row[col] || '';
-                    if (typeof val === 'string' && val.includes(',')) {
-                        val = `"${val}"`;
-                    }
-                    return val;
-                }).join(','));
-            });
-
-            const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'mail.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Stats
-        function updateStats() {
-            let html = `
-                <div class="stat-card">
-                    <div class="stat-label" data-i18n="totalItems">Total Items</div>
-                    <div class="stat-value">${allData.length}</div>
-                </div>
-            `;
-
-            // Status stats
-            const statusCol = currentColumns.find(c => c.toLowerCase().includes('status'));
-            if (statusCol) {
-                const statusCounts = {};
-                allData.forEach(row => {
-                    const status = row[statusCol] || 'Unknown';
-                    statusCounts[status] = (statusCounts[status] || 0) + 1;
-                });
-
-                Object.entries(statusCounts).forEach(([status, count]) => {
-                    html += `
-                        <div class="stat-card">
-                            <div class="stat-label">${status}</div>
-                            <div class="stat-value">${count}</div>
-                        </div>
-                    `;
-                });
-            }
-
-            document.getElementById('statsRow').innerHTML = html;
-            updateUI();
-        }
-
-        // Modal
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-        }
-
-        // Theme
-        function initTheme() {
-            const saved = localStorage.getItem(CONFIG.themeKey);
-            if (saved === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
-        }
-
-        function toggleTheme() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            if (isDark) {
-                document.documentElement.removeAttribute('data-theme');
-                localStorage.removeItem(CONFIG.themeKey);
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem(CONFIG.themeKey, 'dark');
-            }
-        }
-
-        // Language
-        function toggleLang() {
-            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
-            localStorage.setItem(CONFIG.langKey, currentLanguage);
-            document.getElementById('langLabel').textContent = currentLanguage.toUpperCase();
-            updateUI();
-        }
-
-        function updateUI() {
+        // ===== Language =====
+        function applyLanguage() {
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 el.textContent = translations[currentLanguage][key] || key;
@@ -1471,35 +1013,537 @@
                 const key = el.getAttribute('data-i18n-placeholder');
                 el.placeholder = translations[currentLanguage][key] || key;
             });
-            document.getElementById('langLabel').textContent = currentLanguage.toUpperCase();
         }
 
-        // Clocks
-        function initClocks() {
-            setInterval(updateClocks, 1000);
-            updateClocks();
-        }
+        document.getElementById('langToggle').addEventListener('click', () => {
+            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
+            localStorage.setItem('language', currentLanguage);
+            applyLanguage();
+        });
 
+        // ===== Clock =====
         function updateClocks() {
-            const now = new Date();
-            const colTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
-            const prTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Puerto_Rico' }));
+            const colTime = new Date().toLocaleString('en-US', { timeZone: 'America/Bogota', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const prTime = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-            document.getElementById('clockCOL').textContent = colTime.toLocaleTimeString('en-US', { hour12: false });
-            document.getElementById('clockPR').textContent = prTime.toLocaleTimeString('en-US', { hour12: false });
+            document.getElementById('colClock').textContent = colTime;
+            document.getElementById('prClock').textContent = prTime;
         }
 
-        // Badge
-        function updateTodayBadge() {
-            const today = new Date();
-            const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            document.getElementById('todayBadge').textContent = dateStr;
+        function updateDateBadge() {
+            const now = new Date();
+            const options = { month: '2-digit', day: '2-digit', year: '2-digit' };
+            document.getElementById('dateBadge').textContent = now.toLocaleDateString('en-US', options);
         }
 
-        // Last Updated
-        function updateLastUpdated() {
+        // ===== Event Listeners =====
+        function setupEventListeners() {
+            document.getElementById('chooseFileBtn').addEventListener('click', () => {
+                document.getElementById('csvFile').click();
+            });
+
+            document.getElementById('csvFile').addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    parseCSV(e.target.files[0]);
+                }
+            });
+
+            const uploadZone = document.getElementById('uploadZone');
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    parseCSV(e.dataTransfer.files[0]);
+                }
+            });
+
+            document.getElementById('sheetsBtn').addEventListener('click', () => {
+                const url = prompt('Enter Google Sheets CSV export URL:');
+                if (url) {
+                    localStorage.setItem('nf6_sheets_url_mail', url);
+                    alert('Google Sheets URL saved!');
+                }
+            });
+
+            document.getElementById('exportBtn').addEventListener('click', () => {
+                exportToCSV();
+            });
+
+            document.getElementById('signOut').addEventListener('click', () => {
+                auth.signOut().then(() => {
+                    window.location.href = 'index.html';
+                });
+            });
+
+            // Filters
+            document.getElementById('filterPriority').addEventListener('change', applyFilters);
+            document.getElementById('filterStatus').addEventListener('change', applyFilters);
+            document.getElementById('filterSender').addEventListener('change', applyFilters);
+            document.getElementById('filterAddressed').addEventListener('change', applyFilters);
+            document.getElementById('clearFiltersBtn').addEventListener('click', clearFilters);
+
+            // Search
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+            // Table headers
+            document.querySelectorAll('table th').forEach(th => {
+                th.addEventListener('click', () => {
+                    const column = th.getAttribute('data-column');
+                    if (sortColumn === column) {
+                        sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        sortColumn = column;
+                        sortOrder = 'asc';
+                    }
+                    renderTable();
+                });
+            });
+
+            // Modal
+            document.getElementById('modalClose').addEventListener('click', () => {
+                document.getElementById('detailModal').classList.remove('active');
+            });
+
+            document.getElementById('detailModal').addEventListener('click', (e) => {
+                if (e.target.id === 'detailModal') {
+                    document.getElementById('detailModal').classList.remove('active');
+                }
+            });
+        }
+
+        // ===== CSV Parsing =====
+        function parseCSV(file) {
+            Papa.parse(file, {
+                header: true,
+                complete: (results) => {
+                    mailData = normalizeKeys(results.data).filter(row => Object.values(row).some(v => v));
+                    localStorage.setItem('nf6_mail_data', JSON.stringify(mailData));
+                    applyFilters();
+                    updateStats();
+                    populateFilters();
+                    renderCharts();
+                    alert('CSV loaded successfully! ' + mailData.length + ' items.');
+                },
+                error: (error) => {
+                    alert('Error parsing CSV: ' + error.message);
+                }
+            });
+        }
+
+        function normalizeKeys(data) {
+            return data.map(row => {
+                const clean = {};
+                Object.keys(row).forEach(k => {
+                    clean[k.trim()] = row[k];
+                });
+                return clean;
+            });
+        }
+
+        // ===== Filters =====
+        function applyFilters() {
+            const priority = document.getElementById('filterPriority').value;
+            const status = document.getElementById('filterStatus').value;
+            const sender = document.getElementById('filterSender').value;
+            const addressed = document.getElementById('filterAddressed').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            filteredData = mailData.filter(row => {
+                if (priority && row['Priority'] !== priority) return false;
+                if (status && row['Status'] !== status) return false;
+                if (sender && row['Sender'] !== sender) return false;
+                if (addressed && row['Addressed To'] !== addressed) return false;
+                if (search) {
+                    const searchFields = [
+                        row['Date Received'],
+                        row['Sender'],
+                        row['Mail Heading'],
+                        row['Addressed To'],
+                        row['Priority'],
+                        row['Status'],
+                        row['Lead']
+                    ].join(' ').toLowerCase();
+                    if (!searchFields.includes(search)) return false;
+                }
+                return true;
+            });
+
+            renderTable();
+        }
+
+        function clearFilters() {
+            document.getElementById('filterPriority').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterSender').value = '';
+            document.getElementById('filterAddressed').value = '';
+            document.getElementById('searchInput').value = '';
+            filteredData = [...mailData];
+            renderTable();
+        }
+
+        function populateFilters() {
+            const priorities = [...new Set(mailData.map(r => r['Priority']).filter(Boolean))].sort();
+            const statuses = [...new Set(mailData.map(r => r['Status']).filter(Boolean))].sort();
+            const senders = [...new Set(mailData.map(r => r['Sender']).filter(Boolean))].sort().slice(0, 10);
+            const addressed = [...new Set(mailData.map(r => r['Addressed To']).filter(Boolean))].sort();
+
+            populateSelect('filterPriority', priorities);
+            populateSelect('filterStatus', statuses);
+            populateSelect('filterSender', senders);
+            populateSelect('filterAddressed', addressed);
+        }
+
+        function populateSelect(id, values) {
+            const select = document.getElementById(id);
+            const current = select.value;
+            select.innerHTML = '<option value="">All</option>';
+            values.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v;
+                opt.textContent = v;
+                select.appendChild(opt);
+            });
+            select.value = current;
+        }
+
+        // ===== Table =====
+        function renderTable() {
+            const body = document.getElementById('tableBody');
+            const empty = document.getElementById('emptyState');
+
+            let displayData = [...filteredData];
+
+            if (sortColumn) {
+                displayData.sort((a, b) => {
+                    let aVal = a[sortColumn] || '';
+                    let bVal = b[sortColumn] || '';
+
+                    if (!isNaN(aVal) && !isNaN(bVal)) {
+                        aVal = parseFloat(aVal);
+                        bVal = parseFloat(bVal);
+                    }
+
+                    if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+                    if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
+
+            if (displayData.length === 0) {
+                body.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+            body.innerHTML = displayData.map((row, idx) => `
+                <tr onclick="openDetailModal(${idx})">
+                    <td>${formatDate(row['Date Received'])}</td>
+                    <td>${row['Sender'] || '-'}</td>
+                    <td>${row['Mail Heading'] || '-'}</td>
+                    <td>${row['Addressed To'] || '-'}</td>
+                    <td>${getPriorityBadge(row['Priority'])}</td>
+                    <td>${getStatusBadge(row['Status'])}</td>
+                    <td>${row['Lead'] || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function getPriorityBadge(priority) {
+            if (!priority) return '<span class="badge badge-na">None</span>';
+            if (priority === 'High') return '<span class="badge badge-high">High</span>';
+            if (priority === 'Medium') return '<span class="badge badge-medium">Medium</span>';
+            if (priority === 'Low') return '<span class="badge badge-low">Low</span>';
+            return '<span class="badge badge-na">N/A</span>';
+        }
+
+        function getStatusBadge(status) {
+            if (!status) return '<span class="badge badge-na">-</span>';
+            if (status === 'Completed') return '<span class="badge badge-completed">Completed</span>';
+            if (status === 'In Progress') return '<span class="badge badge-in-progress">In Progress</span>';
+            if (status === 'Pending') return '<span class="badge badge-pending">Pending</span>';
+            if (status === 'Not started') return '<span class="badge badge-not-started">Not Started</span>';
+            if (status === 'Filed - nothing to do') return '<span class="badge badge-filed">Filed</span>';
+            if (status === 'Info - nothing to do') return '<span class="badge badge-info">Info</span>';
+            if (status === 'Bill - on autopay') return '<span class="badge badge-bill">Autopay</span>';
+            return '<span class="badge badge-na">' + status + '</span>';
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            if (isNaN(date)) return dateStr;
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function openDetailModal(idx) {
+            const row = filteredData[idx];
+            const body = document.getElementById('modalBody');
+
+            body.innerHTML = `
+                <div class="modal-field">
+                    <label>Date Received</label>
+                    <div class="modal-field-value">${formatDate(row['Date Received'])}</div>
+                </div>
+                <div class="modal-field">
+                    <label>Sender</label>
+                    <div class="modal-field-value">${row['Sender'] || '-'}</div>
+                </div>
+                <div class="modal-field">
+                    <label>Mail Heading</label>
+                    <div class="modal-field-value">${row['Mail Heading'] || '-'}</div>
+                </div>
+                <div class="modal-field">
+                    <label>Addressed To</label>
+                    <div class="modal-field-value">${row['Addressed To'] || '-'}</div>
+                </div>
+                <div class="modal-field">
+                    <label>Priority</label>
+                    <div class="modal-field-value">${row['Priority'] || '-'}</div>
+                </div>
+                <div class="modal-field">
+                    <label>Status</label>
+                    <div class="modal-field-value">${row['Status'] || '-'}</div>
+                </div>
+                <div class="modal-field">
+                    <label>Lead</label>
+                    <div class="modal-field-value">${row['Lead'] || '-'}</div>
+                </div>
+                <div class="modal-field">
+                    <label>Action Items</label>
+                    <div class="modal-field-value">${row['Action Items'] || '-'}</div>
+                </div>
+                <div class="modal-field">
+                    <label>Drive Link</label>
+                    <div class="modal-field-value">
+                        ${row['Drive Link'] ? `<a href="${row['Drive Link']}" target="_blank">View Document</a>` : '-'}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        // ===== Stats =====
+        function updateStats() {
+            const total = mailData.length;
+            const high = mailData.filter(r => r['Priority'] === 'High').length;
+            const actionRequired = mailData.filter(r =>
+                (r['Action Items'] && r['Action Items'].trim()) ||
+                r['Status'] === 'In Progress' ||
+                r['Status'] === 'Pending' ||
+                r['Status'] === 'Not started'
+            ).length;
+            const completed = mailData.filter(r => r['Status'] === 'Completed').length;
+
             const now = new Date();
-            document.getElementById('lastUpdated').textContent = 'Last updated: ' + now.toLocaleTimeString('en-US', { hour12: false });
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            const thisMonth = mailData.filter(r => {
+                const d = new Date(r['Date Received']);
+                return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+            }).length;
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statHigh').textContent = high;
+            document.getElementById('statAction').textContent = actionRequired;
+            document.getElementById('statCompleted').textContent = completed;
+            document.getElementById('statMonth').textContent = thisMonth;
+        }
+
+        // ===== Charts =====
+        let priorityChart, statusChart, sendersChart, monthChart;
+
+        function renderCharts() {
+            renderPriorityChart();
+            renderStatusChart();
+            renderSendersChart();
+            renderMonthChart();
+        }
+
+        function renderPriorityChart() {
+            const counts = {};
+            ['High', 'Medium', 'Low', 'N/A - info only'].forEach(p => counts[p] = 0);
+            counts['None'] = 0;
+
+            mailData.forEach(row => {
+                const p = row['Priority'] || 'None';
+                if (p in counts) counts[p]++;
+                else if (p) counts[p] = 1;
+            });
+
+            const ctx = document.getElementById('priorityChart').getContext('2d');
+            if (priorityChart) priorityChart.destroy();
+
+            priorityChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(counts),
+                    datasets: [{
+                        data: Object.values(counts),
+                        backgroundColor: ['#dc2626', '#ca8a04', '#16a34a', '#9ca3af', '#6b7280']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        function renderStatusChart() {
+            const counts = {};
+            const statuses = ['Completed', 'In Progress', 'Pending', 'Not started', 'Filed - nothing to do', 'Info - nothing to do', 'Bill - on autopay'];
+            statuses.forEach(s => counts[s] = 0);
+
+            mailData.forEach(row => {
+                const s = row['Status'] || '';
+                if (s && s in counts) counts[s]++;
+                else if (s) counts[s] = 1;
+            });
+
+            const labels = Object.keys(counts).filter(k => counts[k] > 0);
+            const data = labels.map(k => counts[k]);
+
+            const colors = [];
+            labels.forEach(l => {
+                if (l === 'Completed') colors.push('#16a34a');
+                else if (l === 'In Progress') colors.push('#0284c7');
+                else if (l === 'Pending') colors.push('#ca8a04');
+                else if (l === 'Not started') colors.push('#dc2626');
+                else colors.push('#9ca3af');
+            });
+
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            if (statusChart) statusChart.destroy();
+
+            statusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels, datasets: [{ data, backgroundColor: colors }] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        function renderSendersChart() {
+            const counts = {};
+            mailData.forEach(row => {
+                const sender = row['Sender'] || 'Unknown';
+                counts[sender] = (counts[sender] || 0) + 1;
+            });
+
+            const sorted = Object.entries(counts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            const labels = sorted.map(([s]) => s);
+            const data = sorted.map(([, c]) => c);
+
+            const ctx = document.getElementById('sendersChart').getContext('2d');
+            if (sendersChart) sendersChart.destroy();
+
+            sendersChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Count',
+                        data,
+                        backgroundColor: '#2563eb'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function renderMonthChart() {
+            const months = {};
+
+            mailData.forEach(row => {
+                const dateStr = row['Date Received'];
+                if (dateStr) {
+                    const date = new Date(dateStr);
+                    if (!isNaN(date)) {
+                        const key = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                        months[key] = (months[key] || 0) + 1;
+                    }
+                }
+            });
+
+            const sorted = Object.entries(months).sort((a, b) => {
+                return new Date(a[0]) - new Date(b[0]);
+            });
+
+            const labels = sorted.map(([m]) => m);
+            const data = sorted.map(([, c]) => c);
+
+            const ctx = document.getElementById('monthChart').getContext('2d');
+            if (monthChart) monthChart.destroy();
+
+            monthChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Mail Items',
+                        data,
+                        backgroundColor: '#16a34a'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // ===== Export =====
+        function exportToCSV() {
+            if (mailData.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const headers = Object.keys(mailData[0]);
+            const csv = [
+                headers.join(','),
+                ...mailData.map(row =>
+                    headers.map(h => {
+                        const val = row[h] || '';
+                        if (val.includes(',') || val.includes('"')) {
+                            return '"' + val.replace(/"/g, '""') + '"';
+                        }
+                        return val;
+                    }).join(',')
+                )
+            ].join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mail_tracker_export.csv';
+            a.click();
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>
