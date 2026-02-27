@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NF6 Capital — Assets</title>
+    <title>NF6 Capital - Assets Dashboard</title>
 
+    <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+    <!-- PapaParse for CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <style>
         * {
@@ -76,30 +82,24 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
         nav a {
             color: white;
             text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        nav a:hover {
-            color: var(--accent);
+            font-weight: 500;
         }
 
         .brand {
             font-size: 1.5rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .brand span {
             color: var(--accent);
+            font-style: italic;
         }
 
         .nav-links {
@@ -108,10 +108,35 @@
             margin-left: 3rem;
         }
 
+        .nav-links a {
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
         .nav-right {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.5rem;
+        }
+
+        .toggle-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
         }
 
         .hamburger {
@@ -123,209 +148,355 @@
             cursor: pointer;
         }
 
-        .toggle-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: background-color 0.2s;
-        }
-
-        .toggle-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .toggle-btn .icon {
-            font-size: 1rem;
-        }
-
         .nav-clocks {
             display: flex;
             gap: 1rem;
         }
 
         .clock-circle {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            font-size: 0.65rem;
+            font-size: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.4rem;
         }
 
         .clock-label {
-            font-weight: bold;
-            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--accent);
         }
 
         .clock-time {
-            font-size: 0.6rem;
-            font-family: 'Courier New', monospace;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.7rem;
+            margin-top: 0.25rem;
         }
 
         .today-badge {
             background: var(--accent);
             color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.75rem;
-            font-weight: bold;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.4rem;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
 
         .sign-out-btn {
-            background: var(--red);
-            color: white;
-            border: none;
+            background: transparent;
+            border: 1px solid var(--red);
+            color: var(--red);
             padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
+            border-radius: 0.4rem;
             cursor: pointer;
-            font-size: 0.875rem;
-            transition: background-color 0.2s;
+            font-size: 0.9rem;
+            transition: all 0.3s;
         }
 
         .sign-out-btn:hover {
-            background: #b91c1c;
+            background: var(--red);
+            color: white;
         }
 
         /* Main Container */
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 2rem;
         }
 
-        .header {
+        .page-header {
             margin-bottom: 2rem;
         }
 
-        .header h1 {
-            font-size: 2.5rem;
+        .page-header h1 {
+            font-size: 2rem;
             margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
         }
 
-        .header p {
+        .page-header p {
             color: var(--text2);
-            font-size: 1.125rem;
+            font-size: 1rem;
         }
 
-        /* Action Bar */
-        .action-bar {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            background: var(--card);
-            color: var(--text);
-            cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s;
+        /* Auth Overlay */
+        .auth-overlay {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn:hover {
+            justify-content: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: var(--bg);
-            border-color: var(--accent);
+            z-index: 1000;
         }
 
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
+        .auth-overlay.hidden {
+            display: none;
         }
 
-        .btn-primary:hover {
-            background: #1d4ed8;
+        .auth-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 3rem;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
 
-        /* Stats Row */
-        .stats-row {
+        .auth-card h2 {
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .auth-card p {
+            color: var(--text2);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        #firebaseui-auth-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .stat-card {
             background: var(--card);
             border: 1px solid var(--border);
+            border-radius: 0.75rem;
             padding: 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .stat-label {
+            font-size: 0.85rem;
             color: var(--text2);
-            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             margin-bottom: 0.5rem;
+            font-weight: 600;
         }
 
         .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
+            font-size: 1.75rem;
+            font-weight: 700;
             color: var(--text);
         }
 
-        /* Search Bar */
-        .search-container {
+        .stat-change {
+            font-size: 0.8rem;
+            color: var(--green);
+            margin-top: 0.5rem;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
-        .search-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
+        .chart-card {
             background: var(--card);
-            color: var(--text);
-            font-size: 1rem;
-            transition: border-color 0.2s;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            position: relative;
         }
 
-        .search-input:focus {
+        .chart-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: var(--card);
+            border: 2px dashed var(--border);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            transition: all 0.3s;
+        }
+
+        .upload-section.dragover {
+            border-color: var(--accent);
+            background: var(--accent-lt);
+        }
+
+        .upload-section h3 {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .upload-section p {
+            color: var(--text2);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .upload-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent);
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--card);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-lt);
+        }
+
+        .btn-success {
+            background: var(--green);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: var(--green);
+            opacity: 0.9;
+        }
+
+        .btn-danger {
+            background: var(--red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: var(--red);
+            opacity: 0.9;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* File Input */
+        #csvFile, #sheetsUrl {
+            display: none;
+        }
+
+        /* Data Table */
+        .table-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .table-header h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text2);
+        }
+
+        .search-bar input:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 3px var(--accent-lt);
         }
 
-        /* Table */
         .table-wrapper {
-            background: var(--card);
+            overflow-x: auto;
             border: 1px solid var(--border);
             border-radius: 0.5rem;
-            overflow-x: auto;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.9rem;
         }
 
         thead {
             background: var(--bg);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         th {
@@ -333,9 +504,8 @@
             text-align: left;
             font-weight: 600;
             color: var(--text);
-            cursor: pointer;
             user-select: none;
-            white-space: nowrap;
+            cursor: pointer;
             transition: background-color 0.2s;
         }
 
@@ -345,32 +515,32 @@
 
         th.sortable::after {
             content: ' ⇅';
-            color: var(--text2);
-            font-size: 0.75rem;
+            opacity: 0.5;
+            font-size: 0.8rem;
         }
 
         th.sorted-asc::after {
             content: ' ↑';
-            color: var(--accent);
+            opacity: 1;
         }
 
         th.sorted-desc::after {
             content: ' ↓';
-            color: var(--accent);
+            opacity: 1;
         }
 
         tbody tr {
             border-bottom: 1px solid var(--border);
             transition: background-color 0.2s;
+            cursor: pointer;
         }
 
-        tbody tr:nth-child(odd) {
+        tbody tr:nth-child(even) {
             background: var(--bg);
         }
 
         tbody tr:hover {
             background: var(--accent-lt);
-            cursor: pointer;
         }
 
         td {
@@ -378,1129 +548,1559 @@
             color: var(--text);
         }
 
-        .actions-cell {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.4rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.125rem;
-            transition: transform 0.2s;
-            color: var(--text2);
+        .status-active {
+            background: var(--green-bg);
+            color: var(--green);
         }
 
-        .action-btn:hover {
-            transform: scale(1.2);
-            color: var(--accent);
+        .status-sold {
+            background: var(--orange-bg);
+            color: var(--orange);
         }
 
-        .action-btn.delete:hover {
+        .status-dissolved {
+            background: var(--red-bg);
+            color: var(--red);
+        }
+
+        .status-written-off {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+
+        .currency {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .percentage {
+            color: var(--green);
+            font-weight: 600;
+        }
+
+        .percentage.negative {
             color: var(--red);
         }
 
         /* Empty State */
         .empty-state {
-            background: var(--card);
-            border: 2px dashed var(--border);
-            border-radius: 0.5rem;
-            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
             text-align: center;
             color: var(--text2);
         }
 
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
             opacity: 0.5;
         }
 
         .empty-state h3 {
-            color: var(--text);
+            font-size: 1.25rem;
             margin-bottom: 0.5rem;
+            color: var(--text);
         }
 
-        /* Modal */
+        .empty-state p {
+            max-width: 400px;
+            line-height: 1.6;
+        }
+
+        /* Detail Modal */
         .modal {
             display: none;
             position: fixed;
-            top: 0;
+            z-index: 200;
             left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
+            animation: fadeIn 0.3s;
+            overflow-y: auto;
         }
 
-        .modal.active {
+        .modal.open {
             display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal-content {
             background: var(--card);
-            border-radius: 0.75rem;
-            padding: 2rem;
-            max-width: 600px;
+            border-radius: 1rem;
             width: 90%;
+            max-width: 900px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .modal-header {
+            background: var(--accent);
+            color: white;
+            padding: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 201;
         }
 
         .modal-header h2 {
-            font-size: 1.5rem;
-            color: var(--text);
+            margin: 0;
+            font-size: 1.75rem;
         }
 
         .modal-close {
             background: none;
             border: none;
+            color: white;
             font-size: 1.5rem;
             cursor: pointer;
-            color: var(--text2);
-            transition: color 0.2s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            transition: background 0.2s;
         }
 
         .modal-close:hover {
-            color: var(--text);
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        /* Form */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--text);
-        }
-
-        input[type="text"],
-        input[type="number"],
-        input[type="email"],
-        input[type="date"],
-        input[type="url"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            background: var(--bg);
-            color: var(--text);
-            font-size: 1rem;
-            font-family: inherit;
-            transition: border-color 0.2s;
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-lt);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        /* Dropzone */
-        .dropzone {
-            border: 2px dashed var(--border);
-            border-radius: 0.5rem;
+        .modal-body {
             padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
+        }
+
+        .detail-section {
+            margin-bottom: 2rem;
+        }
+
+        .detail-section h3 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text2);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .detail-item {
             background: var(--bg);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 3px solid var(--accent);
         }
 
-        .dropzone:hover,
-        .dropzone.dragover {
-            border-color: var(--accent);
-            background: var(--accent-lt);
-        }
-
-        .dropzone-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        /* Preview */
-        .preview-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-            font-size: 0.875rem;
-        }
-
-        .preview-table th,
-        .preview-table td {
-            padding: 0.5rem;
-            border: 1px solid var(--border);
-            text-align: left;
-        }
-
-        .preview-table th {
-            background: var(--bg);
+        .detail-label {
+            font-size: 0.8rem;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
             font-weight: 600;
         }
 
-        /* Buttons */
-        .btn-group {
+        .detail-value {
+            font-size: 1rem;
+            color: var(--text);
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .detail-value.currency {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+        }
+
+        .links-list {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .links-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        .links-list a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .links-list a:hover {
+            text-decoration: underline;
+        }
+
+        .modal-footer {
             display: flex;
             gap: 1rem;
-            margin-top: 2rem;
-            justify-content: flex-end;
-        }
-
-        .btn-cancel {
+            padding: 2rem;
+            border-top: 1px solid var(--border);
             background: var(--bg);
-            color: var(--text);
-            border: 1px solid var(--border);
+            position: sticky;
+            bottom: 0;
+            z-index: 201;
         }
 
-        .btn-cancel:hover {
-            background: var(--border);
+        .modal-footer button {
+            flex: 1;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--text);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 300;
+            animation: slideInRight 0.3s;
+            max-width: 400px;
+        }
+
+        .toast.success {
+            background: var(--green);
+        }
+
+        .toast.error {
+            background: var(--red);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         /* Footer */
         footer {
-            position: fixed;
-            bottom: 1rem;
-            right: 2rem;
-            font-size: 0.75rem;
-            color: var(--text2);
-            text-align: right;
-        }
-
-        /* Auth Overlay */
-        .auth-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .auth-container {
             background: var(--card);
-            padding: 3rem;
-            border-radius: 0.75rem;
+            border-top: 1px solid var(--border);
+            padding: 1.5rem 2rem;
             text-align: center;
-            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
-            max-width: 400px;
-            width: 90%;
-        }
-
-        .auth-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .auth-container h2 {
-            margin-bottom: 1rem;
-            color: var(--text);
-        }
-
-        .auth-container p {
             color: var(--text2);
-            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            margin-top: 3rem;
         }
 
-        .google-signin-btn {
-            background: white;
-            color: #1f2937;
-            border: 1px solid var(--border);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-weight: 500;
-            width: 100%;
-            transition: box-shadow 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-        }
-
-        .google-signin-btn:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Mobile */
+        /* Mobile Responsive */
         @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
             .hamburger {
                 display: block;
             }
 
             .nav-links {
                 display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: var(--nav);
                 flex-direction: column;
-                padding: 1rem;
                 gap: 1rem;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                width: 100%;
+                margin-left: 0;
             }
 
             .nav-links.open {
                 display: flex;
             }
 
-            .mobile-menu {
-                display: none;
-            }
-
-            .mobile-menu.open {
-                display: flex;
-            }
-
-            nav {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
             .nav-right {
-                flex-wrap: wrap;
+                width: 100%;
                 justify-content: space-between;
-                width: 100%;
+                flex-wrap: wrap;
             }
 
-            .nav-clocks {
-                order: 3;
-                width: 100%;
-            }
-
-            .container {
-                padding: 1rem;
-            }
-
-            .header h1 {
-                font-size: 1.75rem;
-            }
-
-            .stats-row {
+            .stats-grid {
                 grid-template-columns: 1fr;
             }
 
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-header {
+                flex-direction: column;
+            }
+
+            .search-bar {
+                min-width: 100%;
+            }
+
             table {
-                font-size: 0.875rem;
+                font-size: 0.8rem;
             }
 
             th, td {
                 padding: 0.75rem 0.5rem;
             }
 
-            .table-wrapper {
-                border-radius: 0;
+            .modal-content {
+                width: 95%;
             }
 
-            footer {
-                bottom: auto;
-                top: auto;
-                right: auto;
+            .modal-header {
+                padding: 1.5rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.25rem;
+            }
+
+            .modal-body {
+                padding: 1.5rem;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toast {
+                bottom: 1rem;
+                right: 1rem;
                 left: 1rem;
-                position: static;
-                margin-top: 2rem;
+                max-width: none;
             }
         }
 
-        /* Status badges */
-        .badge {
+        /* Loading State */
+        .loading {
             display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            white-space: nowrap;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse 1.5s infinite;
         }
 
-        .badge-active {
-            background: var(--green-bg);
-            color: var(--green);
-        }
-
-        .badge-inactive {
-            background: var(--red-bg);
-            color: var(--red);
-        }
-
-        .badge-pending {
-            background: var(--yellow-bg);
-            color: var(--yellow);
-        }
-
-        .badge-archived {
-            background: var(--purple-bg);
-            color: var(--purple);
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
         }
     </style>
 </head>
 <body>
+    <!-- Auth Overlay -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-card">
+            <h2>NF6 Capital</h2>
+            <p>Sign in with your nf6capital.com account to continue</p>
+            <div id="firebaseui-auth-container"></div>
+        </div>
+    </div>
+
     <!-- Navigation -->
     <nav>
-        <div style="display:flex;align-items:center;gap:1rem">
-            <button class="hamburger" onclick="document.querySelector('.mobile-menu').classList.toggle('open')">☰</button>
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;width:100%">
+            <button class="hamburger" onclick="toggleMobileMenu()">☰</button>
             <a href="index.html" class="brand">NF6 <span>Capital</span></a>
-            <div class="nav-links">
-                <a href="index.html" data-i18n="home">HomeBase</a>
-                <a href="compliance-dashboard.html" data-i18n="dashboard">Dashboard</a>
-                <a href="compliance-calendar.html" data-i18n="calendar">Calendar</a>
-                <a href="audit-trail.html" data-i18n="audit">Audit Trail</a>
-                <a href="upload.html" data-i18n="upload">Upload</a>
-                <a href="document-finder.html" data-i18n="documents">Documents</a>
+            <div class="nav-links" id="mobileMenu">
+                <a href="index.html">HomeBase</a>
+                <a href="compliance-dashboard.html">Dashboard</a>
+                <a href="compliance-calendar.html">Calendar</a>
+                <a href="audit-trail.html">Audit Trail</a>
+                <a href="upload.html">Upload</a>
+                <a href="document-finder.html">Documents</a>
             </div>
         </div>
         <div class="nav-right">
-            <button class="toggle-btn" onclick="toggleLang()"><span class="icon">●</span> <span id="langLabel">ES</span></button>
-            <button class="toggle-btn" onclick="toggleTheme()"><span class="icon">☽</span> <span data-i18n="dark">Dark</span></button>
+            <button class="toggle-btn" onclick="toggleLang()">● <span id="langLabel">ES</span></button>
+            <button class="toggle-btn" onclick="toggleTheme()">☽ Dark</button>
             <div class="nav-clocks">
-                <div class="clock-circle"><span class="clock-label">COL</span><span class="clock-time" id="clockCOL">--:--:--</span></div>
-                <div class="clock-circle"><span class="clock-label">PR</span><span class="clock-time" id="clockPR">--:--:--</span></div>
+                <div class="clock-circle">
+                    <span class="clock-label">COL</span>
+                    <span class="clock-time" id="clockCOL">--:--:--</span>
+                </div>
+                <div class="clock-circle">
+                    <span class="clock-label">PR</span>
+                    <span class="clock-time" id="clockPR">--:--:--</span>
+                </div>
             </div>
             <span class="today-badge" id="todayBadge"></span>
-            <button class="sign-out-btn" onclick="signOut()" data-i18n="signOut">Sign Out</button>
+            <button class="sign-out-btn" onclick="signOut()">Sign Out</button>
         </div>
     </nav>
 
-    <!-- Auth Overlay -->
-    <div class="auth-overlay" id="authOverlay">
-        <div class="auth-container">
-            <div class="auth-icon">🏦</div>
-            <h2 data-i18n="signIn">Sign In</h2>
-            <p data-i18n="signInMsg">Sign in with your NF6 Capital account to continue</p>
-            <button class="google-signin-btn" onclick="signInWithGoogle()">
-                <span>🔐</span>
-                <span data-i18n="signInGoogle">Sign in with Google</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Main Container -->
-    <div class="container" id="mainContainer" style="display:none;">
-        <!-- Header -->
-        <div class="header">
-            <h1><span>🏦</span> <span data-i18n="assets">Assets</span></h1>
-            <p data-i18n="assetsSubtitle">Track and manage all entity assets, valuations, depreciation schedules, and inventory.</p>
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Assets Dashboard</h1>
+            <p>Manage and track your capital assets across all locations</p>
         </div>
 
-        <!-- Action Bar -->
-        <div class="action-bar">
-            <button class="btn btn-primary" onclick="openUploadModal()" data-i18n="uploadCSV">📤 Upload CSV</button>
-            <button class="btn" onclick="exportCSV()" data-i18n="exportCSV">📥 Export CSV</button>
-            <button class="btn" onclick="openSheetsModal()" data-i18n="googleSheets">📊 Google Sheets</button>
-            <button class="btn btn-primary" onclick="openAddItemModal()" data-i18n="addItem">➕ Add Item</button>
-        </div>
-
-        <!-- Stats Row -->
-        <div class="stats-row" id="statsRow">
-            <div class="stat-card">
-                <div class="stat-label" data-i18n="totalItems">Total Items</div>
-                <div class="stat-value" id="statTotalItems">0</div>
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadSection" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+            <h3>📊 Upload Data or Sync from Google Sheets</h3>
+            <p>Drag and drop a CSV file, or choose from the options below</p>
+            <div class="upload-buttons">
+                <button class="btn btn-primary" onclick="document.getElementById('csvFile').click()">📁 Choose CSV File</button>
+                <input type="file" id="csvFile" accept=".csv" onchange="handleFileSelect(event)">
+                <button class="btn btn-secondary" onclick="showSheetsDialog()">📊 Google Sheets URL</button>
+                <button class="btn btn-secondary" onclick="exportCSV()">💾 Export CSV</button>
             </div>
         </div>
 
-        <!-- Search Bar -->
-        <div class="search-container">
-            <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search all columns..." data-i18n-placeholder="search">
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="statsGrid" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-label">Total Assets</div>
+                <div class="stat-value" id="statTotalAssets">0</div>
+                <div class="stat-change" id="statTotalAssetsChange"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Capital Invested</div>
+                <div class="stat-value" id="statTotalCapital">$0</div>
+                <div class="stat-change" id="statTotalCapitalChange"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Assets</div>
+                <div class="stat-value" id="statActiveAssets">0</div>
+                <div class="stat-change" id="statActiveAssetsChange"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Distributions</div>
+                <div class="stat-value" id="statTotalDistributions">$0</div>
+                <div class="stat-change" id="statTotalDistributionsChange"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Average ROI %</div>
+                <div class="stat-value" id="statAverageROI">0%</div>
+                <div class="stat-change" id="statAverageROIChange"></div>
+            </div>
         </div>
 
-        <!-- Table -->
-        <div class="table-wrapper">
-            <table id="dataTable">
-                <thead id="tableHead"></thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+        <!-- Charts Grid -->
+        <div class="charts-grid" id="chartsGrid" style="display: none;">
+            <div class="chart-card">
+                <h3>Assets by Category</h3>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>Assets by Status</h3>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>Capital Invested by Location</h3>
+                <div class="chart-container">
+                    <canvas id="locationChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>Top 10 Assets by Investment</h3>
+                <div class="chart-container">
+                    <canvas id="topAssetsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table Section -->
+        <div class="table-section" id="tableSection" style="display: none;">
+            <div class="table-header">
+                <h3>Asset Portfolio</h3>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search assets..." onkeyup="filterTable()">
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable" onclick="sortTable('Asset')">Asset</th>
+                            <th class="sortable" onclick="sortTable('Location')">Location</th>
+                            <th class="sortable" onclick="sortTable('Category')">Category</th>
+                            <th class="sortable" onclick="sortTable('Status')">Status</th>
+                            <th class="sortable" onclick="sortTable('Owner')">Owner</th>
+                            <th>% Owned</th>
+                            <th class="sortable" onclick="sortTable('Initial investment')">Initial Investment</th>
+                            <th class="sortable" onclick="sortTable('Total Capital Invested')">Total Capital</th>
+                            <th class="sortable" onclick="sortTable('Net profit')">Net Profit</th>
+                            <th class="sortable" onclick="sortTable('ROI % on cash distributions')">ROI %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Empty State -->
-        <div class="empty-state" id="emptyState" style="display:none;">
-            <div class="empty-state-icon">📁</div>
-            <h3 data-i18n="noData">No data yet</h3>
-            <p data-i18n="noDataMsg">Upload a CSV or sync from Google Sheets to get started.</p>
+        <div class="empty-state" id="emptyState">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="30" r="20" fill="currentColor"/>
+                <path d="M 20 60 Q 20 70 30 75 L 70 75 Q 80 70 80 60" fill="currentColor"/>
+            </svg>
+            <h3>No Data Yet</h3>
+            <p>Upload a CSV file or sync from Google Sheets to get started with your assets dashboard</p>
         </div>
     </div>
 
-    <!-- Upload Modal -->
-    <div class="modal" id="uploadModal">
-        <div class="modal-content">
+    <!-- Detail Modal -->
+    <div class="modal" id="detailModal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h2 data-i18n="uploadCSV">Upload CSV</h2>
-                <button class="modal-close" onclick="closeModal('uploadModal')">✕</button>
+                <h2 id="modalAssetName"></h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
-            <div class="form-group">
-                <div class="dropzone" id="dropzone" ondrop="handleDrop(event)" ondragover="event.preventDefault(); document.getElementById('dropzone').classList.add('dragover')" ondragleave="document.getElementById('dropzone').classList.remove('dragover')">
-                    <div class="dropzone-icon">📤</div>
-                    <p data-i18n="dragDrop">Drag and drop your CSV file here</p>
-                    <p style="color:var(--text2);font-size:0.875rem;margin-top:0.5rem;" data-i18n="orClick">or click to select</p>
-                    <input type="file" id="fileInput" accept=".csv" onchange="handleFileSelect(event)">
+            <div class="modal-body">
+                <!-- Description -->
+                <div class="detail-section">
+                    <h3>Description</h3>
+                    <p id="modalDescription" style="color: var(--text2); line-height: 1.6;"></p>
                 </div>
-                <button class="btn" onclick="document.getElementById('fileInput').click()" style="width:100%;margin-top:1rem;" data-i18n="selectFile">📁 Select File</button>
-            </div>
-            <div id="previewContainer" style="display:none;">
-                <label data-i18n="preview">Preview</label>
-                <table class="preview-table" id="previewTable">
-                    <thead id="previewHead"></thead>
-                    <tbody id="previewBody"></tbody>
-                </table>
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-cancel" onclick="closeModal('uploadModal')" data-i18n="cancel">Cancel</button>
-                <button class="btn btn-primary" onclick="confirmUpload()" id="confirmUploadBtn" style="display:none;" data-i18n="upload">Upload</button>
-            </div>
-        </div>
-    </div>
 
-    <!-- Google Sheets Modal -->
-    <div class="modal" id="sheetsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 data-i18n="googleSheets">Google Sheets Sync</h2>
-                <button class="modal-close" onclick="closeModal('sheetsModal')">✕</button>
-            </div>
-            <div class="form-group">
-                <label data-i18n="sheetsURL">Google Sheets URL</label>
-                <input type="url" id="sheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/..." data-i18n-placeholder="sheetsURLPlaceholder">
-            </div>
-            <div class="form-group">
-                <small style="color:var(--text2);" data-i18n="sheetsHelp">Convert the URL to CSV format: add /export?format=csv to the end</small>
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-cancel" onclick="closeModal('sheetsModal')" data-i18n="cancel">Cancel</button>
-                <button class="btn" onclick="saveSheetURL()" data-i18n="save">💾 Save URL</button>
-                <button class="btn btn-primary" onclick="syncSheets()" data-i18n="syncNow">🔄 Sync Now</button>
-            </div>
-        </div>
-    </div>
+                <!-- Key Metrics -->
+                <div class="detail-section">
+                    <h3>Key Metrics</h3>
+                    <div class="detail-grid" id="modalMetrics"></div>
+                </div>
 
-    <!-- Edit Modal -->
-    <div class="modal" id="editModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 data-i18n="editItem">Edit Item</h2>
-                <button class="modal-close" onclick="closeModal('editModal')">✕</button>
-            </div>
-            <div id="editFormContainer"></div>
-            <div class="btn-group">
-                <button class="btn btn-cancel" onclick="closeModal('editModal')" data-i18n="cancel">Cancel</button>
-                <button class="btn btn-primary" onclick="saveEdit()" data-i18n="save">💾 Save</button>
-            </div>
-        </div>
-    </div>
+                <!-- Investment Details -->
+                <div class="detail-section">
+                    <h3>Investment Details</h3>
+                    <div class="detail-grid" id="modalInvestment"></div>
+                </div>
 
-    <!-- Add Item Modal -->
-    <div class="modal" id="addModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 data-i18n="addNewItem">Add New Item</h2>
-                <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+                <!-- Ownership & Location -->
+                <div class="detail-section">
+                    <h3>Ownership & Location</h3>
+                    <div class="detail-grid" id="modalOwnership"></div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="detail-section">
+                    <h3>Timeline</h3>
+                    <div class="detail-grid" id="modalTimeline"></div>
+                </div>
+
+                <!-- Documents & Links -->
+                <div class="detail-section">
+                    <h3>Documents & Links</h3>
+                    <div id="modalLinks"></div>
+                </div>
+
+                <!-- Tax & Accounting -->
+                <div class="detail-section">
+                    <h3>Tax & Accounting</h3>
+                    <div class="detail-grid" id="modalTax"></div>
+                </div>
+
+                <!-- Additional Notes -->
+                <div class="detail-section">
+                    <h3>Additional Notes</h3>
+                    <div class="detail-grid" id="modalNotes"></div>
+                </div>
             </div>
-            <div id="addFormContainer"></div>
-            <div class="btn-group">
-                <button class="btn btn-cancel" onclick="closeModal('addModal')" data-i18n="cancel">Cancel</button>
-                <button class="btn btn-primary" onclick="saveNewItem()" data-i18n="add">➕ Add</button>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteAsset()" style="flex: 0;">Delete Asset</button>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer id="lastUpdated">Last updated: --:--:--</footer>
+    <footer>
+        <p>NF6 Capital Assets Dashboard | Last updated: <span id="lastUpdated">Never</span></p>
+    </footer>
 
     <script>
-        // Configuration
-        const CONFIG = {
-            storageKey: 'nf6_assets_data',
-            sheetsKey: 'nf6_sheets_url_assets',
-            themeKey: 'nf6_theme',
-            langKey: 'nf6_lang',
-            auth: {
-                enabled: true,
-                allowedDomain: 'nf6capital.com',
-                config: {
-                    apiKey: "AIzaSyAbvvj4qCzfZPdRxU6BtbRSfXDXPitNwkQ",
-                    authDomain: "nf6-compliance.firebaseapp.com",
-                    projectId: "nf6-compliance"
-                }
-            }
+        // ===============================
+        // CONFIG & INITIALIZATION
+        // ===============================
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyAbvvj4qCzfZPdRxU6BtbRSfXDXPitNwkQ",
+            authDomain: "nf6-compliance.firebaseapp.com",
+            projectId: "nf6-compliance"
         };
+        const ALLOWED_DOMAIN = 'nf6capital.com';
+        const STORAGE_KEY = 'nf6_assets_data';
+        const SHEETS_KEY = 'nf6_sheets_url_assets';
 
-        // i18n translations
-        const translations = {
-            en: {
-                home: 'HomeBase',
-                dashboard: 'Dashboard',
-                calendar: 'Calendar',
-                audit: 'Audit Trail',
-                upload: 'Upload',
-                documents: 'Documents',
-                dark: 'Dark',
-                signOut: 'Sign Out',
-                signIn: 'Sign In',
-                signInMsg: 'Sign in with your NF6 Capital account to continue',
-                signInGoogle: 'Sign in with Google',
-                assets: 'Assets',
-                assetsSubtitle: 'Track and manage all entity assets, valuations, depreciation schedules, and inventory.',
-                uploadCSV: '📤 Upload CSV',
-                exportCSV: '📥 Export CSV',
-                googleSheets: '📊 Google Sheets',
-                addItem: '➕ Add Item',
-                totalItems: 'Total Items',
-                search: '🔍 Search all columns...',
-                noData: 'No data yet',
-                noDataMsg: 'Upload a CSV or sync from Google Sheets to get started.',
-                dragDrop: 'Drag and drop your CSV file here',
-                orClick: 'or click to select',
-                selectFile: '📁 Select File',
-                preview: 'Preview',
-                cancel: 'Cancel',
-                upload: 'Upload',
-                sheetsURL: 'Google Sheets URL',
-                sheetsURLPlaceholder: 'https://docs.google.com/spreadsheets/d/...',
-                sheetsHelp: 'Convert the URL to CSV format: add /export?format=csv to the end',
-                save: '💾 Save URL',
-                syncNow: '🔄 Sync Now',
-                editItem: 'Edit Item',
-                addNewItem: 'Add New Item',
-                add: '➕ Add'
-            },
-            es: {
-                home: 'Inicio',
-                dashboard: 'Panel',
-                calendar: 'Calendario',
-                audit: 'Auditoría',
-                upload: 'Cargar',
-                documents: 'Documentos',
-                dark: 'Oscuro',
-                signOut: 'Cerrar Sesión',
-                signIn: 'Iniciar Sesión',
-                signInMsg: 'Inicia sesión con tu cuenta de NF6 Capital para continuar',
-                signInGoogle: 'Inicia sesión con Google',
-                assets: 'Activos',
-                assetsSubtitle: 'Rastrea y administra todos los activos de la entidad, valuaciones, cronogramas de depreciación e inventario.',
-                uploadCSV: '📤 Cargar CSV',
-                exportCSV: '📥 Descargar CSV',
-                googleSheets: '📊 Google Sheets',
-                addItem: '➕ Agregar Elemento',
-                totalItems: 'Elementos Totales',
-                search: '🔍 Buscar en todas las columnas...',
-                noData: 'Sin datos',
-                noDataMsg: 'Carga un CSV o sincroniza desde Google Sheets para comenzar.',
-                dragDrop: 'Arrastra y suelta tu archivo CSV aquí',
-                orClick: 'o haz clic para seleccionar',
-                selectFile: '📁 Seleccionar Archivo',
-                preview: 'Vista Previa',
-                cancel: 'Cancelar',
-                upload: 'Cargar',
-                sheetsURL: 'URL de Google Sheets',
-                sheetsURLPlaceholder: 'https://docs.google.com/spreadsheets/d/...',
-                sheetsHelp: 'Convierte la URL a formato CSV: añade /export?format=csv al final',
-                save: '💾 Guardar URL',
-                syncNow: '🔄 Sincronizar Ahora',
-                editItem: 'Editar Elemento',
-                addNewItem: 'Agregar Nuevo Elemento',
-                add: '➕ Agregar'
-            }
-        };
+        let assetData = [];
+        let filteredData = [];
+        let sortColumn = 'Asset';
+        let sortDirection = 'asc';
+        let charts = {};
+        let currentUser = null;
 
-        let currentLanguage = localStorage.getItem(CONFIG.langKey) || 'en';
-        let currentData = [];
-        let allData = [];
-        let sortConfig = { column: null, ascending: true };
-        let editingIndex = -1;
-        let currentColumns = [];
-        let tempUploadData = [];
+        // Initialize Firebase
+        try {
+            firebase.initializeApp(FIREBASE_CONFIG);
+        } catch (error) {
+            console.log('Firebase already initialized');
+        }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            initTheme();
-            initClocks();
-            updateTodayBadge();
-            initAuth();
-            updateUI();
-        });
+        const auth = firebase.auth();
 
-        // Auth
+        // ===============================
+        // AUTH
+        // ===============================
         function initAuth() {
-            try {
-                firebase.initializeApp(CONFIG.auth.config);
-            } catch(e) { console.warn('Firebase init:', e.message); }
-            firebase.auth().onAuthStateChanged(user => {
-                if (!user) {
-                    document.getElementById('authOverlay').style.display = 'flex';
-                    document.getElementById('mainContainer').style.display = 'none';
-                    return;
+            auth.onAuthStateChanged((user) => {
+                if (user && user.email && user.email.endsWith('@' + ALLOWED_DOMAIN)) {
+                    currentUser = user;
+                    document.getElementById('authOverlay').classList.add('hidden');
+                    initApp();
+                } else if (user) {
+                    signOut();
+                    showToast('Error: Please sign in with an ' + ALLOWED_DOMAIN + ' account', 'error');
+                } else {
+                    document.getElementById('authOverlay').classList.remove('hidden');
+                    showGoogleSignIn();
                 }
-                if (!user.email.endsWith(`@${CONFIG.auth.allowedDomain}`)) {
-                    alert('Access restricted to @' + CONFIG.auth.allowedDomain);
-                    firebase.auth().signOut();
-                    return;
-                }
-                document.getElementById('authOverlay').style.display = 'none';
-                document.getElementById('mainContainer').style.display = 'block';
-                loadData();
-                autoSyncSheets();
             });
         }
 
-        function signInWithGoogle() {
+        function showGoogleSignIn() {
             const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({hd: CONFIG.auth.allowedDomain});
-            firebase.auth().signInWithPopup(provider).catch(err => {
-                console.error('Auth error:', err);
-                alert(err.message || 'Sign in failed');
-            });
+            provider.setCustomParameters({ hd: ALLOWED_DOMAIN });
+
+            const signInBtn = document.createElement('button');
+            signInBtn.className = 'btn btn-primary';
+            signInBtn.textContent = 'Sign In with Google';
+            signInBtn.onclick = () => {
+                auth.signInWithPopup(provider).catch(error => {
+                    showToast('Authentication failed: ' + error.message, 'error');
+                });
+            };
+
+            const container = document.getElementById('firebaseui-auth-container');
+            container.innerHTML = '';
+            container.appendChild(signInBtn);
         }
 
         function signOut() {
-            firebase.auth().signOut();
+            auth.signOut().then(() => {
+                currentUser = null;
+                document.getElementById('authOverlay').classList.remove('hidden');
+            });
         }
 
-        // Data Management
+        // ===============================
+        // APP INITIALIZATION
+        // ===============================
+        function initApp() {
+            loadData();
+            initClocks();
+            initTheme();
+            initLanguage();
+            loadSheetsUrlIfExists();
+        }
+
         function loadData() {
-            const stored = localStorage.getItem(CONFIG.storageKey);
-            allData = stored ? JSON.parse(stored) : [];
-            currentData = [...allData];
-            detectColumns();
-            renderTable();
-            updateStats();
-        }
-
-        function saveData() {
-            localStorage.setItem(CONFIG.storageKey, JSON.stringify(allData));
-            currentData = [...allData];
-            renderTable();
-            updateStats();
-            updateLastUpdated();
-        }
-
-        function detectColumns() {
-            if (allData.length === 0) {
-                currentColumns = [];
-                return;
-            }
-            currentColumns = Object.keys(allData[0]);
-        }
-
-        // CSV Upload
-        function openUploadModal() {
-            document.getElementById('uploadModal').classList.add('active');
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            document.getElementById('dropzone').classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    assetData = JSON.parse(stored);
+                    renderDashboard();
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    showToast('Error loading saved data', 'error');
+                }
             }
         }
 
-        function handleFileSelect(e) {
-            const files = e.target.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
-            }
-        }
+        // ===============================
+        // CSV HANDLING
+        // ===============================
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-        function handleFile(file) {
             Papa.parse(file, {
                 header: true,
+                skipEmptyLines: true,
                 complete: (results) => {
-                    tempUploadData = results.data.filter(row => Object.values(row).some(v => v));
-                    showPreview(tempUploadData);
+                    if (results.data && results.data.length > 0) {
+                        assetData = results.data;
+                        saveData();
+                        renderDashboard();
+                        showToast(`Loaded ${assetData.length} assets successfully`, 'success');
+                    } else {
+                        showToast('CSV file is empty', 'error');
+                    }
                 },
-                error: (err) => {
-                    alert('Error parsing CSV: ' + err.message);
+                error: (error) => {
+                    showToast('Error parsing CSV: ' + error.message, 'error');
                 }
             });
+
+            event.target.value = '';
         }
 
-        function showPreview(data) {
-            if (data.length === 0) {
-                alert('No valid data in file');
-                return;
-            }
+        function handleDrop(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById('uploadSection').classList.remove('dragover');
 
-            const previewContainer = document.getElementById('previewContainer');
-            const previewHead = document.getElementById('previewHead');
-            const previewBody = document.getElementById('previewBody');
-
-            const cols = Object.keys(data[0]);
-            previewHead.innerHTML = cols.map(c => `<th>${c}</th>`).join('');
-            previewBody.innerHTML = data.slice(0, 5).map(row =>
-                `<tr>${cols.map(c => `<td>${row[c] || ''}</td>`).join('')}</tr>`
-            ).join('');
-
-            previewContainer.style.display = 'block';
-            document.getElementById('confirmUploadBtn').style.display = 'block';
-        }
-
-        function confirmUpload() {
-            allData = tempUploadData;
-            saveData();
-            closeModal('uploadModal');
-            tempUploadData = [];
-            document.getElementById('previewContainer').style.display = 'none';
-            document.getElementById('confirmUploadBtn').style.display = 'none';
-        }
-
-        // Google Sheets
-        function openSheetsModal() {
-            const saved = localStorage.getItem(CONFIG.sheetsKey);
-            if (saved) {
-                document.getElementById('sheetsUrl').value = saved;
-            }
-            document.getElementById('sheetsModal').classList.add('active');
-        }
-
-        function saveSheetURL() {
-            const url = document.getElementById('sheetsUrl').value;
-            if (!url) {
-                alert('Please enter a URL');
-                return;
-            }
-            localStorage.setItem(CONFIG.sheetsKey, url);
-            alert('URL saved!');
-        }
-
-        async function syncSheets() {
-            const url = localStorage.getItem(CONFIG.sheetsKey);
-            if (!url) {
-                alert('No Google Sheets URL saved');
-                return;
-            }
-
-            const csvUrl = url.includes('/export?format=csv') ? url : url.replace(/\/$/, '') + '/export?format=csv';
-
-            try {
-                const response = await fetch(csvUrl);
-                const csv = await response.text();
-                Papa.parse(csv, {
+            const files = event.dataTransfer.files;
+            if (files.length > 0 && (files[0].type === 'text/csv' || files[0].name.endsWith('.csv'))) {
+                const file = files[0];
+                Papa.parse(file, {
                     header: true,
+                    skipEmptyLines: true,
                     complete: (results) => {
-                        allData = results.data.filter(row => Object.values(row).some(v => v));
-                        saveData();
-                        closeModal('sheetsModal');
-                        alert('Synced from Google Sheets!');
+                        if (results.data && results.data.length > 0) {
+                            assetData = results.data;
+                            saveData();
+                            renderDashboard();
+                            showToast(`Loaded ${assetData.length} assets successfully`, 'success');
+                        }
+                    },
+                    error: (error) => {
+                        showToast('Error parsing CSV: ' + error.message, 'error');
                     }
                 });
-            } catch (err) {
-                alert('Error syncing: ' + err.message);
+            } else {
+                showToast('Please drop a CSV file', 'error');
             }
         }
 
-        async function autoSyncSheets() {
-            const url = localStorage.getItem(CONFIG.sheetsKey);
+        function handleDragOver(event) {
+            event.preventDefault();
+            document.getElementById('uploadSection').classList.add('dragover');
+        }
+
+        function handleDragLeave(event) {
+            if (event.target.id === 'uploadSection') {
+                document.getElementById('uploadSection').classList.remove('dragover');
+            }
+        }
+
+        // ===============================
+        // GOOGLE SHEETS
+        // ===============================
+        function showSheetsDialog() {
+            const url = prompt('Enter Google Sheets CSV export URL (https://docs.google.com/spreadsheets/d/...export?format=csv)');
             if (url) {
-                try {
-                    await syncSheets();
-                } catch (err) {
-                    console.error('Auto-sync failed:', err);
-                }
+                localStorage.setItem(SHEETS_KEY, url);
+                loadFromSheets(url);
             }
         }
 
-        // Table Rendering
-        function renderTable() {
-            const head = document.getElementById('tableHead');
-            const body = document.getElementById('tableBody');
-            const emptyState = document.getElementById('emptyState');
+        function loadFromSheets(url) {
+            fetch(url)
+                .then(response => response.text())
+                .then(csv => {
+                    Papa.parse(csv, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: (results) => {
+                            if (results.data && results.data.length > 0) {
+                                assetData = results.data;
+                                saveData();
+                                renderDashboard();
+                                showToast(`Synced ${assetData.length} assets from Google Sheets`, 'success');
+                                updateLastUpdated();
+                            }
+                        },
+                        error: (error) => {
+                            showToast('Error parsing Google Sheets: ' + error.message, 'error');
+                        }
+                    });
+                })
+                .catch(error => {
+                    showToast('Error fetching Google Sheets: ' + error.message, 'error');
+                });
+        }
 
-            if (currentData.length === 0) {
-                head.innerHTML = '';
-                body.innerHTML = '';
-                emptyState.style.display = 'block';
-                document.querySelector('.table-wrapper').style.display = 'none';
+        function loadSheetsUrlIfExists() {
+            const url = localStorage.getItem(SHEETS_KEY);
+            if (url) {
+                loadFromSheets(url);
+            }
+        }
+
+        // ===============================
+        // DATA PERSISTENCE
+        // ===============================
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(assetData));
+                updateLastUpdated();
+            } catch (error) {
+                console.error('Error saving data:', error);
+                showToast('Error saving data', 'error');
+            }
+        }
+
+        function updateLastUpdated() {
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = now.toLocaleString();
+            localStorage.setItem('nf6_assets_lastUpdated', now.toISOString());
+        }
+
+        // ===============================
+        // CURRENCY PARSING
+        // ===============================
+        function parseCurrency(value) {
+            if (!value || value === 'N/A' || value === '#VALUE!' || value === '') return 0;
+
+            if (typeof value === 'string' && value.includes('%')) return 0;
+
+            if (typeof value === 'string') {
+                value = value.replace(/[$,]/g, '');
+
+                if (value.includes('(') && value.includes(')')) {
+                    value = '-' + value.replace(/[()]/g, '');
+                }
+
+                const num = parseFloat(value);
+                return isNaN(num) ? 0 : num;
+            }
+
+            return typeof value === 'number' ? value : 0;
+        }
+
+        function formatCurrency(value) {
+            const num = parseCurrency(value);
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            }).format(num);
+        }
+
+        function parsePercentage(value) {
+            if (!value || value === 'N/A' || value === '#VALUE!' || value === '') return 0;
+
+            if (typeof value === 'string') {
+                value = value.replace('%', '').trim();
+                const num = parseFloat(value);
+                return isNaN(num) ? 0 : num;
+            }
+
+            return typeof value === 'number' ? value : 0;
+        }
+
+        // ===============================
+        // DASHBOARD RENDERING
+        // ===============================
+        function renderDashboard() {
+            if (assetData.length === 0) {
+                document.getElementById('emptyState').style.display = 'flex';
+                document.getElementById('statsGrid').style.display = 'none';
+                document.getElementById('chartsGrid').style.display = 'none';
+                document.getElementById('tableSection').style.display = 'none';
+                document.getElementById('uploadSection').style.display = 'block';
                 return;
             }
 
-            emptyState.style.display = 'none';
-            document.querySelector('.table-wrapper').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('statsGrid').style.display = 'grid';
+            document.getElementById('chartsGrid').style.display = 'grid';
+            document.getElementById('tableSection').style.display = 'block';
+            document.getElementById('uploadSection').style.display = 'block';
 
-            const cols = currentColumns;
-            head.innerHTML = cols.map(col => `
-                <th class="sortable" onclick="sortTable('${col}')">${col}</th>
-            `).join('') + '<th>Actions</th>';
-
-            body.innerHTML = currentData.map((row, idx) => `
-                <tr onclick="openEditModal(${idx})">
-                    ${cols.map(col => {
-                        let val = row[col] || '';
-                        if (col.toLowerCase().includes('status')) {
-                            const status = val.toLowerCase();
-                            let badgeClass = 'badge-pending';
-                            if (status === 'active' || status === 'activo') badgeClass = 'badge-active';
-                            else if (status === 'inactive' || status === 'inactivo') badgeClass = 'badge-inactive';
-                            else if (status === 'archived' || status === 'archivado') badgeClass = 'badge-archived';
-                            return `<td><span class="badge ${badgeClass}">${val}</span></td>`;
-                        }
-                        return `<td>${val}</td>`;
-                    }).join('')}
-                    <td class="actions-cell">
-                        <button class="action-btn" onclick="event.stopPropagation(); openEditModal(${idx})">✏</button>
-                        <button class="action-btn delete" onclick="event.stopPropagation(); deleteRow(${idx})">✕</button>
-                    </td>
-                </tr>
-            `).join('');
+            renderStats();
+            renderCharts();
+            renderTable();
         }
 
-        function sortTable(column) {
-            if (sortConfig.column === column) {
-                sortConfig.ascending = !sortConfig.ascending;
-            } else {
-                sortConfig.column = column;
-                sortConfig.ascending = true;
-            }
+        function renderStats() {
+            const totalAssets = assetData.length;
+            const activeAssets = assetData.filter(a => a.Status === 'Active').length;
+            const totalCapital = assetData.reduce((sum, a) => sum + parseCurrency(a['Total Capital Invested']), 0);
+            const totalDistributions = assetData.reduce((sum, a) => sum + parseCurrency(a['Distributions received total']), 0);
 
-            currentData.sort((a, b) => {
-                let valA = a[column] || '';
-                let valB = b[column] || '';
+            const roiValues = assetData
+                .map(a => parsePercentage(a['ROI % on cash distributions']))
+                .filter(r => r !== 0);
+            const avgROI = roiValues.length > 0 ? (roiValues.reduce((a, b) => a + b, 0) / roiValues.length).toFixed(2) : 0;
 
-                if (!isNaN(valA) && !isNaN(valB)) {
-                    valA = parseFloat(valA);
-                    valB = parseFloat(valB);
-                }
+            document.getElementById('statTotalAssets').textContent = totalAssets;
+            document.getElementById('statActiveAssets').textContent = activeAssets;
+            document.getElementById('statTotalCapital').textContent = formatCurrency(totalCapital);
+            document.getElementById('statTotalDistributions').textContent = formatCurrency(totalDistributions);
+            document.getElementById('statAverageROI').textContent = avgROI + '%';
+        }
 
-                if (valA < valB) return sortConfig.ascending ? -1 : 1;
-                if (valA > valB) return sortConfig.ascending ? 1 : -1;
-                return 0;
+        function renderCharts() {
+            destroyCharts();
+
+            // Category Chart
+            const categoryCounts = {};
+            const categoryColors = {
+                'Real Estate': '#3b82f6',
+                'Business Asset': '#8b5cf6',
+                'Other Asset': '#ec4899'
+            };
+
+            assetData.forEach(a => {
+                const cat = a.Category || 'Unknown';
+                categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
             });
 
-            renderTable();
+            charts.categoryChart = new Chart(document.getElementById('categoryChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categoryCounts),
+                    datasets: [{
+                        data: Object.values(categoryCounts),
+                        backgroundColor: Object.keys(categoryCounts).map(cat => categoryColors[cat] || '#6b7280'),
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card'),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') }
+                        }
+                    }
+                }
+            });
+
+            // Status Chart
+            const statusCounts = {};
+            const statusColors = {
+                'Active': '#16a34a',
+                'Sold': '#ea580c',
+                'Dissolved': '#dc2626',
+                'Written Off': '#9ca3af'
+            };
+
+            assetData.forEach(a => {
+                const status = a.Status || 'Unknown';
+                statusCounts[status] = (statusCounts[status] || 0) + 1;
+            });
+
+            charts.statusChart = new Chart(document.getElementById('statusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        data: Object.values(statusCounts),
+                        backgroundColor: Object.keys(statusCounts).map(status => statusColors[status] || '#6b7280'),
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card'),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') }
+                        }
+                    }
+                }
+            });
+
+            // Location Chart
+            const locationCapital = {};
+            assetData.forEach(a => {
+                const loc = a.Location || 'Unknown';
+                locationCapital[loc] = (locationCapital[loc] || 0) + parseCurrency(a['Total Capital Invested']);
+            });
+
+            const sortedLocations = Object.entries(locationCapital)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            charts.locationChart = new Chart(document.getElementById('locationChart'), {
+                type: 'bar',
+                data: {
+                    labels: sortedLocations.map(l => l[0]),
+                    datasets: [{
+                        label: 'Capital Invested',
+                        data: sortedLocations.map(l => l[1]),
+                        backgroundColor: '#3b82f6',
+                        borderColor: '#1e40af',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text2') }
+                        },
+                        y: {
+                            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text2') }
+                        }
+                    }
+                }
+            });
+
+            // Top Assets Chart
+            const sortedAssets = assetData
+                .sort((a, b) => parseCurrency(b['Total Capital Invested']) - parseCurrency(a['Total Capital Invested']))
+                .slice(0, 10);
+
+            charts.topAssetsChart = new Chart(document.getElementById('topAssetsChart'), {
+                type: 'bar',
+                data: {
+                    labels: sortedAssets.map(a => a.Asset),
+                    datasets: [{
+                        label: 'Capital Invested',
+                        data: sortedAssets.map(a => parseCurrency(a['Total Capital Invested'])),
+                        backgroundColor: '#8b5cf6',
+                        borderColor: '#6d28d9',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'x',
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text2'),
+                                maxRotation: 45,
+                                minRotation: 0
+                            }
+                        },
+                        y: {
+                            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text2') }
+                        }
+                    }
+                }
+            });
+        }
+
+        function destroyCharts() {
+            Object.values(charts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            charts = {};
+        }
+
+        function renderTable() {
+            filteredData = [...assetData];
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            filteredData.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
+                tr.onclick = () => showDetail(index);
+
+                const status = row.Status || 'Unknown';
+                const statusClass = {
+                    'Active': 'status-active',
+                    'Sold': 'status-sold',
+                    'Dissolved': 'status-dissolved',
+                    'Written Off': 'status-written-off'
+                }[status] || 'status-written-off';
+
+                tr.innerHTML = `
+                    <td>${row.Asset || '-'}</td>
+                    <td>${row.Location || '-'}</td>
+                    <td>${row.Category || '-'}</td>
+                    <td><span class="status-badge ${statusClass}">${status}</span></td>
+                    <td>${row.Owner || '-'}</td>
+                    <td>${row['% owned'] || '-'}%</td>
+                    <td class="currency">${formatCurrency(row['Initial investment'])}</td>
+                    <td class="currency">${formatCurrency(row['Total Capital Invested'])}</td>
+                    <td class="currency">${formatCurrency(row['Net profit'])}</td>
+                    <td class="percentage ${parsePercentage(row['ROI % on cash distributions']) < 0 ? 'negative' : ''}">${parsePercentage(row['ROI % on cash distributions']).toFixed(2)}%</td>
+                `;
+
+                tbody.appendChild(tr);
+            });
         }
 
         function filterTable() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            currentData = allData.filter(row =>
-                Object.values(row).some(v => String(v).toLowerCase().includes(query))
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            filteredData = assetData.filter(row => {
+                return Object.values(row).some(val =>
+                    String(val).toLowerCase().includes(searchTerm)
+                );
+            });
+
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            filteredData.forEach((row) => {
+                const tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
+                const originalIndex = assetData.indexOf(row);
+                tr.onclick = () => showDetail(originalIndex);
+
+                const status = row.Status || 'Unknown';
+                const statusClass = {
+                    'Active': 'status-active',
+                    'Sold': 'status-sold',
+                    'Dissolved': 'status-dissolved',
+                    'Written Off': 'status-written-off'
+                }[status] || 'status-written-off';
+
+                tr.innerHTML = `
+                    <td>${row.Asset || '-'}</td>
+                    <td>${row.Location || '-'}</td>
+                    <td>${row.Category || '-'}</td>
+                    <td><span class="status-badge ${statusClass}">${status}</span></td>
+                    <td>${row.Owner || '-'}</td>
+                    <td>${row['% owned'] || '-'}%</td>
+                    <td class="currency">${formatCurrency(row['Initial investment'])}</td>
+                    <td class="currency">${formatCurrency(row['Total Capital Invested'])}</td>
+                    <td class="currency">${formatCurrency(row['Net profit'])}</td>
+                    <td class="percentage ${parsePercentage(row['ROI % on cash distributions']) < 0 ? 'negative' : ''}">${parsePercentage(row['ROI % on cash distributions']).toFixed(2)}%</td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function sortTable(column) {
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+
+            assetData.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+
+                const aNum = parseCurrency(aVal);
+                const bNum = parseCurrency(bVal);
+
+                if (aNum !== 0 || bNum !== 0) {
+                    return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
+                }
+
+                aVal = String(aVal || '').toLowerCase();
+                bVal = String(bVal || '').toLowerCase();
+
+                if (sortDirection === 'asc') {
+                    return aVal.localeCompare(bVal);
+                } else {
+                    return bVal.localeCompare(aVal);
+                }
+            });
+
+            document.querySelectorAll('th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+
+            const activeHeader = Array.from(document.querySelectorAll('th')).find(th =>
+                th.textContent.includes(column)
             );
+            if (activeHeader) {
+                activeHeader.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+            }
+
             renderTable();
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.addEventListener('input', filterTable);
-            }
-        });
+        // ===============================
+        // DETAIL MODAL
+        // ===============================
+        function showDetail(index) {
+            const asset = assetData[index];
+            document.getElementById('modalAssetName').textContent = asset.Asset || 'Asset Details';
+            document.getElementById('modalDescription').textContent = asset.Description || 'No description available';
 
-        // Edit/Add
-        function openEditModal(idx) {
-            editingIndex = idx;
-            const row = allData[idx];
-            const form = document.getElementById('editFormContainer');
-            form.innerHTML = currentColumns.map(col => `
-                <div class="form-group">
-                    <label>${col}</label>
-                    <input type="text" value="${row[col] || ''}" data-col="${col}">
+            const metricsHtml = `
+                <div class="detail-item">
+                    <div class="detail-label">Total Capital Invested</div>
+                    <div class="detail-value currency">${formatCurrency(asset['Total Capital Invested'])}</div>
                 </div>
-            `).join('');
-            document.getElementById('editModal').classList.add('active');
-        }
-
-        function saveEdit() {
-            const inputs = document.querySelectorAll('#editFormContainer input');
-            inputs.forEach(input => {
-                allData[editingIndex][input.dataset.col] = input.value;
-            });
-            saveData();
-            closeModal('editModal');
-        }
-
-        function openAddItemModal() {
-            if (currentColumns.length === 0) {
-                alert('Please upload data first to determine columns');
-                return;
-            }
-            const form = document.getElementById('addFormContainer');
-            form.innerHTML = currentColumns.map(col => `
-                <div class="form-group">
-                    <label>${col}</label>
-                    <input type="text" data-col="${col}">
+                <div class="detail-item">
+                    <div class="detail-label">Net Profit</div>
+                    <div class="detail-value currency">${formatCurrency(asset['Net profit'])}</div>
                 </div>
-            `).join('');
-            document.getElementById('addModal').classList.add('active');
-        }
-
-        function saveNewItem() {
-            const newRow = {};
-            document.querySelectorAll('#addFormContainer input').forEach(input => {
-                newRow[input.dataset.col] = input.value;
-            });
-            allData.push(newRow);
-            saveData();
-            closeModal('addModal');
-        }
-
-        function deleteRow(idx) {
-            if (confirm('Delete this item?')) {
-                allData.splice(idx, 1);
-                saveData();
-            }
-        }
-
-        // Export
-        function exportCSV() {
-            if (allData.length === 0) {
-                alert('No data to export');
-                return;
-            }
-
-            const cols = currentColumns;
-            const csv = [cols.join(',')];
-            allData.forEach(row => {
-                csv.push(cols.map(col => {
-                    let val = row[col] || '';
-                    if (typeof val === 'string' && val.includes(',')) {
-                        val = `"${val}"`;
-                    }
-                    return val;
-                }).join(','));
-            });
-
-            const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'assets.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Stats
-        function updateStats() {
-            let html = `
-                <div class="stat-card">
-                    <div class="stat-label" data-i18n="totalItems">Total Items</div>
-                    <div class="stat-value">${allData.length}</div>
+                <div class="detail-item">
+                    <div class="detail-label">Total Distributions</div>
+                    <div class="detail-value currency">${formatCurrency(asset['Distributions received total'])}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">ROI %</div>
+                    <div class="detail-value">${parsePercentage(asset['ROI % on cash distributions']).toFixed(2)}%</div>
                 </div>
             `;
+            document.getElementById('modalMetrics').innerHTML = metricsHtml;
 
-            // Status stats
-            const statusCol = currentColumns.find(c => c.toLowerCase().includes('status'));
-            if (statusCol) {
-                const statusCounts = {};
-                allData.forEach(row => {
-                    const status = row[statusCol] || 'Unknown';
-                    statusCounts[status] = (statusCounts[status] || 0) + 1;
-                });
+            const investmentHtml = `
+                <div class="detail-item">
+                    <div class="detail-label">Initial Investment</div>
+                    <div class="detail-value currency">${formatCurrency(asset['Initial investment'])}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Additional Contributions</div>
+                    <div class="detail-value currency">${formatCurrency(asset['Additional Capital Contributions'])}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Maintenance Costs (Yearly)</div>
+                    <div class="detail-value currency">${formatCurrency(asset['Any other costs to maintain (yearly)'])}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Initial Asset Value</div>
+                    <div class="detail-value currency">${formatCurrency(asset['Initial asset value'])}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Exit/Sale Proceeds</div>
+                    <div class="detail-value currency">${formatCurrency(asset['Exit/Sale Proceeds/final balance'])}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Total Cash Returned</div>
+                    <div class="detail-value currency">${formatCurrency(asset['Total cash returned'])}</div>
+                </div>
+            `;
+            document.getElementById('modalInvestment').innerHTML = investmentHtml;
 
-                Object.entries(statusCounts).forEach(([status, count]) => {
-                    html += `
-                        <div class="stat-card">
-                            <div class="stat-label">${status}</div>
-                            <div class="stat-value">${count}</div>
-                        </div>
-                    `;
-                });
-            }
+            const ownershipHtml = `
+                <div class="detail-item">
+                    <div class="detail-label">Owner</div>
+                    <div class="detail-value">${asset.Owner || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">% Owned</div>
+                    <div class="detail-value">${asset['% owned'] || '-'}%</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Location</div>
+                    <div class="detail-value">${asset.Location || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Category</div>
+                    <div class="detail-value">${asset.Category || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">
+                        <span class="status-badge status-${asset.Status ? asset.Status.toLowerCase().replace(' ', '-') : 'unknown'}">
+                            ${asset.Status || 'Unknown'}
+                        </span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Info Owner</div>
+                    <div class="detail-value">${asset['Info Owner'] || '-'}</div>
+                </div>
+            `;
+            document.getElementById('modalOwnership').innerHTML = ownershipHtml;
 
-            document.getElementById('statsRow').innerHTML = html;
-            updateUI();
-        }
+            const timelineHtml = `
+                <div class="detail-item">
+                    <div class="detail-label">Year Bought</div>
+                    <div class="detail-value">${asset['Year bought'] || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Year Sold</div>
+                    <div class="detail-value">${asset['Year sold'] || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Year of Write Off</div>
+                    <div class="detail-value">${asset['Year of write off'] || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Target Exit Date</div>
+                    <div class="detail-value">${asset['Target exit date'] || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Distributions Interval</div>
+                    <div class="detail-value">${asset['Distributions interval'] || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Distribution Day</div>
+                    <div class="detail-value">${asset['What day'] || '-'}</div>
+                </div>
+            `;
+            document.getElementById('modalTimeline').innerHTML = timelineHtml;
 
-        // Modal
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-        }
-
-        // Theme
-        function initTheme() {
-            const saved = localStorage.getItem(CONFIG.themeKey);
-            if (saved === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
-        }
-
-        function toggleTheme() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            if (isDark) {
-                document.documentElement.removeAttribute('data-theme');
-                localStorage.removeItem(CONFIG.themeKey);
+            let linksHtml = '';
+            if (asset['Link to sheet'] || asset['Documents link']) {
+                linksHtml = '<ul class="links-list">';
+                if (asset['Link to sheet'] && asset['Link to sheet'] !== '-') {
+                    linksHtml += `<li><a href="${asset['Link to sheet']}" target="_blank">📊 Link to Sheet</a></li>`;
+                }
+                if (asset['Documents link'] && asset['Documents link'] !== '-') {
+                    linksHtml += `<li><a href="${asset['Documents link']}" target="_blank">📄 Documents Link</a></li>`;
+                }
+                linksHtml += '</ul>';
             } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem(CONFIG.themeKey, 'dark');
+                linksHtml = '<p style="color: var(--text2);">No links available</p>';
+            }
+            document.getElementById('modalLinks').innerHTML = linksHtml;
+
+            const taxHtml = `
+                <div class="detail-item">
+                    <div class="detail-label">K1 Profit/Loss (2019-2026)</div>
+                    <div class="detail-value currency">${formatCurrency(asset['2019-2026 K1 Profit/Loss'])}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">K1 Distributions (2019-2026)</div>
+                    <div class="detail-value currency">${formatCurrency(asset['2019-2026 Distributions'])}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Total Profit & Loss Share K1</div>
+                    <div class="detail-value currency">${formatCurrency(asset['Total Profit & loss Share K1'])}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Written Off Amount</div>
+                    <div class="detail-value currency">${formatCurrency(asset['Written off Amount'])}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Accounting Value if Still Held</div>
+                    <div class="detail-value currency">${formatCurrency(asset['Accounting value if still held - K1'])}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Remaining to Break Even</div>
+                    <div class="detail-value currency">${formatCurrency(asset['Remaining to Break Even'])}</div>
+                </div>
+            `;
+            document.getElementById('modalTax').innerHTML = taxHtml;
+
+            const notesHtml = `
+                <div class="detail-item">
+                    <div class="detail-label">Notes About Investment</div>
+                    <div class="detail-value">${asset['Notes about investment'] || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Tax Implications / Comments</div>
+                    <div class="detail-value">${asset['Tax implications/Dr. Mikes comments'] || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Any Other Costs</div>
+                    <div class="detail-value">${asset['Any other costs to maintain (yearly)'] || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Industry ROI %</div>
+                    <div class="detail-value">${parsePercentage(asset['Industry ROI']).toFixed(2)}%</div>
+                </div>
+            `;
+            document.getElementById('modalNotes').innerHTML = notesHtml;
+
+            document.getElementById('detailModal').dataset.index = index;
+            document.getElementById('detailModal').classList.add('open');
+        }
+
+        function closeModal(event) {
+            if (event && event.target.id !== 'detailModal') return;
+            document.getElementById('detailModal').classList.remove('open');
+        }
+
+        function deleteAsset() {
+            const index = parseInt(document.getElementById('detailModal').dataset.index);
+            if (confirm(`Are you sure you want to delete "${assetData[index].Asset}"?`)) {
+                assetData.splice(index, 1);
+                saveData();
+                renderDashboard();
+                closeModal();
+                showToast('Asset deleted successfully', 'success');
             }
         }
 
-        // Language
+        // ===============================
+        // EXPORT
+        // ===============================
+        function exportCSV() {
+            if (assetData.length === 0) {
+                showToast('No data to export', 'error');
+                return;
+            }
+
+            const headers = Object.keys(assetData[0]);
+            const csv = [
+                headers.join(','),
+                ...assetData.map(row =>
+                    headers.map(header => {
+                        let value = row[header] || '';
+                        if (String(value).includes(',') || String(value).includes('"')) {
+                            value = '"' + String(value).replace(/"/g, '""') + '"';
+                        }
+                        return value;
+                    }).join(',')
+                )
+            ].join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `assets_export_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            showToast('CSV exported successfully', 'success');
+        }
+
+        // ===============================
+        // THEME & LANGUAGE
+        // ===============================
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-theme') === 'dark';
+
+            if (isDark) {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('nf6_theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('nf6_theme', 'dark');
+            }
+
+            destroyCharts();
+            if (assetData.length > 0) {
+                renderCharts();
+            }
+        }
+
+        function initTheme() {
+            const theme = localStorage.getItem('nf6_theme');
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        }
+
         function toggleLang() {
-            currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
-            localStorage.setItem(CONFIG.langKey, currentLanguage);
-            document.getElementById('langLabel').textContent = currentLanguage.toUpperCase();
-            updateUI();
+            const current = localStorage.getItem('nf6_lang') || 'EN';
+            const next = current === 'EN' ? 'ES' : 'EN';
+            localStorage.setItem('nf6_lang', next);
+            document.getElementById('langLabel').textContent = next;
+            showToast(`Language changed to ${next}`, 'success');
         }
 
-        function updateUI() {
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                el.textContent = translations[currentLanguage][key] || key;
-            });
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-                const key = el.getAttribute('data-i18n-placeholder');
-                el.placeholder = translations[currentLanguage][key] || key;
-            });
-            document.getElementById('langLabel').textContent = currentLanguage.toUpperCase();
+        function initLanguage() {
+            const lang = localStorage.getItem('nf6_lang') || 'EN';
+            document.getElementById('langLabel').textContent = lang;
         }
 
-        // Clocks
+        // ===============================
+        // CLOCKS & DATE
+        // ===============================
         function initClocks() {
-            setInterval(updateClocks, 1000);
             updateClocks();
+            updateTodayBadge();
+            setInterval(updateClocks, 1000);
         }
 
         function updateClocks() {
-            const now = new Date();
-            const colTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
-            const prTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Puerto_Rico' }));
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                timeZone: 'America/Bogota'
+            });
 
-            document.getElementById('clockCOL').textContent = colTime.toLocaleTimeString('en-US', { hour12: false });
-            document.getElementById('clockPR').textContent = prTime.toLocaleTimeString('en-US', { hour12: false });
+            const formatterPR = new Intl.DateTimeFormat('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                timeZone: 'America/Puerto_Rico'
+            });
+
+            document.getElementById('clockCOL').textContent = formatter.format(new Date());
+            document.getElementById('clockPR').textContent = formatterPR.format(new Date());
         }
 
-        // Badge
         function updateTodayBadge() {
-            const today = new Date();
-            const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            document.getElementById('todayBadge').textContent = dateStr;
+            const today = new Date().toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+            });
+            document.getElementById('todayBadge').textContent = today;
         }
 
-        // Last Updated
-        function updateLastUpdated() {
-            const now = new Date();
-            document.getElementById('lastUpdated').textContent = 'Last updated: ' + now.toLocaleTimeString('en-US', { hour12: false });
+        // ===============================
+        // UTILITIES
+        // ===============================
+        function toggleMobileMenu() {
+            document.getElementById('mobileMenu').classList.toggle('open');
         }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // ===============================
+        // STARTUP
+        // ===============================
+        document.addEventListener('DOMContentLoaded', () => {
+            initAuth();
+        });
     </script>
 </body>
 </html>
