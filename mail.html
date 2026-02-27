@@ -12,8 +12,8 @@
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
     <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 
     <style>
         * {
@@ -675,9 +675,51 @@
                 font-size: 1.5rem;
             }
         }
+
+        .auth-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-overlay.hidden { display: none; }
+        .auth-card {
+            background: var(--card);
+            padding: 3rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        .auth-card h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .auth-card p { color: var(--text2); margin-bottom: 1.5rem; font-size: 0.9rem; }
+        .auth-card button {
+            padding: 0.75rem 2rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .auth-card button:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
+    <!-- Auth Overlay -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-card">
+            <h2>NF6 Capital</h2>
+            <p>Sign in with your nf6capital.com account to continue</p>
+            <button onclick="signInWithGoogle()">Sign In with Google</button>
+        </div>
+    </div>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="navbar-left">
@@ -958,10 +1000,7 @@
         const firebaseConfig = {
             apiKey: "AIzaSyAbvvj4qCzfZPdRxU6BtbRSfXDXPitNwkQ",
             authDomain: "nf6-compliance.firebaseapp.com",
-            projectId: "nf6-compliance",
-            storageBucket: "nf6-compliance.appspot.com",
-            messagingSenderId: "606372",
-            appId: "1:606372:web:abc123"
+            projectId: "nf6-compliance"
         };
         const ALLOWED_DOMAIN = 'nf6capital.com';
 
@@ -971,7 +1010,28 @@
             console.log('Firebase already initialized');
         }
 
-        const auth = firebase.auth();
+        // ===== Auth =====
+        function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ hd: ALLOWED_DOMAIN });
+            firebase.auth().signInWithPopup(provider)
+                .catch(e => console.error('Auth error:', e));
+        }
+
+        function checkAuth() {
+            firebase.auth().onAuthStateChanged(user => {
+                if (user) {
+                    const domain = user.email.split('@')[1];
+                    if (domain !== ALLOWED_DOMAIN) {
+                        firebase.auth().signOut();
+                        return;
+                    }
+                    document.getElementById('authOverlay').classList.add('hidden');
+                } else {
+                    document.getElementById('authOverlay').classList.remove('hidden');
+                }
+            });
+        }
 
         // ===== Initialize =====
         document.addEventListener('DOMContentLoaded', () => {
@@ -982,11 +1042,22 @@
             setInterval(updateClocks, 1000);
 
             setupEventListeners();
-            renderTable();
-            updateStats();
-            populateFilters();
-            renderCharts();
+            loadStoredData();
+            checkAuth();
         });
+
+        function loadStoredData() {
+            const stored = localStorage.getItem('nf6_mail_data');
+            if (stored) {
+                try {
+                    mailData = JSON.parse(stored);
+                    applyFilters();
+                    updateStats();
+                    populateFilters();
+                    renderCharts();
+                } catch(e) { console.log('No stored data'); }
+            }
+        }
 
         // ===== Theme =====
         function applyTheme() {
@@ -1079,7 +1150,7 @@
             });
 
             document.getElementById('signOut').addEventListener('click', () => {
-                auth.signOut().then(() => {
+                firebase.auth().signOut().then(() => {
                     window.location.href = 'index.html';
                 });
             });
